@@ -2807,8 +2807,7 @@ function renderHome() {
     `${formatJP(todayStr())}<small>${fromDateStr(todayStr()).getFullYear()}年</small>`;
 
   const count = Object.keys(entries).length;
-  document.getElementById("home-count").textContent =
-    count > 0 ? `これまでの記録：${count}日分` : "一日ひとつでも書けたら十分です。";
+  document.getElementById("home-count").textContent = `これまでの記録：${count}日分`; // 0日でも同じ形で（表示が日によって変わると迷うため）
 
   // 風船のように浮かぶ扉。毎日同じ配置（場所で覚えられる）：四隅＋食事は真ん中
   const box = document.getElementById("home-doors");
