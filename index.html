@@ -5362,6 +5362,7 @@ function stopMic() {
   if (!micActive) return;
   const m = micActive;
   micActive = null;
+  if (m.cleanup) m.cleanup();
   try { m.rec.stop(); } catch (e) {}
   m.btn.classList.remove("listening");
   m.btn.innerHTML = m.btn.dataset.idle ? micIconSvg() : `${micIconSvg()}<span class="mic-label">話して書く</span>`;
@@ -5380,7 +5381,12 @@ function wireMics(root) {
       rec.interimResults = true; // 話している途中の言葉もその場で見せる（待たされ感をなくす）
       rec.continuous = true;
       const base = target.value; // マイクを押した時点の文（ここに継ぎ足す）
+      // 手で欄を直したらマイクは止める（止めないと、次の認識結果が手直しを上書きしてしまう）
+      let programmatic = false;
+      const onUserEdit = () => { if (!programmatic && micActive && micActive.rec === rec) stopMic(); };
+      target.addEventListener("input", onUserEdit);
       rec.onresult = ev => {
+        if (!micActive || micActive.rec !== rec) return; // 止めたあとに遅れて届いた結果は無視
         // 確定した分と、話している途中の分を毎回組み立て直す
         // （間を空けて話すと別々の文として確定するので、つなぎ目に区切りを入れる）
         const parts = []; let interim = "";
@@ -5396,8 +5402,10 @@ function wireMics(root) {
         const m = finals.match(/(?:保存|ほぞん|ホゾン)[。．\s　]*$/);
         if (m && !interim) { wantSave = true; finals = finals.slice(0, m.index).replace(/[、。．\s　]+$/, ""); }
         const said = (finals + interim).trim();
+        programmatic = true;
         target.value = said ? (base ? base + "　" : "") + said : base;
         target.dispatchEvent(new Event("input", { bubbles: true })); // 自動保存・自動のびを効かせる
+        programmatic = false;
         if (wantSave) {
           stopMic();
           // 保存ボタンがある欄はそれを押す。自動保存の欄は止めるだけでよい
@@ -5407,8 +5415,8 @@ function wireMics(root) {
       };
       rec.onend = () => { if (micActive && micActive.btn === btn) stopMic(); };
       rec.onerror = () => stopMic();
-      try { rec.start(); } catch (e) { return; }
-      micActive = { rec, btn, target };
+      try { rec.start(); } catch (e) { target.removeEventListener("input", onUserEdit); return; }
+      micActive = { rec, btn, target, cleanup: () => target.removeEventListener("input", onUserEdit) };
       btn.classList.add("listening");
       btn.innerHTML = btn.dataset.idle ? micIconSvg() : `${micIconSvg()}<span class="mic-label">聞いています…（押すと止まる）</span>`;
     });
