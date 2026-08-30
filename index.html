@@ -1,3 +1,4 @@
+<!doctype html>
 <meta charset="utf-8">
 <title>記憶のギフト ～未来の自分へ～</title>
 <style>
@@ -5645,4 +5646,32 @@ function init() {
 }
 
 init();
+</script>
+
+<div id="pv-gate" style="position:fixed;inset:0;z-index:99999;background:#f6f3ec;display:flex;align-items:center;justify-content:center;padding:24px;">
+  <div style="max-width:320px;width:100%;text-align:center;font-family:sans-serif;color:#4a4437;">
+    <div style="font-size:1.15rem;font-weight:800;margin-bottom:6px;">記憶のギフト（試作）</div>
+    <div style="font-size:.95rem;color:#8a8272;margin-bottom:18px;">合言葉を入れてください</div>
+    <input id="pv-pass" type="tel" inputmode="numeric" autocomplete="off" style="width:100%;box-sizing:border-box;font-size:1.4rem;text-align:center;letter-spacing:.3em;padding:12px;border:1.5px solid #d9d2c2;border-radius:14px;background:#fff;">
+    <button id="pv-go" type="button" style="width:100%;margin-top:12px;font-size:1.1rem;font-weight:800;padding:14px;border:none;border-radius:999px;background:#8ea983;color:#fff;">開く</button>
+    <div id="pv-ng" style="min-height:1.4em;color:#b3543f;font-size:.9rem;margin-top:10px;"></div>
+  </div>
+</div>
+<script>
+(function(){
+  var KEY = "pv_gate_ok_2026";
+  var gate = document.getElementById("pv-gate");
+  try { if (localStorage.getItem(KEY) === "1") { gate.remove(); return; } } catch(e) {}
+  function go(){
+    var v = (document.getElementById("pv-pass").value || "").trim();
+    if (v === "2026") {
+      try { localStorage.setItem(KEY, "1"); } catch(e) {}
+      gate.remove();
+    } else {
+      document.getElementById("pv-ng").textContent = "合言葉がちがいます";
+    }
+  }
+  document.getElementById("pv-go").addEventListener("click", go);
+  document.getElementById("pv-pass").addEventListener("keydown", function(e){ if (e.key === "Enter") go(); });
+})();
 </script>
