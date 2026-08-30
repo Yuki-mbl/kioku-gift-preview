@@ -2462,6 +2462,7 @@ const RESUME_SCREENS = new Set(["screen-shopping", "screen-outfit", "screen-albu
 let lastScreenId = null;
 const NO_SLIDE_SCREENS = new Set(["screen-lock", "screen-flow"]);
 function showScreen(id) {
+  stopMic(); // 画面を移ったらマイクは止める
   document.querySelectorAll(".screen").forEach(s => s.classList.remove("active"));
   const scr = document.getElementById(id);
   scr.classList.add("active");
@@ -5358,6 +5359,9 @@ function micMini(targetId, saveBtnId) {
   const saveAttr = saveBtnId ? ` data-voice-save="${saveBtnId}"` : "";
   return `<button type="button" class="mic-btn mic-mini" data-mic="${targetId}" data-idle="1"${saveAttr} aria-label="話して書く">${micIconSvg()}</button>`;
 }
+// アプリから離れたら（他のアプリを見る・タブを替える・画面が消える）マイクは止める
+document.addEventListener("visibilitychange", () => { if (document.hidden) stopMic(); });
+window.addEventListener("pagehide", () => stopMic());
 function stopMic() {
   if (!micActive) return;
   const m = micActive;
