@@ -1794,7 +1794,8 @@ html[data-fontsize="xlarge"] .balloon-k-sleep { width: min(112px, 29vw, 14.2vh);
 [data-theme="pastel"] .balloon {
   color: #6b6152;
   background: radial-gradient(circle at 35% 28%, #ffffff 0%, var(--p1) 40%, var(--p2) 100%);
-  border: 1px solid rgba(150, 138, 120, .26);
+  /* 輪郭線なし：1pxの薄い線は実機で描けたり消えたりしてかえって汚く見えた（2026-08-30） */
+  border: none;
   box-shadow: 0 10px 22px rgba(160, 148, 126, .32), inset 0 2px 6px rgba(255, 255, 255, .8);
 }
 [data-theme="pastel"] .balloon-ico { stroke-width: 1.5; }
