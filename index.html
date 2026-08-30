@@ -5382,11 +5382,15 @@ function wireMics(root) {
       const base = target.value; // マイクを押した時点の文（ここに継ぎ足す）
       rec.onresult = ev => {
         // 確定した分と、話している途中の分を毎回組み立て直す
-        let finals = "", interim = "";
+        // （間を空けて話すと別々の文として確定するので、つなぎ目に区切りを入れる）
+        const parts = []; let interim = "";
         for (let i = 0; i < ev.results.length; i++) {
-          const t = ev.results[i][0].transcript;
-          if (ev.results[i].isFinal) finals += t; else interim += t;
+          const t = ev.results[i][0].transcript.trim();
+          if (!t) continue;
+          if (ev.results[i].isFinal) parts.push(t); else interim += t;
         }
+        let finals = parts.join("　");
+        if (interim) interim = (finals ? "　" : "") + interim;
         // 最後に「保存」と言ったら、その言葉は書かずにマイクを止めて保存する（全マイク欄で共通の合図）
         let wantSave = false;
         const m = finals.match(/(?:保存|ほぞん|ホゾン)[。．\s　]*$/);
