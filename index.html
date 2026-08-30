@@ -2843,8 +2843,7 @@ function openCalendar() {
   renderCalendar();
   const count = Object.keys(entries).length;
   const streak = document.getElementById("home-streak");
-  if (streak) streak.textContent =
-    count > 0 ? `これまでの記録：${count}日分` : "一日ひとつでも書けたら十分です。";
+  if (streak) streak.textContent = `これまでの記録：${count}日分`; // ホームと同じ形で統一
   showScreen("screen-calendar");
 }
 
