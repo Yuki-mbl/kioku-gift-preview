@@ -5377,19 +5377,23 @@ function wireMics(root) {
       if (!target) return;
       const rec = new SpeechRec();
       rec.lang = "ja-JP";
-      rec.interimResults = false;
+      rec.interimResults = true; // 話している途中の言葉もその場で見せる（待たされ感をなくす）
       rec.continuous = true;
+      const base = target.value; // マイクを押した時点の文（ここに継ぎ足す）
       rec.onresult = ev => {
-        let said = [...ev.results].slice(ev.resultIndex).map(r => r[0].transcript).join("").trim();
-        if (!said) return;
+        // 確定した分と、話している途中の分を毎回組み立て直す
+        let finals = "", interim = "";
+        for (let i = 0; i < ev.results.length; i++) {
+          const t = ev.results[i][0].transcript;
+          if (ev.results[i].isFinal) finals += t; else interim += t;
+        }
         // 最後に「保存」と言ったら、その言葉は書かずにマイクを止めて保存する（全マイク欄で共通の合図）
         let wantSave = false;
-        const m = said.match(/(?:保存|ほぞん|ホゾン)[。．\s　]*$/);
-        if (m) { wantSave = true; said = said.slice(0, m.index).replace(/[、。．\s　]+$/, ""); }
-        if (said) {
-          target.value = (target.value ? target.value + "　" : "") + said;
-          target.dispatchEvent(new Event("input", { bubbles: true })); // 自動保存・自動のびを効かせる
-        }
+        const m = finals.match(/(?:保存|ほぞん|ホゾン)[。．\s　]*$/);
+        if (m && !interim) { wantSave = true; finals = finals.slice(0, m.index).replace(/[、。．\s　]+$/, ""); }
+        const said = (finals + interim).trim();
+        target.value = said ? (base ? base + "　" : "") + said : base;
+        target.dispatchEvent(new Event("input", { bubbles: true })); // 自動保存・自動のびを効かせる
         if (wantSave) {
           stopMic();
           // 保存ボタンがある欄はそれを押す。自動保存の欄は止めるだけでよい
