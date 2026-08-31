@@ -2507,14 +2507,13 @@ function showScreen(id) {
 
 // ---------- 指のスライドで画面を移る（右＝戻る／左＝進む） ----------
 // 記入中・クイズ中は無効（書きかけを守る）／80px以上の大きな横移動だけ／縦スクロール中は無効
-const SWIPE_OFF_SCREENS = new Set(["screen-flow", "screen-lock", "screen-onboarding"]);
+const SWIPE_OFF_SCREENS = new Set(["screen-lock", "screen-onboarding"]); // 日記・思い出す中もなぞりでホームへ（書きかけは自動保存）
 // その画面の「戻る」ボタン（あれば押す）
 const BACK_BTN_BY_SCREEN = {
   "screen-calendar": "cal-back",
   "screen-search": "search-back",
   "screen-daydetail": "detail-back",
   "screen-sleep": "sleep-back",
-  "screen-shopping": "shopping-back",
   "screen-outfit": "outfit-back",
   "screen-album": "album-back",
   "screen-settings": "settings-back",
@@ -2533,6 +2532,7 @@ function swipeAnim(dir) {
 function swipeBack() {
   const id = document.querySelector(".screen.active")?.id;
   if (!id || id === "screen-home") return; // ホームではこれ以上戻らない
+  if (id === "screen-flow") { saveFlowDraftIfAny(); goHome(); swipeAnim("back"); return; } // 日記・思い出す：書きかけを保存してホームへ
   const btn = document.getElementById(BACK_BTN_BY_SCREEN[id] || "");
   if (btn) btn.click(); else goHome();
   swipeAnim("back"); // 指の動きに合わせて左からスッと入る
@@ -2551,7 +2551,7 @@ function wireSwipeNav() {
     const scr = document.querySelector(".screen.active")?.id;
     // 入力欄・下タブ・服のアルバム（月めくりが優先）から始めた指は対象外
     const from = e.target;
-    const inExcluded = from.closest("input, textarea, #tab-bar, #ocal-grid"); // 服の月めくりだけ除外。見返すカレンダーは矢印でめくるので、なぞりはページ移動に使う
+    const inExcluded = from.closest("input, textarea, #tab-bar"); // どのカレンダーも月めくりは矢印のみ。なぞりはどこでもページ移動
     ok = !!scr && !SWIPE_OFF_SCREENS.has(scr) && !inExcluded;
   }, { passive: true });
   app.addEventListener("touchend", e => {
@@ -4353,20 +4353,7 @@ function renderOutfitMain() {
   });
   document.getElementById("ocal-prev").addEventListener("click", () => { outfitCursor.setMonth(outfitCursor.getMonth() - 1); renderOutfitCalendar("prev"); });
   document.getElementById("ocal-next").addEventListener("click", () => { outfitCursor.setMonth(outfitCursor.getMonth() + 1); renderOutfitCalendar("next"); });
-  // アルバムを指でめくる（左右スワイプで前後の月へ）
-  const og = document.getElementById("ocal-grid");
-  let sx = 0, sy = 0, swiped = false;
-  og.addEventListener("touchstart", e => { sx = e.touches[0].clientX; sy = e.touches[0].clientY; }, { passive: true });
-  og.addEventListener("touchend", e => {
-    const dx = e.changedTouches[0].clientX - sx, dy = e.changedTouches[0].clientY - sy;
-    if (Math.abs(dx) > 48 && Math.abs(dx) > Math.abs(dy) * 1.5) {
-      swiped = true; setTimeout(() => { swiped = false; }, 400);
-      outfitCursor.setMonth(outfitCursor.getMonth() + (dx < 0 ? 1 : -1));
-      renderOutfitCalendar(dx < 0 ? "next" : "prev");
-    }
-  }, { passive: true });
-  // めくった直後のタップ誤爆（日が開いてしまう）を止める
-  og.addEventListener("click", e => { if (swiped) { e.stopPropagation(); e.preventDefault(); swiped = false; } }, true);
+  // 月めくりは矢印のみ（なぞりはホームへ戻るに統一。2026-09-01）
 }
 // 服のアルバム：月ごとのページに、その日の服の写真が小さく並ぶ（曜日の段は置かない）
 function renderOutfitCalendar(dir) {
