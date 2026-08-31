@@ -1715,6 +1715,8 @@ mark {
 .btn-ico { display: inline-flex; align-items: center; vertical-align: -.3em; margin-right: 8px; }
 /* 大きめのカメラ絵（服装の「今日の服」ボタン。文字を短くしたぶん絵で伝える） */
 .btn-ico.btn-ico-big.btn-ico-big .balloon-ico { width: 34px; height: 34px; }
+/* 長めの文のボタン：1行に収まる大きさまで自動で縮む（2行にしない） */
+.btn.btn-shrink { white-space: nowrap; font-size: min(1.35rem, 5.2vw); }
 .btn-ico.btn-ico svg, .btn-ico.btn-ico .balloon-ico { width: 30px; height: 30px; color: currentColor; stroke-width: 2; }
 /* 幅のせまいボタン用のひとまわり小さい線画 */
 .btn-ico.btn-ico-sm { margin-right: 6px; vertical-align: -.24em; }
@@ -4400,7 +4402,7 @@ function renderOutfitDay(ds) {
     <div class="outfit-day-date">${formatJP(ds, true)}</div>
     ${o.photo ? `<img class="outfit-day-img" src="${o.photo}" alt="この日の服">` : ""}
     <div class="card outfit-day-edit">
-      <button type="button" class="btn ${o.photo ? "btn-secondary" : "btn-primary"} btn-xl" id="oday-pick"><span class="btn-ico">${balloonIconSvg("camera")}</span>${o.photo ? "写真を入れ替える" : "この日の服の写真を入れる"}</button>
+      <button type="button" class="btn ${o.photo ? "btn-secondary" : "btn-primary"} btn-xl btn-shrink" id="oday-pick"><span class="btn-ico btn-ico-big">${balloonIconSvg("camera")}</span>${o.photo ? "写真を入れ替える" : "この日の服の写真"}</button>
       <input type="file" id="oday-file-pick" accept="image/*" style="display:none;">
       <div class="meal-line" style="margin-top:12px;">
         <textarea id="oday-note" class="outfit-note-input" rows="1" placeholder="ここに書いてもOK">${esc(o.note || "")}</textarea>
