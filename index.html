@@ -714,6 +714,7 @@ input[type="month"]::-webkit-calendar-picker-indicator { width: 28px; height: 28
 .album-note { color: var(--muted); font-size: 1rem; text-align: center; line-height: 1.7; margin: 6px 0 14px; }
 .album-note-lg { font-size: 1.2rem; color: var(--text); font-weight: 700; margin: 10px 0 18px; }
 .album-saved { text-align: center; font-weight: 800; color: var(--accent-strong); background: var(--accent-soft); border-radius: 14px; padding: 8px; margin-bottom: 12px; }
+.outfit-saved { text-align: center; font-weight: 800; color: var(--accent-strong); background: var(--accent-soft); border-radius: 14px; padding: 8px; margin-top: 8px; }
 .album-links { display: flex; justify-content: space-between; gap: 10px; margin-top: 14px; }
 .linkbtn { flex: 1; background: none; border: none; color: var(--accent); font-family: inherit; font-size: 1rem; font-weight: 700; padding: 10px; cursor: pointer; -webkit-tap-highlight-color: transparent; }
 .album-list-head { font-size: 1.2rem; font-weight: 800; text-align: center; margin-bottom: 4px; }
@@ -4298,8 +4299,10 @@ function renderOutfitMain() {
       <input type="file" id="outfit-file" accept="image/*" style="display:none;">
       <div class="meal-line" style="margin-top:10px;">
         <textarea id="outfit-note" class="outfit-note-input" rows="1" placeholder="紺スーツ　田中さん">${esc(today?.note || "")}</textarea>
-        ${micMini("outfit-note")}
+        ${micMini("outfit-note", "outfit-save")}
       </div>
+      <button type="button" class="btn btn-primary" id="outfit-save" style="margin-top:10px;">保存</button>
+      <div class="outfit-saved" id="outfit-saved" hidden>✓ 残しました</div>
       <p class="outfit-hint outfit-hint-center">鏡の前で1枚。文字だけでも大丈夫</p>
     </div>
     <div class="card cal-card outfit-cal outfit-album">
@@ -4325,6 +4328,14 @@ function renderOutfitMain() {
   growNote();
   regrowOutfitNotes(); // 画面が整ってから測り直す（保存済みの文が隠れないように）
   note.addEventListener("input", () => { growNote(); setOutfit(t, { note: note.value.trim() }); }); // 書くたび自動保存
+  // 「保存」は安心の締めくくり（データは自動保存済み）。押すと✓を見せてキーボードを閉じる
+  document.getElementById("outfit-save").addEventListener("click", () => {
+    setOutfit(t, { note: note.value.trim() });
+    note.blur();
+    const ok = document.getElementById("outfit-saved");
+    ok.hidden = false;
+    setTimeout(() => { ok.hidden = true; }, 2500);
+  });
   document.getElementById("ocal-prev").addEventListener("click", () => { outfitCursor.setMonth(outfitCursor.getMonth() - 1); renderOutfitCalendar("prev"); });
   document.getElementById("ocal-next").addEventListener("click", () => { outfitCursor.setMonth(outfitCursor.getMonth() + 1); renderOutfitCalendar("next"); });
   // アルバムを指でめくる（左右スワイプで前後の月へ）
@@ -5295,7 +5306,7 @@ function renderShoppingHub() {
       <div class="shop-cat">${shopIconHtml(c)}${c.name}</div>
       <div class="meal-line">
         <textarea class="shop-edit-input grow-input" id="shop-${c.key}" data-key="${c.key}" rows="2" placeholder="買うものを書く">${esc(s[c.key] || "")}</textarea>
-        ${micMini("shop-" + c.key)}
+        ${micMini("shop-" + c.key, "shop-hide")}
       </div>
     </div>`);
   // 先頭（まとめて）と分類の間の一言
@@ -5305,7 +5316,7 @@ function renderShoppingHub() {
     ${shopDoneBarHtml()}
     <div class="shop-hub-list">${cardHtml}</div>
     <div class="shop-fab-spacer"></div>
-    <button type="button" class="btn btn-primary shop-fab" id="shop-hide">買い物へ</button>`;
+    <button type="button" class="btn btn-primary shop-fab btn-shrink" id="shop-hide">保存して買い物へ</button>`;
   const fab = document.getElementById("shop-hide");
   const updateFab = () => { fab.style.display = shoppingHasAny() ? "" : "none"; };
   // 高さの自動調整は他の欄と同じ仕組み（枠線ぶんも足すので文字が切れない）
