@@ -2534,6 +2534,7 @@ function swipeAnim(dir) {
 function tabPos() {
   const id = document.querySelector(".screen.active")?.id;
   if (id === "screen-home") return 0;
+  if (id === "screen-lock" && lockMode === "diary") return 1; // 日記のパスコード画面も「日記」の位置（なぞりで先へ進める）
   if (id === "screen-flow") {
     if (flow?.recallOnly) return 2; // 思い出す
     if (flow?.steps?.length === 1 && flow.steps[0].id === "diary") return 1; // 日記
@@ -2576,7 +2577,8 @@ function wireSwipeNav() {
     // 入力欄・下タブから始めた指は対象外
     const from = e.target;
     const inExcluded = from.closest("input, textarea, #tab-bar"); // どのカレンダーも月めくりは矢印のみ。なぞりはどこでもページ移動
-    ok = !!scr && !SWIPE_OFF_SCREENS.has(scr) && !inExcluded;
+    const diaryLock = scr === "screen-lock" && lockMode === "diary"; // 日記のパスコード画面はなぞりで先へ進めてよい（アプリ全体ロックは不可）
+    ok = !!scr && (!SWIPE_OFF_SCREENS.has(scr) || diaryLock) && !inExcluded;
   }, { passive: true });
   // 横のなぞりと分かった時点で、縦スクロールを止める（なぞり中に画面が上下に揺れないように）
   app.addEventListener("touchmove", e => {
