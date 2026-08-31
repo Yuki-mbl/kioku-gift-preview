@@ -5625,6 +5625,24 @@ function wireEvents() {
     }, { passive: true });
   }
   document.getElementById("shop-pop-close").addEventListener("click", closeShopPop);
+  // 上から降りるシートは、上へすっとなぞっても閉じられる（✕と同じ）
+  {
+    const sheet = document.getElementById("shop-sheet");
+    let ssx = 0, ssy = 0, sok = false;
+    sheet.addEventListener("touchstart", e => {
+      if (e.touches.length !== 1) { sok = false; return; }
+      ssx = e.touches[0].clientX; ssy = e.touches[0].clientY;
+      const body = sheet.querySelector(".memo-sheet-body");
+      // 一覧の途中を読んでいる（下にまだ続きがある）ときは、スクロールを優先して閉じない
+      sok = !body || body.scrollTop + body.clientHeight >= body.scrollHeight - 2;
+    }, { passive: true });
+    sheet.addEventListener("touchend", e => {
+      if (!sok) return;
+      sok = false;
+      const dy = e.changedTouches[0].clientY - ssy, dx = e.changedTouches[0].clientX - ssx;
+      if (dy <= -70 && -dy >= Math.abs(dx) * 1.5) closeShopPop();
+    }, { passive: true });
+  }
   document.getElementById("shop-pop").addEventListener("click", e => {
     if (e.target.id === "shop-pop") closeShopPop();
   });
