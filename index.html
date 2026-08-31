@@ -16,7 +16,7 @@
   --bg-accent: linear-gradient(180deg, #fbfaf4 0%, #f8f7f0 55%, #f5f5ec 100%);
   --card: #ffffff;
   --text: #35413a;
-  --muted: #64735f;
+  --muted: #55634f;
   --accent: #3e7258;             /* 深緑 */
   --accent-strong: #2c543f;
   --accent-grad: linear-gradient(135deg, #3f7257 0%, #2c543f 100%);
@@ -45,7 +45,7 @@
   --bg-accent: linear-gradient(180deg, #3d434f 0%, #383e4a 55%, #333944 100%);
   --card: #434a58;
   --text: #f1efe7;
-  --muted: #b7bcc7;
+  --muted: #c9cdd6;
   --accent: #d6b878;             /* 真鍮ゴールド */
   --accent-strong: #e6cd93;
   --accent-grad: linear-gradient(135deg, #33477a 0%, #243356 100%); /* 主ボタンは紺 */
@@ -74,7 +74,7 @@
   --bg-accent: linear-gradient(180deg, #f8f5ef 0%, #f6f3ec 55%, #f4f0e8 100%);
   --card: #fffdf9;
   --text: #5a5347;
-  --muted: #8a8172;
+  --muted: #746c5c;
   --accent: #7f976f;             /* やわらかな若葉 */
   --accent-strong: #66805c;
   --accent-grad: linear-gradient(135deg, #c4d5be 0%, #adc4a6 100%); /* 淡いセージ地 */
@@ -437,7 +437,7 @@ button { color: inherit; } /* 色未指定のボタンがブラウザ標準の�
 .field-label .ar { font-size: 1.35em; line-height: 0; color: var(--accent); vertical-align: -.08em; margin: 0 1px; }
 /* 服装の「写真⬆でも 説明⬇でもOK」見出しは中央、入力の文字は左寄せ */
 .outfit-day-edit .field-label { display: block; text-align: center; }
-.outfit-hint { color: var(--muted); font-size: .92rem; line-height: 1.5; }
+.outfit-hint { color: var(--text); font-size: min(1.08rem, 4.6vw); font-weight: 700; line-height: 1.5; }
 /* 今日の服の欄だけ、写真の枠に合わせて幅を抑える（文字は読みやすい大きさで） */
 .outfit-today-body .outfit-hint { max-width: 108px; font-size: 1.02rem; line-height: 1.6; color: var(--text); opacity: .8; }
 /* 画面上部のサブタイトル：高齢の方にも読めるよう大きく・はっきり */
@@ -457,7 +457,7 @@ button { color: inherit; } /* 色未指定のボタンがブラウザ標準の�
   display: flex; align-items: baseline; justify-content: center; gap: 8px;
   font-size: 1.3rem; font-weight: 800; letter-spacing: .08em;
 }
-.oalb-y { font-size: .82rem; font-weight: 600; color: var(--muted); letter-spacing: .06em; }
+.oalb-y { font-size: .95rem; font-weight: 700; color: var(--muted); letter-spacing: .06em; }
 .oalb-head { margin-bottom: 8px; }
 /* ページをめくる動き */
 @keyframes oalb-in-next { from { opacity: 0; transform: translateX(24px); } }
@@ -465,7 +465,7 @@ button { color: inherit; } /* 色未指定のボタンがブラウザ標準の�
 .oalb-anim-next { animation: oalb-in-next .22s ease-out; }
 .oalb-anim-prev { animation: oalb-in-prev .22s ease-out; }
 .outfit-grid-cal .ocal-cell {
-  position: relative; aspect-ratio: 1; padding: 0; overflow: hidden;
+  position: relative; aspect-ratio: 6 / 7; padding: 0; overflow: hidden;
   border-radius: 8px; border: none;
   background: color-mix(in srgb, var(--text) 5%, transparent); /* 写真のない日は空きポケット */
 }
@@ -476,8 +476,8 @@ button { color: inherit; } /* 色未指定のボタンがブラウザ標準の�
   border: 2px solid #fff; border-radius: 8px; box-sizing: border-box;
 }
 .ocal-note { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font-size: 1.1rem; }
-.ocal-day { position: absolute; left: 0; right: 0; bottom: 0; font-size: .78rem; font-weight: 700; line-height: 1.5; }
-.ocal-cell:not(.has-outfit) .ocal-day { opacity: .6; }
+.ocal-day { position: absolute; left: 0; right: 0; bottom: 0; font-size: .95rem; font-weight: 800; line-height: 1.55; }
+.ocal-cell:not(.has-outfit) .ocal-day { opacity: .85; }
 .ocal-cell.has-outfit .ocal-day { background: rgba(0,0,0,.5); color: #fff; }
 .ocal-cell[disabled] { cursor: default; background: transparent; }
 .ocal-cell.today { box-shadow: inset 0 0 0 2px var(--accent); }
@@ -500,7 +500,7 @@ button { color: inherit; } /* 色未指定のボタンがブラウザ標準の�
 }
 .moon-sky svg { width: min(100%, clamp(220px, 39vh, 331px)); height: auto; display: block; margin: 0 auto; }
 .moon-caption { color: #d9dff5; font-size: 1.05rem; font-weight: 700; letter-spacing: .06em; margin-top: -6px; }
-.moon-lore { color: #c3cbe8; font-size: .9rem; margin-top: 2px; }
+.moon-lore { color: #dde3f5; font-size: 1rem; margin-top: 2px; }
 /* 星のまたたき（星ごとに速さとタイミングをずらす） */
 @keyframes twinkle-visit { 0%, 100% { opacity: .92; } 50% { opacity: .55; } } /* 浅めのまたたき＝星座の形が読める */
 @keyframes twinkle-base { 0%, 100% { opacity: .22; } 50% { opacity: .1; } }
@@ -545,7 +545,7 @@ button { color: inherit; } /* 色未指定のボタンがブラウザ標準の�
 
 /* おやすみモード */
 .sleep-fade { transition: opacity 1.6s ease; }
-.sleep-remaining { text-align: center; color: var(--muted); font-size: .95rem; margin-top: 4px; }
+.sleep-remaining { text-align: center; color: var(--muted); font-size: 1rem; margin-top: 4px; }
 .sleep-goodnight { text-align: center; font-size: 1.6rem; font-weight: 800; line-height: 2; margin: 90px 0 24px; }
 .sleep-dim {
   position: fixed; inset: 0; background: #000;
@@ -626,7 +626,7 @@ input[type="month"]::-webkit-calendar-picker-indicator { width: 28px; height: 28
 #screen-shopping .shop-note { margin-top: 0; margin-bottom: 2px; }
 
 /* 「まとめて」と分類の境目の一言 */
-.shop-divider { text-align: center; color: var(--muted); font-size: .95rem; margin: 4px 0 0; }
+.shop-divider { text-align: center; color: var(--muted); font-size: 1rem; font-weight: 700; margin: 4px 0 0; }
 /* 入力ハブ：カテゴリ一覧（今の中身が見える） */
 .shop-hub-list { display: flex; flex-direction: column; gap: 12px; }
 /* 書く画面：4カテゴリをその場で直接編集 */
@@ -693,7 +693,7 @@ input[type="month"]::-webkit-calendar-picker-indicator { width: 28px; height: 28
 /* 一覧の小さなサムネイル（実写真のとき） */
 .album-item-photo img { width: 48px; height: 48px; object-fit: cover; border-radius: 10px; display: block; }
 .album-photo .ph-emoji { font-size: 5rem; }
-.album-cap { text-align: center; color: var(--muted); font-size: .95rem; margin-bottom: 16px; }
+.album-cap { text-align: center; color: var(--muted); font-size: 1rem; margin-bottom: 16px; }
 .album-q { font-size: 1.25rem; font-weight: 800; text-align: center; line-height: 1.6; margin-bottom: 4px; }
 /* アルバム画面の上の一行（線画＋文字。狭い端末でも1行に収まる） */
 .album-lead {
@@ -716,13 +716,13 @@ input[type="month"]::-webkit-calendar-picker-indicator { width: 28px; height: 28
 .album-item-photo { font-size: 2.2rem; flex-shrink: 0; }
 .album-item-body { flex: 1; min-width: 0; }
 .album-item-note { font-weight: 700; word-break: break-word; }
-.album-item-date { color: var(--muted); font-size: .95rem; margin-top: 3px; }
+.album-item-date { color: var(--muted); font-size: 1rem; margin-top: 3px; }
 .album-del, .album-edit { background: none; border: none; font-size: 1.3rem; cursor: pointer; flex-shrink: 0; padding: 6px; -webkit-tap-highlight-color: transparent; }
 .album-cap-sub { opacity: .8; font-size: .8rem; }
 .album-rec { opacity: .7; margin-left: 6px; }
 .album-field-label { display: block; font-weight: 700; margin-bottom: 6px; font-size: .95rem; text-align: left; }
 .album-reveal { font-size: 1.3rem; font-weight: 800; color: var(--accent-strong); background: var(--accent-soft); border-radius: 14px; padding: 10px 14px; margin: 4px 0 12px; }
-.home-note { margin-top: 4px; color: var(--muted); font-size: .9rem; text-align: center; }
+.home-note { margin-top: 4px; color: var(--muted); font-size: 1rem; font-weight: 700; text-align: center; }
 
 /* 検索バー */
 .search-trigger {
@@ -784,7 +784,7 @@ input[type="month"]::-webkit-calendar-picker-indicator { width: 28px; height: 28
   display: grid; grid-template-columns: repeat(7, 1fr);
   text-align: center; margin-bottom: 6px;
 }
-.wd { font-size: .85rem; font-weight: 700; color: var(--muted); padding: 6px 0; }
+.wd { font-size: .98rem; font-weight: 800; color: var(--muted); padding: 6px 0; }
 .wd.sun { color: var(--accent2); } .wd.sat { color: var(--accent); }
 
 .cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; }
@@ -792,7 +792,7 @@ input[type="month"]::-webkit-calendar-picker-indicator { width: 28px; height: 28
   aspect-ratio: 1;
   border: none; background: none;
   border-radius: 16px;
-  font-family: inherit; font-size: 1.05rem; font-weight: 600;
+  font-family: inherit; font-size: 1.18rem; font-weight: 700;
   color: var(--text);
   cursor: pointer;
   position: relative; /* ●は下端に固定し、数字の位置を全マスでそろえる */
@@ -859,7 +859,7 @@ input[type="month"]::-webkit-calendar-picker-indicator { width: 28px; height: 28
   border-radius: 999px;
   box-shadow: var(--shadow);
 }
-.search-count { text-align: center; color: var(--muted); font-size: .95rem; font-weight: 700; margin-top: 12px; }
+.search-count { text-align: center; color: var(--muted); font-size: 1rem; font-weight: 700; margin-top: 12px; }
 .search-hint {
   color: var(--muted);
   text-align: center;
@@ -1066,7 +1066,7 @@ mark {
 .quiz-actions { display: flex; flex-direction: column; gap: 12px; }
 .quiz-judge { display: flex; gap: 12px; }
 /* もっと思い出すの下の注記（記録が多い人にだけ出る） */
-.quiz-more-note { text-align: center; color: var(--muted); font-size: .95rem; margin: 6px 0 10px; }
+.quiz-more-note { text-align: center; color: var(--muted); font-size: 1rem; font-weight: 700; margin: 6px 0 10px; }
 .quiz-judge .btn { flex: 1; min-height: 62px; font-size: 1.18rem; border-radius: 999px; }
 /* 横並び2つのとき（ホームへ／食事を記録）：大きめの字で、2行までは折り返しOK */
 .quiz-judge-2 .btn { font-size: min(1.05rem, 4.5vw); line-height: 1.35; padding: 10px 8px; }
@@ -1547,7 +1547,7 @@ mark {
 .memo-done:active { transform: scale(.94); }
 .memo-done .balloon-ico { width: 24px; height: 24px; color: var(--accent-strong); }
 .memo-text { flex: 1; min-width: 0; font-size: 1.12rem; font-weight: 700; line-height: 1.6; word-break: break-word; }
-.memo-note { text-align: center; color: var(--muted); font-size: .92rem; line-height: 1.7; margin-top: 4px; }
+.memo-note { text-align: center; color: var(--muted); font-size: 1rem; line-height: 1.7; margin-top: 4px; }
 /* 買い物の答え合わせシート（メモと同じ部品＋カテゴリ見出し） */
 #shop-pop { position: fixed; inset: 0; z-index: 300; background: rgba(8, 10, 22, .55);
   display: flex; align-items: flex-start; justify-content: center; }
@@ -1954,7 +1954,7 @@ html[data-fontsize="xlarge"] .tabb-name { font-size: min(.95rem, 4vw); }
   #screen-outfit.one-screen { height: auto; min-height: 100vh; min-height: 100dvh; overflow: visible; }
   #screen-outfit.one-screen .outfit-wrap { flex: 0 0 auto; padding-bottom: 30px; }
 }
-#screen-outfit.one-screen .outfit-hint { font-size: clamp(.82rem,1.7vh,.92rem); }
+#screen-outfit.one-screen .outfit-hint { font-size: min(1.02rem, 4.4vw); font-weight: 700; }
 #screen-outfit.one-screen .outfit-today-body .outfit-hint { font-size: clamp(.9rem,2vh,1.02rem); }
 /* 幅の狭い端末：服のアルバムが下のタブに重ならないよう、余白を少しだけ詰める */
 @media (max-width: 340px) {
