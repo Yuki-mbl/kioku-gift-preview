@@ -5333,7 +5333,7 @@ function renderShoppingHub() {
     <div class="shop-edit-card">
       <div class="shop-cat">${shopIconHtml(c)}${c.name}</div>
       <div class="meal-line">
-        <textarea class="shop-edit-input grow-input" id="shop-${c.key}" data-key="${c.key}" rows="2" placeholder="買うものを書く">${esc(s[c.key] || "")}</textarea>
+        <textarea class="shop-edit-input grow-input" id="shop-${c.key}" data-key="${c.key}" rows="2">${esc(s[c.key] || "")}</textarea>
         ${micMini("shop-" + c.key, "shop-hide")}
       </div>
     </div>`);
