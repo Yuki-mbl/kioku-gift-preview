@@ -481,6 +481,11 @@ button { color: inherit; } /* 色未指定のボタンがブラウザ標準の�
 .ocal-cell.has-outfit .ocal-day { background: rgba(0,0,0,.5); color: #fff; }
 .ocal-cell[disabled] { cursor: default; background: transparent; }
 .ocal-cell.today { box-shadow: inset 0 0 0 2px var(--accent); }
+/* 服カレンダーの曜日行（英語）と、1日を曜日位置にそろえるための空きマス */
+.owd { padding: 2px 0 4px; font-size: min(.85rem, 3.3vw); letter-spacing: .03em; text-align: center; }
+.ocal-pad { aspect-ratio: 6 / 7; }
+/* 文字だけの日の印はホームと同じ服の線画 */
+.ocal-note .balloon-ico { width: 52%; height: auto; color: var(--accent-strong); }
 .outfit-day-date { text-align: center; font-size: 1.3rem; font-weight: 900; margin: 6px 0 12px; }
 .outfit-day-img { display: block; width: 100%; max-width: 300px; border-radius: 16px; margin: 0 auto 14px; border: 1.5px solid var(--border); }
 .outfit-day-note { font-size: 1.1rem; font-weight: 700; text-align: center; margin-bottom: 14px; }
@@ -1948,6 +1953,7 @@ html[data-fontsize="xlarge"] .tabb-name { font-size: min(.95rem, 4vw); }
 #screen-outfit.one-screen #outfit-note { font-size: clamp(1.05rem, 2.4vh, 1.15rem); }
 #screen-outfit.one-screen .cal-weekdays { margin-bottom: clamp(1px,.4vh,4px); }
 #screen-outfit.one-screen .wd { padding: clamp(1px,.4vh,4px) 0; font-size: clamp(.8rem,1.6vh,.9rem); }
+#screen-outfit.one-screen .wd.owd { font-size: min(.85rem, 3.3vw); } /* 英語3文字が7列に収まる大きさを守る */
 #screen-outfit.one-screen .outfit-lead { font-size: clamp(1.05rem,2.4vh,1.18rem); }
 /* 画面が低いときは1画面固定をやめてスクロールできるようにする（文字が切れないように） */
 @media (max-height: 700px) {
@@ -4340,7 +4346,11 @@ function renderOutfitCalendar(dir) {
   const grid = document.getElementById("ocal-grid");
   const all = loadOutfits();
   const today = todayStr();
-  let html = "";
+  // 曜日の行（英語。何曜日だったか思い出す手がかりに）＋1日を曜日の位置にそろえる
+  const WD_EN = ["SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT"];
+  let html = WD_EN.map((w2, i) =>
+    `<span class="wd owd${i === 0 ? " sun" : ""}${i === 6 ? " sat" : ""}">${w2}</span>`).join("");
+  html += `<span class="ocal-pad"></span>`.repeat(new Date(y, m, 1).getDay());
   const lastDate = new Date(y, m + 1, 0).getDate();
   for (let d = 1; d <= lastDate; d++) {
     const ds = toDateStr(new Date(y, m, d));
@@ -4349,7 +4359,7 @@ function renderOutfitCalendar(dir) {
     const cls = ["cal-cell", "ocal-cell", ds === today ? "today" : "", isFuture ? "future" : "", o ? "has-outfit" : ""].join(" ");
     html += `<button class="${cls}" data-date="${ds}" ${isFuture ? "disabled" : ""}>
       ${o?.photo ? `<img src="${o.photo}" alt="">` : ""}
-      ${!o?.photo && o ? `<span class="ocal-note">👕</span>` : ""}
+      ${!o?.photo && o ? `<span class="ocal-note">${balloonIconSvg("outfit")}</span>` : ""}
       <span class="ocal-day">${d}</span>
     </button>`;
   }
