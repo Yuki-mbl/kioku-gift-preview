@@ -1982,6 +1982,13 @@ html[data-fontsize="xlarge"] .tabb-name { font-size: min(.95rem, 4vw); }
 #screen-sleep.one-screen .sleep-topic { padding: clamp(6px,1.3vh,14px) 8px; gap: clamp(2px,.6vh,6px); }
 #screen-sleep.one-screen .sleep-topic-emoji { font-size: clamp(1.2rem,2.9vh,1.7rem); }
 #screen-sleep.one-screen .sleep-topic-name { font-size: clamp(.85rem,2vh,1rem); }
+
+/* なぞって移動したとき：移動方向からスッと入る（通常の遷移より少しだけ大きい動き） */
+.swipe-in-back { animation: swipe-in-back .24s ease-out; }
+.swipe-in-fwd { animation: swipe-in-fwd .24s ease-out; }
+@keyframes swipe-in-back { from { transform: translateX(-26px); opacity: .65; } }
+@keyframes swipe-in-fwd { from { transform: translateX(26px); opacity: .65; } }
+@media (prefers-reduced-motion: reduce) { .swipe-in-back, .swipe-in-fwd { animation: none; } }
 </style>
 <div id="app">
 
@@ -2516,15 +2523,23 @@ const BACK_BTN_BY_SCREEN = {
   "screen-transfer-code": "tc-back",
   "screen-code-entry": "ce-back",
 };
+function swipeAnim(dir) {
+  const scr = document.querySelector(".screen.active");
+  if (!scr) return;
+  scr.classList.remove("screen-anim", "swipe-in-back", "swipe-in-fwd");
+  void scr.offsetWidth;
+  scr.classList.add(dir === "back" ? "swipe-in-back" : "swipe-in-fwd");
+}
 function swipeBack() {
   const id = document.querySelector(".screen.active")?.id;
   if (!id || id === "screen-home") return; // ホームではこれ以上戻らない
   const btn = document.getElementById(BACK_BTN_BY_SCREEN[id] || "");
   if (btn) btn.click(); else goHome();
+  swipeAnim("back"); // 指の動きに合わせて左からスッと入る
 }
 function swipeForward() {
   const id = document.querySelector(".screen.active")?.id;
-  if (id === "screen-home") openCalendar(); // ホームからは「見返す」へ
+  if (id === "screen-home") { openCalendar(); swipeAnim("fwd"); } // ホームからは「見返す」へ
 }
 function wireSwipeNav() {
   const app = document.getElementById("app");
@@ -2536,7 +2551,7 @@ function wireSwipeNav() {
     const scr = document.querySelector(".screen.active")?.id;
     // 入力欄・下タブ・服のアルバム（月めくりが優先）から始めた指は対象外
     const from = e.target;
-    const inExcluded = from.closest("input, textarea, #tab-bar, #ocal-grid, .cal-grid");
+    const inExcluded = from.closest("input, textarea, #tab-bar, #ocal-grid"); // 服の月めくりだけ除外。見返すカレンダーは矢印でめくるので、なぞりはページ移動に使う
     ok = !!scr && !SWIPE_OFF_SCREENS.has(scr) && !inExcluded;
   }, { passive: true });
   app.addEventListener("touchend", e => {
