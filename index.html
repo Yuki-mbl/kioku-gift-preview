@@ -427,7 +427,7 @@ button { color: inherit; } /* 色未指定のボタンがブラウザ標準の�
 /* 服のひとこと欄：書いた分だけ下にのびて、全部見える（横に隠れない） */
 .outfit-note-input {
   width: 100%; box-sizing: border-box; font-size: 1rem;
-  min-height: 0; resize: none; overflow: hidden;
+  min-height: calc(1.6em + 31px); resize: none; overflow: hidden;
   line-height: 1.6; white-space: pre-wrap; word-break: break-word;
   field-sizing: content; /* 対応ブラウザでは高さをブラウザ任せに（フォント読み込み後も正確） */
 }
@@ -1581,7 +1581,8 @@ mark {
 
 /* 1行入力ふうの欄：長く書くと枠が下にのびて全部見える */
 .grow-input {
-  min-height: 0; height: auto; resize: none; overflow: hidden;
+  /* 空でも1行分（文字1.6em＋上下パディング28px＋枠3px）は確保：薄字が縦に切れないように */
+  min-height: calc(1.6em + 31px); height: auto; resize: none; overflow: hidden;
   line-height: 1.6; white-space: pre-wrap; word-break: break-word;
   field-sizing: content;
 }
@@ -4542,7 +4543,7 @@ function renderAlbumPhotoView() {
     <div class="album-photo${isReal ? " has-img" : ""}"><span class="ph-emoji">${albumPhotoHtml(emoji)}</span></div>
     ${isReal ? "" : `<p class="album-cap">（本番アプリでは、あなたのアルバムから1枚出ます）</p>`}
     <div class="album-q q-soft">思い出すだけでも大丈夫</div>
-    <div class="field meal-line"><textarea id="album-text" class="grow-input" rows="2" placeholder="例：家族と行った海。波の音まで思い出す。"></textarea>${micMini("album-text", "album-keep")}</div>
+    <div class="field meal-line"><textarea id="album-text" class="grow-input" rows="2" placeholder="沖縄旅行"></textarea>${micMini("album-text", "album-keep")}</div>
     <button type="button" class="btn btn-primary btn-xl" id="album-keep">保存</button>
     <button type="button" class="btn btn-secondary btn-xl" id="album-skip" style="margin-top:10px;">残さない（ホームへ）</button>
     <button type="button" class="btn btn-secondary btn-xl" id="album-list" style="margin-top:10px;">残した思い出を見る（${memos.length}）</button>`;
