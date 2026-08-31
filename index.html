@@ -2566,17 +2566,29 @@ function swipeForward() {
 }
 function wireSwipeNav() {
   const app = document.getElementById("app");
-  let sx = 0, sy = 0, ok = false;
+  let sx = 0, sy = 0, ok = false, lockedH = false;
   app.addEventListener("touchstart", e => {
+    lockedH = false;
     if (e.touches.length !== 1) { ok = false; return; }
     const t = e.touches[0];
     sx = t.clientX; sy = t.clientY;
     const scr = document.querySelector(".screen.active")?.id;
-    // 入力欄・下タブ・服のアルバム（月めくりが優先）から始めた指は対象外
+    // 入力欄・下タブから始めた指は対象外
     const from = e.target;
     const inExcluded = from.closest("input, textarea, #tab-bar"); // どのカレンダーも月めくりは矢印のみ。なぞりはどこでもページ移動
     ok = !!scr && !SWIPE_OFF_SCREENS.has(scr) && !inExcluded;
   }, { passive: true });
+  // 横のなぞりと分かった時点で、縦スクロールを止める（なぞり中に画面が上下に揺れないように）
+  app.addEventListener("touchmove", e => {
+    if (!ok || e.touches.length !== 1) return;
+    const t = e.touches[0];
+    const dx = t.clientX - sx, dy = t.clientY - sy;
+    if (!lockedH) {
+      if (Math.abs(dx) > 12 && Math.abs(dx) > Math.abs(dy) * 1.2) lockedH = true;       // 横と確定
+      else if (Math.abs(dy) > 12 && Math.abs(dy) >= Math.abs(dx)) { ok = false; return; } // 縦スクロールと確定
+    }
+    if (lockedH && e.cancelable) e.preventDefault();
+  }, { passive: false });
   app.addEventListener("touchend", e => {
     if (!ok) return;
     ok = false;
