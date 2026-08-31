@@ -4395,7 +4395,7 @@ function renderOutfitDay(ds) {
   outfitDay = ds;
   setBackLabel("outfit-back", true);
   // 戻る先が分かる言葉に（重複していた下のもどるボタンは廃止）
-  document.getElementById("outfit-back").textContent = outfitReturnTo ? "← この日の記録へもどる" : "← アルバムへもどる";
+  document.getElementById("outfit-back").textContent = outfitReturnTo ? "← この日の記録へもどる" : "← もどる";
   setOneScreen("screen-outfit", false); // 1日の詳細は内容に合わせて伸びる
   const o = outfitOf(ds) || {};
   document.getElementById("outfit-wrap").innerHTML = `
