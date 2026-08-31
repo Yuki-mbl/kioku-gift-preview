@@ -763,7 +763,6 @@ input[type="month"]::-webkit-calendar-picker-indicator { width: 28px; height: 28
   #screen-calendar .search-trigger:has(.search-eg) { font-size: min(1.12rem, 4.05vw) !important; }
 }
 /* 画面が低いときは例を隠して1行に収める */
-@media (max-height: 620px) { .search-eg { display: none; } }
 /* とても低い画面では、カレンダーもスクロールできるように（切れないように） */
 @media (max-height: 600px) { #screen-calendar .cal-wrap { padding-bottom: 30px; } }
 
@@ -2084,7 +2083,7 @@ html[data-fontsize="xlarge"] .tabb-name { font-size: min(.95rem, 4vw); }
       </header>
       <div class="home-wrap">
         <div class="home-doors" id="home-doors"></div>
-        <button type="button" class="search-trigger js-open-search">記憶の検索<small class="search-eg">（牛丼、ブラウス、太郎など）</small></button>
+        <button type="button" class="search-trigger js-open-search">記憶の検索<small class="search-eg">（パン、ブラウス、太郎）</small></button>
         <div class="home-note" id="home-count"></div>
       </div>
     </section>
@@ -2113,7 +2112,7 @@ html[data-fontsize="xlarge"] .tabb-name { font-size: min(.95rem, 4vw); }
           </div>
           <div class="cal-grid" id="cal-grid"></div>
         </div>
-        <button type="button" class="search-trigger js-open-search">記憶の検索<small class="search-eg">（牛丼、ブラウス、太郎など）</small></button>
+        <button type="button" class="search-trigger js-open-search">記憶の検索<small class="search-eg">（パン、ブラウス、太郎）</small></button>
         <div class="home-note" id="home-streak"></div>
         <div class="cal-encourage">
           <p>面倒な日は、ひと言だけでだいじょうぶ<br>そのひと言が、未来の自分への贈りもの</p>
@@ -2130,7 +2129,7 @@ html[data-fontsize="xlarge"] .tabb-name { font-size: min(.95rem, 4vw); }
       </header>
       <div class="search-wrap">
         <div class="search-line">
-          <input type="text" id="search-input" placeholder="記憶の検索（牛丼、ブラウス、太郎など）">
+          <input type="text" id="search-input" placeholder="記憶の検索（パン、ブラウス、太郎）">
           <button type="button" class="mic-btn search-mic" id="search-mic" aria-label="話して検索" hidden>🎤</button>
         </div>
         <div id="search-results"></div>
