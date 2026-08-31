@@ -1708,6 +1708,8 @@ mark {
 
 /* ボタンの中の線画（思い出す問題へ・この日を書き足す等）。文字色と同じ色で */
 .btn-ico { display: inline-flex; align-items: center; vertical-align: -.3em; margin-right: 8px; }
+/* 大きめのカメラ絵（服装の「今日の服」ボタン。文字を短くしたぶん絵で伝える） */
+.btn-ico.btn-ico-big.btn-ico-big .balloon-ico { width: 34px; height: 34px; }
 .btn-ico.btn-ico svg, .btn-ico.btn-ico .balloon-ico { width: 30px; height: 30px; color: currentColor; stroke-width: 2; }
 /* 幅のせまいボタン用のひとまわり小さい線画 */
 .btn-ico.btn-ico-sm { margin-right: 6px; vertical-align: -.24em; }
@@ -4370,7 +4372,7 @@ function renderOutfitToday() {
          <button type="button" class="btn btn-secondary" id="outfit-shot"><span class="btn-ico btn-ico-sm">${balloonIconSvg("camera")}</span>入れ替える</button>
          <button type="button" class="btn btn-secondary" id="outfit-del">消す</button>
        </div>`
-    : `<button type="button" class="btn btn-primary btn-xl" id="outfit-shot"><span class="btn-ico">${balloonIconSvg("camera")}</span>今日の服の写真を入れる</button>`;
+    : `<button type="button" class="btn btn-primary btn-xl" id="outfit-shot"><span class="btn-ico btn-ico-big">${balloonIconSvg("camera")}</span>今日の服</button>`;
   document.getElementById("outfit-shot")?.addEventListener("click", () => document.getElementById("outfit-file")?.click());
   const del = document.getElementById("outfit-del");
   if (del) del.addEventListener("click", () => { setOutfit(t, { photo: null }); renderOutfitMain(); });
