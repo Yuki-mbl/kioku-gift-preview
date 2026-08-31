@@ -2529,17 +2529,40 @@ function swipeAnim(dir) {
   void scr.offsetWidth;
   scr.classList.add(dir === "back" ? "swipe-in-back" : "swipe-in-fwd");
 }
-function swipeBack() {
+// なぞりは下のタブと同じ並びをぐるっと回る：ホーム→日記→思い出す→見返す→ホーム
+// （左なぞり＝次へ、右なぞり＝前へ。タブ以外の画面では右なぞり＝ホームへ）
+function tabPos() {
   const id = document.querySelector(".screen.active")?.id;
-  if (!id || id === "screen-home") return; // ホームではこれ以上戻らない
-  if (id === "screen-flow") { saveFlowDraftIfAny(); goHome(); swipeAnim("back"); return; } // 日記・思い出す：書きかけを保存してホームへ
+  if (id === "screen-home") return 0;
+  if (id === "screen-flow") {
+    if (flow?.recallOnly) return 2; // 思い出す
+    if (flow?.steps?.length === 1 && flow.steps[0].id === "diary") return 1; // 日記
+    return -1; // 食事などの記入フローはタブ外
+  }
+  if (id === "screen-calendar") return 3;
+  return -1;
+}
+function goTabIndex(i) {
+  saveFlowDraftIfAny();
+  const n = ((i % 4) + 4) % 4;
+  if (n === 0) goHome();
+  else if (n === 1) openDiary();
+  else if (n === 2) startRecall();
+  else openCalendar();
+}
+function swipeBack() {
+  const pos = tabPos();
+  if (pos >= 0) { goTabIndex(pos - 1); swipeAnim("back"); return; } // タブの並びをひとつ前へ（ホームからは見返すへ一周）
+  const id = document.querySelector(".screen.active")?.id;
+  if (!id) return;
+  if (id === "screen-flow") { saveFlowDraftIfAny(); goHome(); swipeAnim("back"); return; } // 記入フロー：書きかけを保存してホームへ
   const btn = document.getElementById(BACK_BTN_BY_SCREEN[id] || "");
   if (btn) btn.click(); else goHome();
   swipeAnim("back"); // 指の動きに合わせて左からスッと入る
 }
 function swipeForward() {
-  const id = document.querySelector(".screen.active")?.id;
-  if (id === "screen-home") { openCalendar(); swipeAnim("fwd"); } // ホームからは「見返す」へ
+  const pos = tabPos();
+  if (pos >= 0) { goTabIndex(pos + 1); swipeAnim("fwd"); } // タブの並びをひとつ次へ（見返すからはホームへ一周）
 }
 function wireSwipeNav() {
   const app = document.getElementById("app");
