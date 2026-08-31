@@ -5606,6 +5606,24 @@ function wireEvents() {
   document.getElementById("search-back").addEventListener("click", goHome);
   // メモのポップアップ：✕・背景タップで閉じる
   document.getElementById("memo-close").addEventListener("click", closeMemo);
+  // 下から出るシートは、下へすっとなぞっても閉じられる（✕と同じ）
+  {
+    const sheet = document.getElementById("memo-sheet");
+    let msx = 0, msy = 0, mok = false;
+    sheet.addEventListener("touchstart", e => {
+      if (e.touches.length !== 1) { mok = false; return; }
+      msx = e.touches[0].clientX; msy = e.touches[0].clientY;
+      const body = sheet.querySelector(".memo-sheet-body");
+      // 入力欄から始めた指と、一覧を上へスクロール中（先頭以外）のときは対象外
+      mok = !e.target.closest("textarea, input") && (!body || body.scrollTop <= 0);
+    }, { passive: true });
+    sheet.addEventListener("touchend", e => {
+      if (!mok) return;
+      mok = false;
+      const dy = e.changedTouches[0].clientY - msy, dx = e.changedTouches[0].clientX - msx;
+      if (dy >= 70 && dy >= Math.abs(dx) * 1.5) closeMemo();
+    }, { passive: true });
+  }
   document.getElementById("shop-pop-close").addEventListener("click", closeShopPop);
   document.getElementById("shop-pop").addEventListener("click", e => {
     if (e.target.id === "shop-pop") closeShopPop();
