@@ -447,7 +447,7 @@ button { color: inherit; } /* 色未指定のボタンがブラウザ標準の�
   font-size: 1.18rem; font-weight: 800; letter-spacing: .02em;
 }
 /* 服のアルバム：月ごとのページに写真が並ぶ（カレンダーではなく「写真棚」として見せる） */
-.outfit-cal { padding: 10px 12px; }
+.outfit-cal { padding: 10px 8px 12px; }
 .outfit-album {
   background: color-mix(in srgb, var(--accent) 6%, var(--card)); /* 台紙の紙色 */
   border: 1.5px solid color-mix(in srgb, var(--accent) 22%, var(--border));
@@ -465,7 +465,7 @@ button { color: inherit; } /* 色未指定のボタンがブラウザ標準の�
 .oalb-anim-next { animation: oalb-in-next .22s ease-out; }
 .oalb-anim-prev { animation: oalb-in-prev .22s ease-out; }
 .outfit-grid-cal .ocal-cell {
-  position: relative; aspect-ratio: 6 / 7; padding: 0; overflow: hidden;
+  position: relative; aspect-ratio: 1; padding: 0; overflow: hidden;
   border-radius: 8px; border: none;
   background: color-mix(in srgb, var(--text) 5%, transparent); /* 写真のない日は空きポケット */
 }
@@ -476,14 +476,14 @@ button { color: inherit; } /* 色未指定のボタンがブラウザ標準の�
   border: 2px solid #fff; border-radius: 8px; box-sizing: border-box;
 }
 .ocal-note { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font-size: 1.1rem; }
-.ocal-day { position: absolute; left: 0; right: 0; bottom: 0; font-size: .95rem; font-weight: 800; line-height: 1.55; }
+.ocal-day { position: absolute; left: 0; right: 0; bottom: 0; font-size: 1.02rem; font-weight: 800; line-height: 1.55; }
 .ocal-cell:not(.has-outfit) .ocal-day { opacity: .85; }
 .ocal-cell.has-outfit .ocal-day { background: rgba(0,0,0,.5); color: #fff; }
 .ocal-cell[disabled] { cursor: default; background: transparent; }
 .ocal-cell.today { box-shadow: inset 0 0 0 2px var(--accent); }
 /* 服カレンダーの曜日行（英語）と、1日を曜日位置にそろえるための空きマス */
 .owd { padding: 2px 0 4px; font-size: min(.85rem, 3.3vw); letter-spacing: .03em; text-align: center; }
-.ocal-pad { aspect-ratio: 6 / 7; }
+.ocal-pad { min-width: 0; } /* 空きマス。大きさは行と列なりに任せる（aspect-ratio指定は列幅を歪めるので付けない） */
 /* 文字だけの日の印はホームと同じ服の線画 */
 .ocal-note .balloon-ico { width: 52%; height: auto; color: var(--accent-strong); }
 .outfit-day-date { text-align: center; font-size: 1.3rem; font-weight: 900; margin: 6px 0 12px; }
@@ -1941,14 +1941,14 @@ html[data-fontsize="xlarge"] .tabb-name { font-size: min(.95rem, 4vw); }
 /* カードは中身の高さを保つ（ひとこと欄が伸びても切れない） */
 #screen-outfit.one-screen .outfit-today,
 #screen-outfit.one-screen .outfit-cal { flex: 0 0 auto; }
-#screen-outfit.one-screen .outfit-cal { padding: clamp(6px,1.2vh,12px) 10px; }
+#screen-outfit.one-screen .outfit-cal { padding: clamp(6px,1.2vh,12px) 8px; }
 #screen-outfit.one-screen .cal-nav { margin: 0 4px clamp(4px,1vh,10px); }
 #screen-outfit.one-screen .icon-btn { width: clamp(34px,5vh,44px); height: clamp(34px,5vh,44px); }
 #screen-outfit.one-screen .cal-grid { gap: clamp(2px,.5vh,4px); }
 #screen-outfit.one-screen .outfit-today { padding: clamp(6px,1.2vh,16px) 14px; }
 #screen-outfit.one-screen .outfit-today-row { gap: clamp(8px,1.6vh,14px); }
 #screen-outfit.one-screen .outfit-today-side .btn { min-height: 0; padding: clamp(8px,1.5vh,12px) 8px; }
-#screen-outfit.one-screen .outfit-grid-cal .ocal-cell { aspect-ratio: auto; height: clamp(26px,4.7vh,46px); }
+#screen-outfit.one-screen .outfit-grid-cal .ocal-cell { aspect-ratio: auto; height: clamp(32px,6vh,52px); } /* 正方形に近い大きめのマス（指の太い方でも押しやすく） */
 #screen-outfit.one-screen .outfit-today-img { width: clamp(50px,10vh,80px); }
 #screen-outfit.one-screen .outfit-note-input { padding: clamp(8px,1.4vh,14px) 14px; font-size: clamp(.9rem,1.9vh,1rem); }
 /* 今日のひとことだけは、例（ジーパン　Ｔシャツ）が読めるよう大きめを保つ */
