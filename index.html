@@ -2529,41 +2529,14 @@ function swipeAnim(dir) {
   void scr.offsetWidth;
   scr.classList.add(dir === "back" ? "swipe-in-back" : "swipe-in-fwd");
 }
-// なぞりは下のタブと同じ並びをぐるっと回る：ホーム→日記→思い出す→見返す→ホーム
-// （左なぞり＝次へ、右なぞり＝前へ。タブ以外の画面では右なぞり＝ホームへ）
-function tabPos() {
-  const id = document.querySelector(".screen.active")?.id;
-  if (id === "screen-home") return 0;
-  if (id === "screen-lock" && lockMode === "diary") return 1; // 日記のパスコード画面も「日記」の位置（なぞりで先へ進める）
-  if (id === "screen-flow") {
-    if (flow?.recallOnly) return 2; // 思い出す
-    if (flow?.steps?.length === 1 && flow.steps[0].id === "diary") return 1; // 日記
-    return -1; // 食事などの記入フローはタブ外
-  }
-  if (id === "screen-calendar") return 3;
-  return -1;
-}
-function goTabIndex(i) {
-  saveFlowDraftIfAny();
-  const n = ((i % 4) + 4) % 4;
-  if (n === 0) goHome();
-  else if (n === 1) openDiary();
-  else if (n === 2) startRecall();
-  else openCalendar();
-}
+// なぞりは「右へ払う＝ホームへ戻る」だけ（タブ間の移動は下のタブで。2026-09-01にタブ巡回を廃止）
 function swipeBack() {
-  const pos = tabPos();
-  if (pos >= 0) { goTabIndex(pos - 1); swipeAnim("back"); return; } // タブの並びをひとつ前へ（ホームからは見返すへ一周）
   const id = document.querySelector(".screen.active")?.id;
-  if (!id) return;
-  if (id === "screen-flow") { saveFlowDraftIfAny(); goHome(); swipeAnim("back"); return; } // 記入フロー：書きかけを保存してホームへ
+  if (!id || id === "screen-home") return; // ホームでは何もしない
+  if (id === "screen-flow" || id === "screen-lock") { saveFlowDraftIfAny(); goHome(); swipeAnim("back"); return; } // 日記・思い出す・日記ロック：書きかけを保存してホームへ
   const btn = document.getElementById(BACK_BTN_BY_SCREEN[id] || "");
   if (btn) btn.click(); else goHome();
   swipeAnim("back"); // 指の動きに合わせて左からスッと入る
-}
-function swipeForward() {
-  const pos = tabPos();
-  if (pos >= 0) { goTabIndex(pos + 1); swipeAnim("fwd"); } // タブの並びをひとつ次へ（見返すからはホームへ一周）
 }
 function wireSwipeNav() {
   const app = document.getElementById("app");
@@ -2600,7 +2573,7 @@ function wireSwipeNav() {
     // （縦スクロールは「縦のほうが大きい動き」になるので、比率の条件だけで区別できる）
     if (Math.abs(dx) < 60) return;                 // 横に60px以上
     if (Math.abs(dx) < Math.abs(dy) * 1.5) return; // 縦の1.5倍以上横に動いたときだけ
-    if (dx > 0) swipeBack(); else swipeForward();
+    if (dx > 0) swipeBack(); // 左なぞりの「進む」は無し（タブで移動する）
   }, { passive: true });
 }
 
