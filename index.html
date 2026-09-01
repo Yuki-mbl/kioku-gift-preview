@@ -5233,7 +5233,7 @@ function scheduleGratNotify() {
 // =========================================================
 // 先頭は「まとめて」＝分けたくない人はここに全部書けばいい（キーotherは旧「その他」のまま）
 const SHOP_CATS = [
-  { key: "other", icon: "basket", name: "まとめて書く人はココ" },
+  { key: "other", icon: "basket", name: "まとめて書く人はココ", short: "まとめて" }, // 長い名前は書く画面だけ。答え合わせ側は「まとめて」
   { key: "veg", icon: "carrot", name: "野菜や果物" },
   { key: "meat", icon: "fish", name: "肉や魚" },
   { key: "misc", icon: "bread", name: "その他" },
@@ -5320,7 +5320,7 @@ function renderShopPop() {
         <button type="button" class="memo-done" data-shop-done="${k}:${i}" aria-label="買えた（消す）">${check}</button>
         <span class="memo-text">${esc(t)}</span>
       </div>`).join("");
-    return `<div class="shop-pop-sec"><div class="shop-cat">${shopIconHtml(c)}${c.name}</div>${rows}</div>`;
+    return `<div class="shop-pop-sec"><div class="shop-cat">${shopIconHtml(c)}${c.short || c.name}</div>${rows}</div>`;
   }).join("");
   document.getElementById("shop-pop-wrap").innerHTML = secs
     ? `${secs}<p class="memo-note">買えたらチェックで消せます</p>`
@@ -5390,7 +5390,7 @@ function renderShoppingRecall() {
   const cards = cats.map(c => `
     <button type="button" class="shop-reveal" data-key="${c.key}">
       <div class="shop-head">
-        <span class="shop-cat">${shopIconHtml(c)}${c.name}</span>
+        <span class="shop-cat">${shopIconHtml(c)}${c.short || c.name}</span>
         <span class="shop-check">答え合わせ</span>
       </div>
     </button>`).join("");
