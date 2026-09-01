@@ -643,6 +643,9 @@ input[type="month"]::-webkit-calendar-picker-indicator { width: 28px; height: 28
   box-shadow: var(--shadow);
 }
 .shop-edit-card .shop-cat { margin-bottom: 8px; }
+/* 「まとめて書く人はココ」だけピンクの枠（一目でここと分かるように） */
+.shop-edit-other { border-color: #e8a9b6; }
+[data-theme="dark"] .shop-edit-other { border-color: #c98fa0; }
 .shop-edit-input {
   width: 100%; box-sizing: border-box;
   min-height: 0; resize: none; overflow: hidden; /* 欄内スクロールなし＝書くほどのびる */
@@ -5347,7 +5350,7 @@ function renderShoppingHub() {
   setOneScreen("screen-shopping", false); // ページ全体でスクロール
   const s = loadShopping();
   const cards = SHOP_CATS.map(c => `
-    <div class="shop-edit-card">
+    <div class="shop-edit-card shop-edit-${c.key}">
       <div class="shop-cat">${shopIconHtml(c)}${c.name}</div>
       <div class="meal-line">
         <textarea class="shop-edit-input grow-input" id="shop-${c.key}" data-key="${c.key}" rows="2">${esc(s[c.key] || "")}</textarea>
