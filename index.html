@@ -1,5 +1,5 @@
 <!doctype html>
-<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, interactive-widget=resizes-content">
 <meta charset="utf-8">
 <title>記憶のギフト ～未来の自分へ～</title>
 <style>
@@ -5726,12 +5726,26 @@ function wireEvents() {
 
 }
 
+// キーボードで隠れる高さぶんページ下に余白を足す
+// （キーボードを出しても画面の高さが変わらない環境だと、いちばん下の入力欄までスクロールできないため）
+function wireKeyboardInset() {
+  const vv = window.visualViewport;
+  if (!vv) return;
+  const update = () => {
+    const hidden = Math.max(0, window.innerHeight - vv.height - vv.offsetTop);
+    document.body.style.paddingBottom = hidden > 40 ? hidden + "px" : "";
+  };
+  vv.addEventListener("resize", update);
+  vv.addEventListener("scroll", update);
+}
+
 function init() {
   applySettings();
   setupOnboarding();
   wireEvents();
   pruneMealPhotos(); // 3日より古い食事写真を自動削除
   wireSwipeNav();    // 指でスライドして移動（右＝戻る／左＝進む）
+  wireKeyboardInset();
   if (!profile) {
     showScreen("screen-onboarding");
   } else if (settings.passcode) {
