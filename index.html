@@ -2004,19 +2004,19 @@ html[data-fontsize="xlarge"] .tabb-name { font-size: min(.95rem, 4vw); }
     <section id="screen-lock" class="screen">
       <div class="lock-wrap" id="lock-wrap">
         <div class="lock-logo">🔒</div>
-        <h2 class="lock-title">パスコードを入力</h2>
+        <h2 class="lock-title" data-t>パスコードを入力</h2>
         <div class="lock-dots" id="lock-dots"></div>
         <div class="lock-msg" id="lock-msg"></div>
         <div class="keypad" id="keypad"></div>
-        <button type="button" class="lock-forgot" id="lock-forgot">パスコードを忘れた方はこちら</button>
+        <button type="button" class="lock-forgot" id="lock-forgot" data-t>パスコードを忘れた方はこちら</button>
       </div>
     </section>
 
     <!-- ===== パスコード設定 ===== -->
     <section id="screen-passcode" class="screen">
       <header class="top-bar">
-        <button class="back-btn" id="pc-back" aria-label="戻る">← 戻る</button>
-        <div class="top-title">パスコード</div>
+        <button class="back-btn" id="pc-back" data-t data-t-aria aria-label="戻る">← 戻る</button>
+        <div class="top-title" data-t>パスコード</div>
         <span class="icon-btn ghost"></span>
       </header>
       <div class="settings-wrap" id="pc-body"></div>
@@ -2025,36 +2025,36 @@ html[data-fontsize="xlarge"] .tabb-name { font-size: min(.95rem, 4vw); }
     <!-- ===== 引き継ぎコード（作る） ===== -->
     <section id="screen-transfer-code" class="screen">
       <header class="top-bar">
-        <button class="back-btn" id="tc-back" aria-label="戻る">← 戻る</button>
-        <div class="top-title">引き継ぎコード</div>
+        <button class="back-btn" id="tc-back" data-t data-t-aria aria-label="戻る">← 戻る</button>
+        <div class="top-title" data-t>引き継ぎコード</div>
         <span class="icon-btn ghost"></span>
       </header>
       <div class="transfer-wrap">
-        <p class="transfer-lead">新しいスマホの最初の画面で、<br>この番号を入れてください。</p>
+        <p class="transfer-lead"><span data-t>新しいスマホの最初の画面で、</span><br><span data-t>この番号を入れてください。</span></p>
         <div class="transfer-code" id="transfer-code"></div>
-        <p class="settings-hint" style="text-align:center;">（この画面は見本です。本番アプリで実際に引き継げます）</p>
+        <p class="settings-hint" style="text-align:center;" data-t>（この画面は見本です。本番アプリで実際に引き継げます）</p>
       </div>
     </section>
 
     <!-- ===== 引き継ぎコード（入れる） ===== -->
     <section id="screen-code-entry" class="screen">
       <header class="top-bar">
-        <button class="back-btn" id="ce-back" aria-label="戻る">← 戻る</button>
-        <div class="top-title">コードで引き継ぐ</div>
+        <button class="back-btn" id="ce-back" data-t data-t-aria aria-label="戻る">← 戻る</button>
+        <div class="top-title" data-t>コードで引き継ぐ</div>
         <span class="icon-btn ghost"></span>
       </header>
       <div class="transfer-wrap">
-        <p class="transfer-lead">前のスマホで作った<br>引き継ぎコードを入れてください。</p>
-        <input type="text" inputmode="numeric" maxlength="6" id="ce-input" class="code-input" placeholder="６けた">
-        <button type="button" class="btn btn-primary btn-xl" id="ce-submit">引き継ぐ</button>
-        <p class="settings-hint" id="ce-msg" style="text-align:center;">（この画面は見本です。本番アプリで実際に引き継げます）</p>
+        <p class="transfer-lead"><span data-t>前のスマホで作った</span><br><span data-t>引き継ぎコードを入れてください。</span></p>
+        <input type="text" inputmode="numeric" maxlength="6" id="ce-input" class="code-input" data-t-ph placeholder="６けた">
+        <button type="button" class="btn btn-primary btn-xl" id="ce-submit" data-t>引き継ぐ</button>
+        <p class="settings-hint" id="ce-msg" style="text-align:center;" data-t>（この画面は見本です。本番アプリで実際に引き継げます）</p>
       </div>
     </section>
 
     <!-- ===== 規約・プライバシー本文 ===== -->
     <section id="screen-legal" class="screen">
       <header class="top-bar">
-        <button class="back-btn" id="legal-back" aria-label="戻る">← 戻る</button>
+        <button class="back-btn" id="legal-back" data-t data-t-aria aria-label="戻る">← 戻る</button>
         <div class="top-title" id="legal-title">&nbsp;</div>
         <span class="icon-btn ghost"></span>
       </header>
@@ -2066,51 +2066,51 @@ html[data-fontsize="xlarge"] .tabb-name { font-size: min(.95rem, 4vw); }
       <div class="onboard-wrap">
         <div class="app-logo">
           <div class="logo-mark">記</div>
-          <h1>記憶のギフト</h1>
-          <p class="app-sub">～未来の自分へ～</p>
-          <p class="tagline">思い出す習慣が自然と身に付く</p>
+          <h1 data-t>記憶のギフト</h1>
+          <p class="app-sub" data-t>～未来の自分へ～</p>
+          <p class="tagline" data-t>思い出す習慣が自然と身に付く</p>
         </div>
         <div class="card">
           <div class="field">
-            <span class="field-label">年代</span>
+            <span class="field-label" data-t>年代</span>
             <div class="age-group" id="ob-age">
-              <button class="seg age-seg" data-value="10代">10代</button>
-              <button class="seg age-seg" data-value="20代">20代</button>
-              <button class="seg age-seg" data-value="30代">30代</button>
-              <button class="seg age-seg" data-value="40代">40代</button>
-              <button class="seg age-seg" data-value="50代">50代</button>
-              <button class="seg age-seg" data-value="60代">60代</button>
-              <button class="seg age-seg" data-value="70代">70代</button>
-              <button class="seg age-seg" data-value="80代">80代</button>
-              <button class="seg age-seg" data-value="90歳以上">90歳以上</button>
+              <button class="seg age-seg" data-t data-value="10代">10代</button>
+              <button class="seg age-seg" data-t data-value="20代">20代</button>
+              <button class="seg age-seg" data-t data-value="30代">30代</button>
+              <button class="seg age-seg" data-t data-value="40代">40代</button>
+              <button class="seg age-seg" data-t data-value="50代">50代</button>
+              <button class="seg age-seg" data-t data-value="60代">60代</button>
+              <button class="seg age-seg" data-t data-value="70代">70代</button>
+              <button class="seg age-seg" data-t data-value="80代">80代</button>
+              <button class="seg age-seg" data-t data-value="90歳以上">90歳以上</button>
             </div>
           </div>
           <div class="field">
-            <span class="field-label">性別</span>
+            <span class="field-label" data-t>性別</span>
             <div class="seg-group" id="ob-gender">
-              <button class="seg" data-value="女性">女性</button>
-              <button class="seg" data-value="男性">男性</button>
-              <button class="seg" data-value="回答しない">回答しない</button>
+              <button class="seg" data-t data-value="女性">女性</button>
+              <button class="seg" data-t data-value="男性">男性</button>
+              <button class="seg" data-t data-value="回答しない">回答しない</button>
             </div>
           </div>
         </div>
-        <button class="btn btn-primary btn-xl" id="ob-start">はじめる</button>
-        <button type="button" class="onboard-code-link" id="ob-code-link">引き継ぎコードをお持ちの方はこちら</button>
+        <button class="btn btn-primary btn-xl" id="ob-start" data-t>はじめる</button>
+        <button type="button" class="onboard-code-link" id="ob-code-link" data-t>引き継ぎコードをお持ちの方はこちら</button>
       </div>
     </section>
 
     <!-- ===== ホーム（今日はどちらから？） ===== -->
     <section id="screen-home" class="screen">
       <div class="home-brand">
-        <span class="brand-line">記憶のギフト～未来の自分へ～</span>
-        <button class="icon-btn" id="btn-settings" aria-label="設定"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3.2"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09a1.65 1.65 0 0 0-1-1.51 1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09a1.65 1.65 0 0 0 1.51-1 1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33h.01a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82v.01a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></button>
+        <span class="brand-line" data-t>記憶のギフト～未来の自分へ～</span>
+        <button class="icon-btn" id="btn-settings" data-t-aria aria-label="設定"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3.2"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09a1.65 1.65 0 0 0-1-1.51 1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09a1.65 1.65 0 0 0 1.51-1 1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33h.01a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82v.01a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></button>
       </div>
       <header class="top-bar">
         <div class="home-date" id="home-today"></div>
       </header>
       <div class="home-wrap">
         <div class="home-doors" id="home-doors"></div>
-        <button type="button" class="search-trigger js-open-search">記憶の検索<small class="search-eg">（パン、ブラウス、太郎）</small></button>
+        <button type="button" class="search-trigger js-open-search"><span data-t>記憶の検索</span><small class="search-eg" data-t>（パン、ブラウス、太郎）</small></button>
         <div class="home-note" id="home-count"></div>
       </div>
     </section>
@@ -2118,31 +2118,31 @@ html[data-fontsize="xlarge"] .tabb-name { font-size: min(.95rem, 4vw); }
     <!-- ===== カレンダー（日々の記憶） ===== -->
     <section id="screen-calendar" class="screen">
       <header class="top-bar">
-        <button class="back-btn" id="cal-back" aria-label="ホームへ">← ホームへ</button>
-        <div class="top-title">日々の記憶</div>
+        <button class="back-btn" id="cal-back" data-t data-t-aria aria-label="ホームへ">← ホームへ</button>
+        <div class="top-title" data-t>日々の記憶</div>
         <span class="icon-btn ghost"></span>
       </header>
       <div class="cal-wrap">
-        <p class="cal-encourage-lead cal-lead-top">日付をタップして書き足せます</p>
+        <p class="cal-encourage-lead cal-lead-top" data-t>日付をタップして書き足せます</p>
         <div class="card cal-card">
           <div class="cal-nav">
             <button class="icon-btn" id="cal-prev">◀</button>
             <div class="cal-ym">
-              <select id="cal-year" aria-label="年をえらぶ"></select>
+              <select id="cal-year" data-t-aria aria-label="年をえらぶ"></select>
               <span class="cal-month" id="cal-month-label"></span>
             </div>
             <button class="icon-btn" id="cal-next">▶</button>
           </div>
           <div class="cal-weekdays">
-            <span class="wd sun">日</span><span class="wd">月</span><span class="wd">火</span>
-            <span class="wd">水</span><span class="wd">木</span><span class="wd">金</span><span class="wd sat">土</span>
+            <span class="wd sun" data-t>日</span><span class="wd" data-t>月</span><span class="wd" data-t>火</span>
+            <span class="wd" data-t>水</span><span class="wd" data-t>木</span><span class="wd" data-t>金</span><span class="wd sat" data-t>土</span>
           </div>
           <div class="cal-grid" id="cal-grid"></div>
         </div>
-        <button type="button" class="search-trigger js-open-search">記憶の検索<small class="search-eg">（パン、ブラウス、太郎）</small></button>
+        <button type="button" class="search-trigger js-open-search"><span data-t>記憶の検索</span><small class="search-eg" data-t>（パン、ブラウス、太郎）</small></button>
         <div class="home-note" id="home-streak"></div>
         <div class="cal-encourage">
-          <p>面倒な日は、ひと言だけでだいじょうぶ<br>そのひと言が、未来の自分への贈りもの</p>
+          <p><span data-t>面倒な日は、ひと言だけでだいじょうぶ</span><br><span data-t>そのひと言が、未来の自分への贈りもの</span></p>
         </div>
       </div>
     </section>
@@ -2150,14 +2150,14 @@ html[data-fontsize="xlarge"] .tabb-name { font-size: min(.95rem, 4vw); }
     <!-- ===== さがす ===== -->
     <section id="screen-search" class="screen">
       <header class="top-bar">
-        <button class="back-btn" id="search-back" aria-label="ホームへ">← ホームへ</button>
-        <div class="top-title">さがす</div>
+        <button class="back-btn" id="search-back" data-t data-t-aria aria-label="ホームへ">← ホームへ</button>
+        <div class="top-title" data-t>さがす</div>
         <span class="icon-btn ghost"></span>
       </header>
       <div class="search-wrap">
         <div class="search-line">
-          <input type="text" id="search-input" placeholder="記憶の検索（パン、ブラウス、太郎）">
-          <button type="button" class="mic-btn search-mic" id="search-mic" aria-label="話して検索" hidden>🎤</button>
+          <input type="text" id="search-input" data-t-ph placeholder="記憶の検索（パン、ブラウス、太郎）">
+          <button type="button" class="mic-btn search-mic" id="search-mic" data-t-aria aria-label="話して検索" hidden>🎤</button>
         </div>
         <div id="search-results"></div>
       </div>
@@ -2166,15 +2166,15 @@ html[data-fontsize="xlarge"] .tabb-name { font-size: min(.95rem, 4vw); }
     <!-- ===== 日の詳細 ===== -->
     <section id="screen-daydetail" class="screen">
       <header class="top-bar">
-        <button class="back-btn" id="detail-back" aria-label="戻る">← 戻る</button>
-        <div class="top-title">この日の記録</div>
+        <button class="back-btn" id="detail-back" data-t data-t-aria aria-label="戻る">← 戻る</button>
+        <div class="top-title" data-t>この日の記録</div>
         <span class="icon-btn ghost"></span>
       </header>
       <div class="detail-wrap">
         <div class="detail-date" id="detail-date"></div>
         <div id="detail-cards"></div>
         <div class="shop-fab-spacer"></div>
-        <button type="button" class="btn btn-primary shop-fab" id="detail-add"><span class="btn-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20h4L19.5 8.5a2.12 2.12 0 0 0-3-3L5 17l-1 3Z"/><path d="M13.7 6.8l3.5 3.5"/></svg></span>この日を書き足す</button>
+        <button type="button" class="btn btn-primary shop-fab" id="detail-add"><span class="btn-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20h4L19.5 8.5a2.12 2.12 0 0 0-3-3L5 17l-1 3Z"/><path d="M13.7 6.8l3.5 3.5"/></svg></span><span data-t>この日を書き足す</span></button>
       </div>
     </section>
 
@@ -2186,16 +2186,16 @@ html[data-fontsize="xlarge"] .tabb-name { font-size: min(.95rem, 4vw); }
       </header>
       <div class="flow-content" id="flow-content"></div>
       <footer class="flow-footer">
-        <button class="btn btn-secondary" id="flow-back">戻る</button>
-        <button class="btn btn-skip btn-xl" id="flow-skip">飛ばす</button>
+        <button class="btn btn-secondary" id="flow-back" data-t>戻る</button>
+        <button class="btn btn-skip btn-xl" id="flow-skip" data-t>飛ばす</button>
       </footer>
     </section>
 
     <!-- ===== 眠りと記憶 ===== -->
     <section id="screen-sleep" class="screen">
       <header class="top-bar">
-        <button class="back-btn" id="sleep-back" aria-label="ホームへ">← ホームへ</button>
-        <div class="top-title">おやすみの記憶</div>
+        <button class="back-btn" id="sleep-back" data-t data-t-aria aria-label="ホームへ">← ホームへ</button>
+        <div class="top-title" data-t>おやすみの記憶</div>
         <span class="icon-btn ghost"></span>
       </header>
       <div class="sleep-wrap" id="sleep-wrap"></div>
@@ -2204,8 +2204,8 @@ html[data-fontsize="xlarge"] .tabb-name { font-size: min(.95rem, 4vw); }
     <!-- ===== 買い物の記憶 ===== -->
     <section id="screen-shopping" class="screen">
       <header class="top-bar">
-        <button class="back-btn" id="shopping-back" aria-label="ホームへ">← ホームへ</button>
-        <div class="top-title">買い物の記憶</div>
+        <button class="back-btn" id="shopping-back" data-t data-t-aria aria-label="ホームへ">← ホームへ</button>
+        <div class="top-title" data-t>買い物の記憶</div>
         <span class="icon-btn ghost"></span>
       </header>
       <div class="shopping-wrap" id="shopping-wrap"></div>
@@ -2214,8 +2214,8 @@ html[data-fontsize="xlarge"] .tabb-name { font-size: min(.95rem, 4vw); }
     <!-- ===== 服装の記憶（クローゼット） ===== -->
     <section id="screen-outfit" class="screen">
       <header class="top-bar">
-        <button class="back-btn" id="outfit-back" aria-label="ホームへ">← ホームへ</button>
-        <div class="top-title">服装の記憶</div>
+        <button class="back-btn" id="outfit-back" data-t data-t-aria aria-label="ホームへ">← ホームへ</button>
+        <div class="top-title" data-t>服装の記憶</div>
         <span class="icon-btn ghost"></span>
       </header>
       <div class="outfit-wrap" id="outfit-wrap"></div>
@@ -2224,8 +2224,8 @@ html[data-fontsize="xlarge"] .tabb-name { font-size: min(.95rem, 4vw); }
     <!-- ===== アルバムの記憶 ===== -->
     <section id="screen-album" class="screen">
       <header class="top-bar">
-        <button class="back-btn" id="album-back" aria-label="ホームへ">← ホームへ</button>
-        <div class="top-title">アルバムの記憶</div>
+        <button class="back-btn" id="album-back" data-t data-t-aria aria-label="ホームへ">← ホームへ</button>
+        <div class="top-title" data-t>アルバムの記憶</div>
         <span class="icon-btn ghost"></span>
       </header>
       <div class="album-wrap" id="album-wrap"></div>
@@ -2234,112 +2234,112 @@ html[data-fontsize="xlarge"] .tabb-name { font-size: min(.95rem, 4vw); }
     <!-- ===== 設定 ===== -->
     <section id="screen-settings" class="screen">
       <header class="top-bar">
-        <button class="back-btn" id="settings-back" aria-label="ホームへ">← ホームへ</button>
-        <div class="top-title">設定</div>
+        <button class="back-btn" id="settings-back" data-t data-t-aria aria-label="ホームへ">← ホームへ</button>
+        <div class="top-title" data-t>設定</div>
         <span class="icon-btn ghost"></span>
       </header>
       <div class="settings-wrap">
         <div class="card">
-          <div class="settings-label">テーマ</div>
+          <div class="settings-label" data-t>テーマ</div>
           <div class="theme-options">
             <button class="theme-opt" data-theme-opt="light">
-              <span class="theme-swatch swatch-light"></span>ライト
+              <span class="theme-swatch swatch-light"></span><span data-t>ライト</span>
             </button>
             <button class="theme-opt" data-theme-opt="dark">
-              <span class="theme-swatch swatch-dark"></span>ダーク
+              <span class="theme-swatch swatch-dark"></span><span data-t>ダーク</span>
             </button>
             <button class="theme-opt" data-theme-opt="pastel">
-              <span class="theme-swatch swatch-pastel"></span>淡い配色
+              <span class="theme-swatch swatch-pastel"></span><span data-t>淡い配色</span>
             </button>
           </div>
         </div>
         <div class="card">
-          <div class="settings-label">文字の大きさ</div>
-          <p class="settings-hint" style="margin-top:0;">ふだんはスマホ本体の設定に合わせています</p>
+          <div class="settings-label" data-t>文字の大きさ</div>
+          <p class="settings-hint" style="margin-top:0;" data-t>ふだんはスマホ本体の設定に合わせています</p>
           <div class="seg-group" id="set-font-size">
-            <button class="seg" data-value="1">もっと大きい字にする</button>
-            <button class="seg" data-value="0">このままでよい</button>
+            <button class="seg" data-t data-value="1">もっと大きい字にする</button>
+            <button class="seg" data-t data-value="0">このままでよい</button>
           </div>
         </div>
         <div class="card">
-          <div class="settings-label">最初に開く画面</div>
-          <p class="settings-hint" style="margin-top:0;">アプリを開いたとき、最初に出る画面をえらべます。</p>
+          <div class="settings-label" data-t>最初に開く画面</div>
+          <p class="settings-hint" style="margin-top:0;" data-t>アプリを開いたとき、最初に出る画面をえらべます。</p>
           <div class="age-group" id="set-start">
-            <button class="seg" data-value="home">ホーム</button>
-            <button class="seg" data-value="daily">食事</button>
-            <button class="seg" data-value="shopping">買い物</button>
-            <button class="seg" data-value="outfit">服装</button>
-            <button class="seg" data-value="album">アルバム</button>
-            <button class="seg" data-value="sleep">おやすみ</button>
+            <button class="seg" data-t data-value="home">ホーム</button>
+            <button class="seg" data-t data-value="daily">食事</button>
+            <button class="seg" data-t data-value="shopping">買い物</button>
+            <button class="seg" data-t data-value="outfit">服装</button>
+            <button class="seg" data-t data-value="album">アルバム</button>
+            <button class="seg" data-t data-value="sleep">おやすみ</button>
           </div>
         </div>
         <div class="card">
-          <div class="settings-label">パスコード（ロック）</div>
+          <div class="settings-label" data-t>パスコード（ロック）</div>
           <p class="settings-hint" id="pc-status" style="margin-top:0;"></p>
-          <button type="button" class="btn btn-secondary btn-xl" id="pc-open" style="margin-top:14px;">設定する</button>
+          <button type="button" class="btn btn-secondary btn-xl" id="pc-open" style="margin-top:14px;" data-t>設定する</button>
         </div>
         <div class="card">
-          <div class="settings-label">広告を消す</div>
+          <div class="settings-label" data-t>広告を消す</div>
           <div class="iap-row">
             <div class="iap-left">
-              <div class="iap-price">買い切り ¥500</div>
-              <div class="iap-status" id="iap-status">未購入</div>
+              <div class="iap-price" data-t>買い切り ¥500</div>
+              <div class="iap-status" id="iap-status" data-t>未購入</div>
             </div>
             <div class="iap-right">
-              <button type="button" class="btn btn-primary" id="iap-buy">購入する</button>
-              <button type="button" class="iap-restore" id="iap-restore">前に購入した方はこちら</button>
+              <button type="button" class="btn btn-primary" id="iap-buy" data-t>購入する</button>
+              <button type="button" class="iap-restore" id="iap-restore" data-t>前に購入した方はこちら</button>
             </div>
           </div>
-          <p class="settings-hint" id="iap-hint">一度の購入で、広告がずっと表示されなくなります。機種変更のときは、先に下の「データの引き継ぎ」で記録を戻してから、「前に購入した方はこちら」を押してください。（この画面は見本です）</p>
+          <p class="settings-hint" id="iap-hint" data-t>一度の購入で、広告がずっと表示されなくなります。機種変更のときは、先に下の「データの引き継ぎ」で記録を戻してから、「前に購入した方はこちら」を押してください。（この画面は見本です）</p>
         </div>
         <div class="card">
-          <div class="settings-label">データの引き継ぎ</div>
-          <p class="about-one" style="font-size:1.05rem;">🔒 記録は自動で守られます</p>
-          <p class="settings-hint" style="margin-top:8px;">機種変更しても、新しいスマホを同じ設定（iPhoneはApple ID、AndroidはGoogleアカウント）で引き継げば、記録もそのまま戻ります。ふだんは何もしなくて大丈夫です。</p>
-          <p class="settings-hint" style="margin-top:16px;">別のスマホや、別のアカウントに移すとき：</p>
-          <button type="button" class="btn btn-secondary btn-xl" id="transfer-make" style="margin-top:8px;">引き継ぎコードを作る</button>
+          <div class="settings-label" data-t>データの引き継ぎ</div>
+          <p class="about-one" style="font-size:1.05rem;" data-t>🔒 記録は自動で守られます</p>
+          <p class="settings-hint" style="margin-top:8px;" data-t>機種変更しても、新しいスマホを同じ設定（iPhoneはApple ID、AndroidはGoogleアカウント）で引き継げば、記録もそのまま戻ります。ふだんは何もしなくて大丈夫です。</p>
+          <p class="settings-hint" style="margin-top:16px;" data-t>別のスマホや、別のアカウントに移すとき：</p>
+          <button type="button" class="btn btn-secondary btn-xl" id="transfer-make" style="margin-top:8px;" data-t>引き継ぎコードを作る</button>
         </div>
         <div class="card">
-          <div class="settings-label">プロフィール</div>
+          <div class="settings-label" data-t>プロフィール</div>
           <div class="settings-profile" id="settings-profile"></div>
         </div>
         <div class="card">
-          <div class="settings-label">このアプリについて</div>
+          <div class="settings-label" data-t>このアプリについて</div>
           <div class="link-list">
             <button type="button" class="link-row" data-about="rate">
               <span class="link-ico" style="color:var(--accent2);">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" aria-hidden="true"><polygon points="12 2 15 9 22 9.4 16.5 14.3 18.3 22 12 17.8 5.7 22 7.5 14.3 2 9.4 9 9"/></svg>
               </span>
-              <span class="link-label">アプリを評価する</span>
+              <span class="link-label" data-t>アプリを評価する</span>
               <span class="link-chev" aria-hidden="true">›</span>
             </button>
             <button type="button" class="link-row" data-about="bug">
               <span class="link-ico" style="color:var(--accent2);">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 22V4h12l-2.5 4L17 12H5"/></svg>
               </span>
-              <span class="link-label">不具合を報告</span>
+              <span class="link-label" data-t>不具合を報告</span>
               <span class="link-chev" aria-hidden="true">›</span>
             </button>
             <button type="button" class="link-row" data-about="privacy">
               <span class="link-ico" style="color:var(--accent);">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" aria-hidden="true"><path d="M12 2l8 3v6c0 5-3.4 8.7-8 11-4.6-2.3-8-6-8-11V5z"/></svg>
               </span>
-              <span class="link-label">プライバシーポリシー</span>
+              <span class="link-label" data-t>プライバシーポリシー</span>
               <span class="link-chev" aria-hidden="true">›</span>
             </button>
             <button type="button" class="link-row" data-about="terms">
               <span class="link-ico" style="color:var(--accent);">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" aria-hidden="true"><path d="M12 2l8 3v6c0 5-3.4 8.7-8 11-4.6-2.3-8-6-8-11V5z"/><path d="M9 11.5l2 2 4-4"/></svg>
               </span>
-              <span class="link-label">利用規約</span>
+              <span class="link-label" data-t>利用規約</span>
               <span class="link-chev" aria-hidden="true">›</span>
             </button>
           </div>
           <p class="settings-hint about-note" id="about-note" style="display:none;"></p>
         </div>
         <div class="card">
-          <div class="settings-label">すべてのデータを消す</div>
-          <p class="settings-hint" style="margin-top:0;">記録・設定をすべて消して、最初の状態にもどします。元に戻せません。</p>
+          <div class="settings-label" data-t>すべてのデータを消す</div>
+          <p class="settings-hint" style="margin-top:0;" data-t>記録・設定をすべて消して、最初の状態にもどします。元に戻せません。</p>
           <div id="reset-area" style="margin-top:14px;"></div>
         </div>
       </div>
@@ -2347,23 +2347,23 @@ html[data-fontsize="xlarge"] .tabb-name { font-size: min(.95rem, 4vw); }
 
     <!-- 下のタブ：のこす・思い出す・見返す（見て回る画面で表示） -->
     <nav id="tab-bar" hidden>
-      <button type="button" class="tabb" id="tab-home"><span class="tabb-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M3.5 11.6 12 4.4l8.5 7.2"/><path d="M5.9 10.3V19a1.6 1.6 0 0 0 1.6 1.6h9A1.6 1.6 0 0 0 18.1 19v-8.7"/></svg></span><span class="tabb-name">ホーム</span></button>
-      <button type="button" class="tabb" id="tab-write"><span class="tabb-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 6.2C10.1 4.7 7.1 4.2 4.2 4.7V18c2.9-.5 5.9 0 7.8 1.5 1.9-1.5 4.9-2 7.8-1.5V4.7c-2.9-.5-5.9 0-7.8 1.5Z"/><path d="M12 6.2v13.3"/></svg></span><span class="tabb-name">日記</span></button>
-      <button type="button" class="tab-quick" id="tab-quick" aria-label="一瞬の思いつきを記す">
+      <button type="button" class="tabb" id="tab-home"><span class="tabb-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M3.5 11.6 12 4.4l8.5 7.2"/><path d="M5.9 10.3V19a1.6 1.6 0 0 0 1.6 1.6h9A1.6 1.6 0 0 0 18.1 19v-8.7"/></svg></span><span class="tabb-name" data-t>ホーム</span></button>
+      <button type="button" class="tabb" id="tab-write"><span class="tabb-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 6.2C10.1 4.7 7.1 4.2 4.2 4.7V18c2.9-.5 5.9 0 7.8 1.5 1.9-1.5 4.9-2 7.8-1.5V4.7c-2.9-.5-5.9 0-7.8 1.5Z"/><path d="M12 6.2v13.3"/></svg></span><span class="tabb-name" data-t>日記</span></button>
+      <button type="button" class="tab-quick" id="tab-quick" data-t-aria aria-label="一瞬の思いつきを記す">
         <span class="tab-quick-circle"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5.5v13M5.5 12h13"/></svg><span class="tab-quick-badge" id="tab-quick-badge" hidden></span></span>
       </button>
-      <button type="button" class="tabb" id="tab-quiz"><span class="tabb-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="12" cy="9.8" rx="8.2" ry="6.4"/><circle cx="6.6" cy="18.6" r="1.7"/><circle cx="3.9" cy="21.6" r="0.9"/></svg></span><span class="tabb-name">思い出す</span></button>
-      <button type="button" class="tabb" id="tab-cal"><span class="tabb-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="3.6" y="5" width="16.8" height="15.4" rx="2.6"/><path d="M3.6 9.6h16.8"/><path d="M8 2.9v3.6M16 2.9v3.6"/><circle cx="8.3" cy="13.4" r="1" fill="currentColor" stroke="none"/><circle cx="12" cy="13.4" r="1" fill="currentColor" stroke="none"/><circle cx="15.7" cy="13.4" r="1" fill="currentColor" stroke="none"/></svg></span><span class="tabb-name">見返す</span></button>
+      <button type="button" class="tabb" id="tab-quiz"><span class="tabb-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="12" cy="9.8" rx="8.2" ry="6.4"/><circle cx="6.6" cy="18.6" r="1.7"/><circle cx="3.9" cy="21.6" r="0.9"/></svg></span><span class="tabb-name" data-t>思い出す</span></button>
+      <button type="button" class="tabb" id="tab-cal"><span class="tabb-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="3.6" y="5" width="16.8" height="15.4" rx="2.6"/><path d="M3.6 9.6h16.8"/><path d="M8 2.9v3.6M16 2.9v3.6"/><circle cx="8.3" cy="13.4" r="1" fill="currentColor" stroke="none"/><circle cx="12" cy="13.4" r="1" fill="currentColor" stroke="none"/><circle cx="15.7" cy="13.4" r="1" fill="currentColor" stroke="none"/></svg></span><span class="tabb-name" data-t>見返す</span></button>
     </nav>
 
     <!-- 写真のポップアップ（タップで閉じる） -->
-    <div id="photo-pop" hidden><img id="photo-pop-img" alt="写真を大きく表示"></div>
+    <div id="photo-pop" hidden><img id="photo-pop-img" data-t-alt alt="写真を大きく表示"></div>
 
     <!-- ===== 忘れたくないこと（ポップアップ） ===== -->
     <div id="memo-pop" hidden>
       <div class="memo-sheet" id="memo-sheet">
         <div class="memo-sheet-head">
-          <button type="button" class="memo-close" id="memo-close" aria-label="閉じる">✕</button>
+          <button type="button" class="memo-close" id="memo-close" data-t-aria aria-label="閉じる">✕</button>
         </div>
         <div class="memo-sheet-body memo-wrap" id="memo-wrap"></div>
       </div>
@@ -2373,7 +2373,7 @@ html[data-fontsize="xlarge"] .tabb-name { font-size: min(.95rem, 4vw); }
     <div id="shop-pop" hidden>
       <div class="memo-sheet" id="shop-sheet">
         <div class="memo-sheet-head">
-          <button type="button" class="memo-close" id="shop-pop-close" aria-label="閉じる">✕</button>
+          <button type="button" class="memo-close" id="shop-pop-close" data-t-aria aria-label="閉じる">✕</button>
         </div>
         <div class="memo-sheet-body memo-wrap" id="shop-pop-wrap"></div>
       </div>
@@ -2381,8 +2381,8 @@ html[data-fontsize="xlarge"] .tabb-name { font-size: min(.95rem, 4vw); }
 
     <!-- 共通の広告バナー（設定以外の全ページに表示） -->
     <div id="ad-banner" class="ad-banner" aria-hidden="true">
-      <span class="ad-tag">広告</span>
-      <span class="ad-body">ここに広告が表示されます（見本）</span>
+      <span class="ad-tag" data-t>広告</span>
+      <span class="ad-body" data-t>ここに広告が表示されます（見本）</span>
     </div>
 
   </div>
@@ -2391,6 +2391,36 @@ html[data-fontsize="xlarge"] .tabb-name { font-size: min(.95rem, 4vw); }
    記憶ノート — アプリ本体
    データはすべて localStorage（端末内）に保存
    ========================================================= */
+
+/* ---------- 多言語の土台（gettext式） ----------
+   ・キーは「日本語の文そのもの」。t("保存") のように包むだけ
+   ・値の差し込みは {n} 形式：t("これまでの記録：{n}日分", { n: 3 })
+   ・日本語では翻訳表を引かずキーをそのまま使う＝表示は今までと完全に同じ
+   ・英語などは LANG.en = { "保存": "Save", ... } を足すだけで切り替わる
+     （対訳の正本は strings.ja-en.md。月の和名・通知30種・規約の本文は
+       文単位の翻訳でなく言語ごとの差し替えデータにする＝各所にコメントあり） */
+const LANG = { en: {} }; // 翻訳表（今は空。翻訳確定後に流し込む）
+// Intl用の言語タグ（日付の書き方に使う）
+const LOCALE_TAGS = { ja: "ja-JP", en: "en-US", es: "es-ES", pt: "pt-BR", de: "de-DE", fr: "fr-FR", it: "it-IT", ko: "ko-KR" };
+let uiLang = "ja"; // applySettings() で settings.lang から設定
+function t(text, params) {
+  let s = text;
+  if (uiLang !== "ja") {
+    const d = LANG[uiLang];
+    if (d && d[text]) s = d[text];
+  }
+  if (params) for (const k in params) s = s.replaceAll("{" + k + "}", String(params[k]));
+  return s;
+}
+// index.html に直接書いてある文字（data-t / data-t-ph 付き）を翻訳で置き換える
+// 日本語では何もしない（元のHTMLがそのまま正）
+function applyStaticLang() {
+  if (uiLang === "ja") return;
+  document.querySelectorAll("[data-t]").forEach(el => { el.textContent = t(el.textContent.trim()); });
+  document.querySelectorAll("[data-t-ph]").forEach(el => { el.placeholder = t(el.placeholder); });
+  document.querySelectorAll("[data-t-aria]").forEach(el => { el.setAttribute("aria-label", t(el.getAttribute("aria-label") || "")); });
+  document.querySelectorAll("[data-t-alt]").forEach(el => { el.setAttribute("alt", t(el.getAttribute("alt") || "")); });
+}
 
 const WEEKDAYS = ["日", "月", "火", "水", "木", "金", "土"];
 
@@ -2437,6 +2467,9 @@ function effectiveFontSize() {
   return FONT_STEPS[Math.min(FONT_STEPS.indexOf(base) + 1, FONT_STEPS.length - 1)];
 }
 function applySettings() {
+  uiLang = settings.lang || "ja"; // 表示言語（今は日本語のみ。英語版で切替UIを足す）
+  document.documentElement.lang = uiLang;
+  applyStaticLang();
   document.documentElement.dataset.theme = settings.theme || "pastel";
   // 旧バージョンで「標準・大・特大」を選んでいた方は、いちど引き継ぐ（特大＝もっと大きくON）
   if (settings.fontBoost === undefined && settings.fontSize) {
@@ -2462,6 +2495,14 @@ function fromDateStr(s) {
 function todayStr() { return toDateStr(new Date()); }
 function formatJP(dateStr, withYear = false) {
   const d = fromDateStr(dateStr);
+  // 日本語以外は、その言語のふつうの書き方で（例：Wed, Sep 3）
+  if (uiLang !== "ja") {
+    try {
+      const opt = { month: "short", day: "numeric", weekday: "short" };
+      if (withYear) opt.year = "numeric";
+      return new Intl.DateTimeFormat(LOCALE_TAGS[uiLang] || uiLang, opt).format(d);
+    } catch (e) {}
+  }
   const wd = WEEKDAYS[d.getDay()];
   const base = `${d.getMonth() + 1}月${d.getDate()}日（${wd}）`;
   return withYear ? `${d.getFullYear()}年${base}` : base;
@@ -2616,8 +2657,8 @@ function setOneScreen(id, on) {
 function setBackLabel(id, inner) {
   const b = document.getElementById(id);
   if (b) {
-    b.textContent = inner ? "← 前に戻る" : "← ホームへ";
-    b.setAttribute("aria-label", inner ? "前に戻る" : "ホームへ");
+    b.textContent = inner ? t("← 前に戻る") : t("← ホームへ");
+    b.setAttribute("aria-label", inner ? t("前に戻る") : t("ホームへ"));
     const bar = b.closest(".top-bar");
     if (bar) bar.style.display = inner ? "" : "none";
   }
@@ -2754,7 +2795,7 @@ const ALBUM_SAMPLE_ICONS = {
 };
 // 見本写真の表示（実写真＝data URLならそのまま画像で。昔の絵文字データもそのまま出せる）
 function albumPhotoHtml(p) {
-  if (String(p || "").startsWith("data:")) return `<img src="${p}" alt="思い出の写真">`;
+  if (String(p || "").startsWith("data:")) return `<img src="${p}" alt="${t("思い出の写真")}">`;
   return ALBUM_SAMPLE_ICONS[p]
     ? `<svg class="sample-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">${ALBUM_SAMPLE_ICONS[p]}</svg>`
     : (p || "");
@@ -2775,11 +2816,11 @@ function loadMemos() { return store.get("mn_memos", []); }
 function saveMemos(a) { store.set("mn_memos", a); }
 const MEMO_MAX = 10; // たまりすぎない上限。満杯のときは追加を止めて案内する（黙って消さない）
 function addMemo(text) {
-  const t = (text || "").trim();
-  if (!t) return;
+  const v = (text || "").trim();
+  if (!v) return;
   const a = loadMemos();
   if (a.length >= MEMO_MAX) return;
-  a.unshift({ text: t, at: Date.now() });
+  a.unshift({ text: v, at: Date.now() });
   saveMemos(a);
 }
 function removeMemo(i) {
@@ -2838,7 +2879,7 @@ function renderMemoScreen() {
   const full = a.length >= MEMO_MAX;
   const list = a.map((m, i) => `
     <div class="memo-row">
-      <button type="button" class="memo-done" data-memo-done="${i}" aria-label="できた（消す）">
+      <button type="button" class="memo-done" data-memo-done="${i}" aria-label="${t("できた（消す）")}">
         <svg class="balloon-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>
       </button>
       <span class="memo-text">${esc(m.text)}</span>
@@ -2846,17 +2887,17 @@ function renderMemoScreen() {
   // 書きとめた中身はすぐ見せない。「思い出してから開く」を押したら並ぶ
   const listPart = !a.length ? "" : (memoListOpen
     ? `<div class="memo-list">${list}</div>
-       <p class="memo-note">できたらチェックで消せます<br>思い出しクイズには出ません</p>`
-    : `<button type="button" class="memo-open memo-reveal" id="memo-reveal">思い出してから開く（${a.length}）</button>`);
+       <p class="memo-note">${t("できたらチェックで消せます")}<br>${t("思い出しクイズには出ません")}</p>`
+    : `<button type="button" class="memo-open memo-reveal" id="memo-reveal">${t("思い出してから開く（{n}）", { n: a.length })}</button>`);
   const writePart = full
-    ? `<p class="memo-note">メモは${MEMO_MAX}個まで。<br>できたものをチェックで消すと、また書けます</p>`
+    ? `<p class="memo-note">${t("メモは{n}個まで。", { n: MEMO_MAX })}<br>${t("できたものをチェックで消すと、また書けます")}</p>`
     : `<div class="memo-line">
-        <textarea id="memo-input" class="grow-input" rows="1" placeholder="お風呂掃除　庭に水やり"></textarea>
+        <textarea id="memo-input" class="grow-input" rows="1" placeholder="${t("お風呂掃除　庭に水やり")}"></textarea>
         ${micMini("memo-input", "memo-save")}
       </div>
-      <button type="button" class="btn btn-primary btn-xl memo-add" id="memo-save">保存</button>`;
+      <button type="button" class="btn btn-primary btn-xl memo-add" id="memo-save">${t("保存")}</button>`;
   document.getElementById("memo-wrap").innerHTML = `
-    <p class="memo-lead">一瞬のひらめき・あとでやること</p>
+    <p class="memo-lead">${t("一瞬のひらめき・あとでやること")}</p>
     ${writePart}
     ${listPart}`;
   wireMics(document.getElementById("memo-wrap"));
@@ -2875,10 +2916,10 @@ function renderMemoScreen() {
 
 function renderHome() {
   document.getElementById("home-today").innerHTML =
-    `${formatJP(todayStr())}<small>${fromDateStr(todayStr()).getFullYear()}年</small>`;
+    `${formatJP(todayStr())}<small>${t("{y}年", { y: fromDateStr(todayStr()).getFullYear() })}</small>`;
 
   const count = Object.keys(entries).length;
-  document.getElementById("home-count").textContent = `これまでの記録：${count}日分`; // 0日でも同じ形で（表示が日によって変わると迷うため）
+  document.getElementById("home-count").textContent = t("これまでの記録：{n}日分", { n: count }); // 0日でも同じ形で（表示が日によって変わると迷うため）
 
   // 風船のように浮かぶ扉。毎日同じ配置（場所で覚えられる）：四隅＋食事は真ん中
   const box = document.getElementById("home-doors");
@@ -2890,8 +2931,8 @@ function renderHome() {
     const d = FAV_DEFS[k];
     return `<div class="balloon-pos ${posCls}">
       <button type="button" class="balloon${lg ? " balloon-lg" : ""} balloon-k-${k}" data-fav-open="${k}"
-        style="--cc:${d.cc};--p1:${d.pale[0]};--p2:${d.pale[1]};" aria-label="${d.name}">
-        ${balloonIconSvg(k)}<span class="balloon-name">${d.short}</span>
+        style="--cc:${d.cc};--p1:${d.pale[0]};--p2:${d.pale[1]};" aria-label="${t(d.name)}">
+        ${balloonIconSvg(k)}<span class="balloon-name">${t(d.short)}</span>
       </button></div>`;
   };
   box.innerHTML = mk("daily", centerCls, true) + sats.map((k, i) => mk(k, slots[i], false)).join("");
@@ -2914,7 +2955,7 @@ function openCalendar() {
   renderCalendar();
   const count = Object.keys(entries).length;
   const streak = document.getElementById("home-streak");
-  if (streak) streak.textContent = `これまでの記録：${count}日分`; // ホームと同じ形で統一
+  if (streak) streak.textContent = t("これまでの記録：{n}日分", { n: count }); // ホームと同じ形で統一
   showScreen("screen-calendar");
 }
 
@@ -2923,7 +2964,7 @@ function renderCalendar() {
   const m = calCursor.getMonth(); // 0-based
   const yearSel = document.getElementById("cal-year");
   if (yearSel) yearSel.value = String(y);
-  document.getElementById("cal-month-label").textContent = `${m + 1}月`;
+  document.getElementById("cal-month-label").textContent = t("{m}月", { m: m + 1 });
 
   const grid = document.getElementById("cal-grid");
   grid.innerHTML = "";
@@ -2967,26 +3008,26 @@ const esc = s => (s || "").replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(
 function eatoutFields(e) {
   const s = e.eatout || {};
   return `
-    <div class="field"><span class="field-label">場所（お店の名前・友人宅など）</span>
+    <div class="field"><span class="field-label">${t("場所（お店の名前・友人宅など）")}</span>
       <div class="meal-line">
-        <textarea id="eo-place" rows="1" class="grow-input" placeholder="例：駅前の蕎麦屋">${esc(s.place)}</textarea>
+        <textarea id="eo-place" rows="1" class="grow-input" placeholder="${t("例：駅前の蕎麦屋")}">${esc(s.place)}</textarea>
         ${micMini("eo-place", "flow-skip")}
       </div>
     </div>
-    <div class="field"><span class="field-label">食べたもの</span>
+    <div class="field"><span class="field-label">${t("食べたもの")}</span>
       <div class="meal-line">
-        <textarea id="eo-food" rows="1" class="grow-input" placeholder="例：天ぷらそば">${esc(s.food)}</textarea>
+        <textarea id="eo-food" rows="1" class="grow-input" placeholder="${t("例：天ぷらそば")}">${esc(s.food)}</textarea>
         <span class="meal-photo-slot" data-slot="eatout"></span>
         ${micMini("eo-food", "flow-skip")}
       </div>
     </div>
-    <div class="field"><span class="field-label">誰と</span>
+    <div class="field"><span class="field-label">${t("誰と")}</span>
       <div class="meal-line">
-        <textarea id="eo-with" rows="1" class="grow-input" placeholder="例：田中さんと">${esc(s.with)}</textarea>
+        <textarea id="eo-with" rows="1" class="grow-input" placeholder="${t("例：田中さんと")}">${esc(s.with)}</textarea>
         ${micMini("eo-with", "flow-skip")}
       </div>
     </div>
-    <label class="field"><span class="field-label">お店のリンク</span>
+    <label class="field"><span class="field-label">${t("お店のリンク")}</span>
     <input type="url" id="eo-link" placeholder="https://…" value="${esc(s.link)}"></label>`;
 }
 function eatoutCollect(e) {
@@ -3010,9 +3051,9 @@ const STEP_DEFS = {
       const m = e.meal || {};
       const v = k => esc(m[k]);
       if (mode === "best") {
-        return `<div class="field"><span class="field-label">記憶にのこしたい</span>
+        return `<div class="field"><span class="field-label">${t("記憶にのこしたい")}</span>
           <div class="meal-line">
-            <textarea id="meal-best" rows="1" class="grow-input" placeholder="例：孫と会えた／史上最高のカレー">${v("best")}</textarea>
+            <textarea id="meal-best" rows="1" class="grow-input" placeholder="${t("例：孫と会えた／史上最高のカレー")}">${v("best")}</textarea>
             ${micMini("meal-best", "flow-skip")}
           </div>
         </div>`;
@@ -3026,10 +3067,10 @@ const STEP_DEFS = {
             ${micMini(id, "flow-skip")}
           </div>
         </div>`;
-      return row("morning", "朝", "meal-morning", "例：トーストと卵", v("morning"))
-        + row("noon", "昼", "meal-noon", "例：そば", v("noon"))
-        + row("evening", "晩", "meal-evening", "例：焼き魚", v("evening"))
-        + row("snack", "間食・その他", "meal-snack", "例：まんじゅう、コーヒー", v("snack"));
+      return row("morning", t("朝"), "meal-morning", t("例：トーストと卵"), v("morning"))
+        + row("noon", t("昼"), "meal-noon", t("例：そば"), v("noon"))
+        + row("evening", t("晩"), "meal-evening", t("例：焼き魚"), v("evening"))
+        + row("snack", t("間食・その他"), "meal-snack", t("例：まんじゅう、コーヒー"), v("snack"));
     },
     collect: (mode, e) => {
       if (mode === "eatout") return eatoutCollect(e);
@@ -3050,13 +3091,13 @@ const STEP_DEFS = {
     ],
     savedMode: e => e.diary ? "write" : null,
     fields: (mode, e) => `
-      <div class="field"><span class="field-label">自由に書いてください</span>
+      <div class="field"><span class="field-label">${t("自由に書いてください")}</span>
         <div class="meal-line">
-          <textarea id="diary-text" rows="6" placeholder="今日あったこと、思ったこと…">${esc(e.diary)}</textarea>
+          <textarea id="diary-text" rows="6" placeholder="${t("今日あったこと、思ったこと…")}">${esc(e.diary)}</textarea>
           ${micMini("diary-text", "flow-skip")}
         </div>
       </div>
-      ${settings.diaryPass ? "" : `<p class="photo-hint" style="margin-top:14px;">設定から日記のみをロックできます</p>`}`,
+      ${settings.diaryPass ? "" : `<p class="photo-hint" style="margin-top:14px;">${t("設定から日記のみをロックできます")}</p>`}`,
     collect: (mode, e) => {
       const v = document.getElementById("diary-text")?.value.trim();
       if (v) e.diary = v; else delete e.diary;
@@ -3080,7 +3121,7 @@ function deleteOutfit(ds) { const o = loadOutfits(); delete o[ds]; saveOutfits(o
 function outfitText(ds) {
   const o = outfitOf(ds);
   if (!o) return "";
-  return (o.note || "").trim() || (o.photo ? "（写真で残しました）" : "");
+  return (o.note || "").trim() || (o.photo ? t("（写真で残しました）") : "");
 }
 
 // ---------- 食事の写真（端末内のみ・3日たったら自動で消える。答え合わせ用） ----------
@@ -3142,8 +3183,8 @@ function attachMealPhotoUI(content) {
   hint.className = "photo-hint";
   // 1行に入らないスマホでは「ずっと」の前で折り返す（半端な位置で切らない）
   hint.innerHTML = flow.mode === "eatout"
-    ? "写真はなくてもOK。ずっと残ります"
-    : `<span class="nowrap">写真はなくてもOK・3日だけ保存。</span> <span class="nowrap">ずっと残すなら「外食」のカメラへ</span>`;
+    ? t("写真はなくてもOK。ずっと残ります")
+    : `<span class="nowrap">${t("写真はなくてもOK・3日だけ保存。")}</span> <span class="nowrap">${t("ずっと残すなら「外食」のカメラへ")}</span>`;
   area.appendChild(hint);
 }
 function renderMealSlot(slotEl) {
@@ -3151,10 +3192,10 @@ function renderMealSlot(slotEl) {
   const url = mealPhotosOf(flow.date)[slot];
   slotEl.innerHTML = url
     ? `<span class="meal-thumb-wrap">
-        <img class="meal-thumb" src="${url}" alt="この食事の写真">
-        <button type="button" class="meal-thumb-del" aria-label="写真を消す">✕</button>
+        <img class="meal-thumb" src="${url}" alt="${t("この食事の写真")}">
+        <button type="button" class="meal-thumb-del" aria-label="${t("写真を消す")}">✕</button>
       </span>`
-    : `<button type="button" class="meal-cam" aria-label="写真を残す">${balloonIconSvg("camera")}</button>
+    : `<button type="button" class="meal-cam" aria-label="${t("写真を残す")}">${balloonIconSvg("camera")}</button>
       <input type="file" accept="image/*" class="meal-cam-file" style="display:none;">`;
   const cam = slotEl.querySelector(".meal-cam");
   if (cam) {
@@ -3205,7 +3246,7 @@ function yesterdayHasRecord() {
 
 function renderStepHeader() {
   document.getElementById("flow-date").innerHTML =
-    `${formatJP(flow.date)}<small>${fromDateStr(flow.date).getFullYear()}年</small>`;
+    `${formatJP(flow.date)}<small>${t("{y}年", { y: fromDateStr(flow.date).getFullYear() })}</small>`;
   const pips = flow.steps.map((s, i) => {
     const cls = i < flow.step ? "done" : i === flow.step ? "now" : "";
     return `<span class="step-pip ${cls}"></span>`;
@@ -3264,14 +3305,14 @@ function renderSelectView(stepId, content) {
   // 今日の食事の選択画面では、思い出す問題への近道にする（過去日の書き足しでは従来の飛ばし）
   const soloToday = flow.steps.length === 1 && !flow.recallOnly;
   const skipBtn = document.getElementById("flow-skip");
-  if (soloToday) skipBtn.innerHTML = `<span class="btn-ico">${balloonIconSvg("recall")}</span>思い出す`;
-  else skipBtn.textContent = "保存して次へ";
+  if (soloToday) skipBtn.innerHTML = `<span class="btn-ico">${balloonIconSvg("recall")}</span>${t("思い出す")}`;
+  else skipBtn.textContent = t("保存して次へ");
   content.innerHTML = `
-    <div class="step-title">${stepIconHtml(def)}${def.title}</div>
-    <div class="step-note">${def.note}</div>
+    <div class="step-title">${stepIconHtml(def)}${t(def.title)}</div>
+    <div class="step-note">${t(def.note)}</div>
     <div class="opt-list">
       ${def.options.map(o =>
-        `<button class="opt-card ${o.value === cur ? "selected" : ""}" data-value="${o.value}" data-action="${o.action}">${o.label}${o.sub ? `<small>${o.sub}</small>` : ""}</button>`
+        `<button class="opt-card ${o.value === cur ? "selected" : ""}" data-value="${o.value}" data-action="${o.action}">${t(o.label)}${o.sub ? `<small>${t(o.sub)}</small>` : ""}</button>`
       ).join("")}
     </div>`;
   content.querySelectorAll(".opt-card").forEach(card => {
@@ -3291,9 +3332,9 @@ function renderInputView(stepId, content) {
   const def = STEP_DEFS[stepId];
   const e = entries[flow.date];
   document.getElementById("flow-skip").textContent =
-    flow.step === flow.steps.length - 1 ? "保存" : "保存して次へ"; // 1行に収まる短い言葉に
+    flow.step === flow.steps.length - 1 ? t("保存") : t("保存して次へ"); // 1行に収まる短い言葉に
   // 外食の入力ページは見出しを変える
-  const inputTitle = stepId === "meal" && flow.mode === "eatout" ? "残したい外食や食事" : def.title;
+  const inputTitle = stepId === "meal" && flow.mode === "eatout" ? t("残したい外食や食事") : t(def.title);
   content.innerHTML = `
     <div class="step-title">${stepIconHtml(def)}${inputTitle}</div>
     <div class="input-area">${def.fields(flow.mode, e)}</div>`;
@@ -3355,21 +3396,21 @@ function prevStep() {
 // =========================================================
 function formatMealAnswer(meal) {
   if (!meal) return "";
-  if (meal.mode === "best") return `記憶にのこしたい：${meal.best}`;
+  if (meal.mode === "best") return t("記憶にのこしたい：{v}", { v: meal.best });
   const rows = [];
-  if (meal.morning) rows.push(`朝：${meal.morning}`);
-  if (meal.noon) rows.push(`昼：${meal.noon}`);
-  if (meal.evening) rows.push(`晩：${meal.evening}`);
-  if (meal.snack) rows.push(`間食：${meal.snack}`);
+  if (meal.morning) rows.push(t("朝：{v}", { v: meal.morning }));
+  if (meal.noon) rows.push(t("昼：{v}", { v: meal.noon }));
+  if (meal.evening) rows.push(t("晩：{v}", { v: meal.evening }));
+  if (meal.snack) rows.push(t("間食：{v}", { v: meal.snack }));
   return rows.join("\n");
 }
 
 function formatPlaceAnswer(p) {
   const rows = [];
-  if (p.place) rows.push(`場所：${p.place}`);
-  if (p.food) rows.push(`食べたもの：${p.food}`);
-  if (p.with) rows.push(`誰と：${p.with}`);
-  if (p.outfit) rows.push(`服装など：${p.outfit}`);
+  if (p.place) rows.push(t("場所：{v}", { v: p.place }));
+  if (p.food) rows.push(t("食べたもの：{v}", { v: p.food }));
+  if (p.with) rows.push(t("誰と：{v}", { v: p.with }));
+  if (p.outfit) rows.push(t("服装など：{v}", { v: p.outfit }));
   return rows.join("\n");
 }
 
@@ -3399,9 +3440,9 @@ function buildQuizQuestions() {
   };
 
   const makeQ = {
-    outfit: (ds) => pushQ(ds, "outfit", `${formatJP(ds)}、どんな服装でしたか？`, outfitText(ds), outfitOf(ds)?.photo),
-    eatout: (ds, e) => pushQ(ds, "eatout", `${formatJP(ds)}、外食しましたね。どこで、誰とでしたか？`, formatPlaceAnswer(e.eatout), mealPhotoList(ds)),
-    diary:  (ds, e) => (settings.diaryPass && !diaryUnlocked) ? false : pushQ(ds, "diary",  `${formatJP(ds)}に書いたこと、思い出せますか？`, e.diary),
+    outfit: (ds) => pushQ(ds, "outfit", t("{d}、どんな服装でしたか？", { d: formatJP(ds) }), outfitText(ds), outfitOf(ds)?.photo),
+    eatout: (ds, e) => pushQ(ds, "eatout", t("{d}、外食しましたね。どこで、誰とでしたか？", { d: formatJP(ds) }), formatPlaceAnswer(e.eatout), mealPhotoList(ds)),
+    diary:  (ds, e) => (settings.diaryPass && !diaryUnlocked) ? false : pushQ(ds, "diary",  t("{d}に書いたこと、思い出せますか？", { d: formatJP(ds) }), e.diary),
   };
 
   const pastDates = Object.keys(entries).filter(d => d < today).sort().reverse();
@@ -3419,15 +3460,15 @@ function buildQuizQuestions() {
       let q;
       if (isYesterday) {
         q = e.meal.mode === "best"
-          ? "昨日、記憶に残っている食べ物は何でしたか？"
-          : (e.meal.evening ? "昨日の夕飯は何でしたか？" : "昨日の食事、思い出せますか？");
-      } else q = `${formatJP(ds)}の食事は何でしたか？`;
+          ? t("昨日、記憶に残っている食べ物は何でしたか？")
+          : (e.meal.evening ? t("昨日の夕飯は何でしたか？") : t("昨日の食事、思い出せますか？"));
+      } else q = t("{d}の食事は何でしたか？", { d: formatJP(ds) });
       return pushQ(ds, "meal", q, formatMealAnswer(e.meal), mealPhotoList(ds));
     }
     if (e.eatout && (e.eatout.place || "").trim()) return makeQ.eatout(ds, e);
     if (mealPhotoList(ds).length) {
-      const q = isYesterday ? "昨日の食事、思い出せますか？" : `${formatJP(ds)}の食事は何でしたか？`;
-      return pushQ(ds, "meal", q, "（この日は写真で記録しました）", mealPhotoList(ds));
+      const q = isYesterday ? t("昨日の食事、思い出せますか？") : t("{d}の食事は何でしたか？", { d: formatJP(ds) });
+      return pushQ(ds, "meal", q, t("（この日は写真で記録しました）"), mealPhotoList(ds));
     }
     return false;
   };
@@ -3531,34 +3572,34 @@ function buildDeepQuestions(excludeKeys, max) {
     const e = entries[ds] || {};
     // 食事は3日以内だけ（日付しか手がかりが無く、古いと思い出せないため）
     if (ds >= d3) {
-      if (e.meal) pushQ(others, ds, "meal", `${formatJP(ds)}の食事は何でしたか？`, formatMealAnswer(e.meal), mealPhotoList(ds));
-      else if (mealPhotoList(ds).length) pushQ(others, ds, "meal", `${formatJP(ds)}の食事は何でしたか？`, "（この日は写真で記録しました）", mealPhotoList(ds));
+      if (e.meal) pushQ(others, ds, "meal", t("{d}の食事は何でしたか？", { d: formatJP(ds) }), formatMealAnswer(e.meal), mealPhotoList(ds));
+      else if (mealPhotoList(ds).length) pushQ(others, ds, "meal", t("{d}の食事は何でしたか？", { d: formatJP(ds) }), t("（この日は写真で記録しました）"), mealPhotoList(ds));
     }
     // 外食は記録の1つをヒントに見せて、残りを思い出してもらう
     const eo = e.eatout || {};
     if ((eo.place || "").trim()) {
       const hints = [];
-      if ((eo.place || "").trim()) hints.push(["place", `「${eo.place}」で外食しましたね。誰と、何を食べたか思い出せますか？`]);
-      if ((eo.food || "").trim()) hints.push(["food", `外で「${eo.food}」を食べましたね。どこで、誰とでしたか？`]);
-      if ((eo.with || "").trim()) hints.push(["with", `「${eo.with}」と外食しましたね。どこで、何を食べたか思い出せますか？`]);
+      if ((eo.place || "").trim()) hints.push(["place", t("「{v}」で外食しましたね。誰と、何を食べたか思い出せますか？", { v: eo.place })]);
+      if ((eo.food || "").trim()) hints.push(["food", t("外で「{v}」を食べましたね。どこで、誰とでしたか？", { v: eo.food })]);
+      if ((eo.with || "").trim()) hints.push(["with", t("「{v}」と外食しましたね。どこで、何を食べたか思い出せますか？", { v: eo.with })]);
       const h = hints[Math.floor(Math.random() * hints.length)];
-      pushQ(others, ds, "eatout", `${formatJP(ds)}、${h[1]}`, formatPlaceAnswer(eo), mealPhotoList(ds));
+      pushQ(others, ds, "eatout", t("{d}、{q}", { d: formatJP(ds), q: h[1] }), formatPlaceAnswer(eo), mealPhotoList(ds));
     }
-    if (e.diary && !(settings.diaryPass && !diaryUnlocked)) pushQ(others, ds, "diary", `${formatJP(ds)}に書いたこと、思い出せますか？`, e.diary);
+    if (e.diary && !(settings.diaryPass && !diaryUnlocked)) pushQ(others, ds, "diary", t("{d}に書いたこと、思い出せますか？", { d: formatJP(ds) }), e.diary);
     // 服装：写真がある日は写真を手がかりに（期間無制限）。写真が無い日は7日以内だけ
     if (outfitText(ds)) {
       const op = outfitOf(ds)?.photo;
       const cue = String(op || "").startsWith("data:") ? op : null;
-      if (cue) pushQ(others, ds, "outfit", "この服を着た日のこと、思い出せますか？", outfitText(ds), null, cue);
-      else if (ds >= d7) pushQ(others, ds, "outfit", `${formatJP(ds)}、どんな服装でしたか？`, outfitText(ds), op);
+      if (cue) pushQ(others, ds, "outfit", t("この服を着た日のこと、思い出せますか？"), outfitText(ds), null, cue);
+      else if (ds >= d7) pushQ(others, ds, "outfit", t("{d}、どんな服装でしたか？", { d: formatJP(ds) }), outfitText(ds), op);
     }
   }
   // アルバムに残した思い出（写真を先に見せて、何の写真か思い出す）
   loadAlbumMemos().forEach((m, i) => {
-    const when = m.photoDate ? `${formatYM(m.photoDate)}ごろの写真です` : "アルバムに残した写真です";
+    const when = m.photoDate ? t("{d}ごろの写真です", { d: formatYM(m.photoDate) }) : t("アルバムに残した写真です");
     pushQ(albums, m.date, "album" + i,
-      `${when}。何の写真か思い出せますか？`,
-      (m.note || "").trim() || "（メモはありません）",
+      t("{w}。何の写真か思い出せますか？", { w: when }),
+      (m.note || "").trim() || t("（メモはありません）"),
       null, albumPhotoForQuiz(m.photo));
   });
   // 2問に1問はアルバムになるよう交互にならべる（無くなったら残りで埋める）
@@ -3589,11 +3630,11 @@ function shuffle(arr) {
 
 function renderQuizStep(content) {
   const questions = buildQuizQuestions();
-  document.getElementById("flow-skip").textContent = "飛ばす";
+  document.getElementById("flow-skip").textContent = t("飛ばす");
 
   const quizTitle = flow.recallOnly
-    ? `<span class="step-emoji step-ico">${balloonIconSvg("recall")}</span>昨日を思い出す`
-    : `<span class="step-emoji step-ico">${balloonIconSvg("recall")}</span>記憶確認`;
+    ? `<span class="step-emoji step-ico">${balloonIconSvg("recall")}</span>${t("昨日を思い出す")}`
+    : `<span class="step-emoji step-ico">${balloonIconSvg("recall")}</span>${t("記憶確認")}`;
 
   // 昨日の記録が無い人には、先にそのことを伝える（→直近の問題へ or 今日の食事の記録へ）
   if (flow.recallOnly && !flow.noticeShown && !yesterdayHasRecord() && questions.length > 0) {
@@ -3602,10 +3643,10 @@ function renderQuizStep(content) {
       <div class="step-title">${quizTitle}</div>
       <div class="quiz-empty">
         <div class="big">🌱</div>
-        昨日の記録はありませんでした。<br>
-        かわりに、少し前の記録から問題をだします。
+        ${t("昨日の記録はありませんでした。")}<br>
+        ${t("かわりに、少し前の記録から問題をだします。")}
       </div>
-      <button class="btn btn-primary btn-xl" id="quiz-go">次の思い出しへ</button>`;
+      <button class="btn btn-primary btn-xl" id="quiz-go">${t("次の思い出しへ")}</button>`;
     document.getElementById("quiz-go").addEventListener("click", () => { flow.noticeShown = true; renderStep(); });
     return;
   }
@@ -3616,10 +3657,10 @@ function renderQuizStep(content) {
       <div class="step-title">${quizTitle}</div>
       <div class="quiz-empty">
         <div class="big">🌱</div>
-        記録がたまってくると、<br>ここで「思い出しクイズ」が出ます。<br><br>
-        まずは今日のことを、ひとつだけ書いてみませんか。
+        ${t("記録がたまってくると、")}<br>${t("ここで「思い出しクイズ」が出ます。")}<br><br>
+        ${t("まずは今日のことを、ひとつだけ書いてみませんか。")}
       </div>
-      <button class="btn btn-primary btn-xl" id="quiz-meal"><span class="btn-ico btn-ico-sm">${balloonIconSvg("daily")}</span><span class="nowrap">今日の</span><span class="nowrap">食事を記録</span></button>`;
+      <button class="btn btn-primary btn-xl" id="quiz-meal"><span class="btn-ico btn-ico-sm">${balloonIconSvg("daily")}</span><span class="nowrap">${t("今日の")}</span><span class="nowrap">${t("食事を記録")}</span></button>`;
     document.getElementById("quiz-meal").addEventListener("click", () => startMeal(todayStr()));
     return;
   }
@@ -3636,26 +3677,26 @@ function renderQuizStep(content) {
     const isLast = qIndex === questions.length - 1;
     // 見出しは「昨日の問題のときだけ」昨日を思い出す。それ以外（2問目など）は思い出す
     const qTitle = flow.recallOnly
-      ? `<span class="step-emoji step-ico">${balloonIconSvg("recall")}</span>${q.dateStr === daysAgoStr(1) ? "昨日を思い出す" : "思い出す"}`
+      ? `<span class="step-emoji step-ico">${balloonIconSvg("recall")}</span>${q.dateStr === daysAgoStr(1) ? t("昨日を思い出す") : t("思い出す")}`
       : quizTitle;
     content.scrollTop = 0; // いちばん上から見せる
     content.innerHTML = `
       <div class="step-title">${qTitle}</div>
-      <div class="quiz-count">${qIndex + 1}問目 / 全${questions.length}問</div>
+      <div class="quiz-count">${t("{i}問目 / 全{n}問", { i: qIndex + 1, n: questions.length })}</div>
       <div class="quiz-q">${q.q}</div>
-      <div class="quiz-date-ref">${formatJP(q.dateStr, true)}の記録から</div>
-      <label class="field"><span class="field-label quiz-guess-label">頭の中で思い出すだけでOK</span>
-      <textarea id="quiz-guess" rows="1" placeholder="書きたい方はここをタップ"></textarea></label>
+      <div class="quiz-date-ref">${t("{d}の記録から", { d: formatJP(q.dateStr, true) })}</div>
+      <label class="field"><span class="field-label quiz-guess-label">${t("頭の中で思い出すだけでOK")}</span>
+      <textarea id="quiz-guess" rows="1" placeholder="${t("書きたい方はここをタップ")}"></textarea></label>
       <div class="quiz-reveal-slot" id="quiz-reveal-slot"></div>
       <div class="quiz-actions">
-        <button class="btn btn-primary btn-xl" id="quiz-reveal">答えを見る</button>
+        <button class="btn btn-primary btn-xl" id="quiz-reveal">${t("答えを見る")}</button>
       </div>`;
     // 自動でキーボードを出さない（書くのは任意。頭の中で思い出すだけでいい）
     document.getElementById("quiz-reveal").addEventListener("click", () => {
       document.getElementById("quiz-reveal-slot").innerHTML = `
-        <div class="quiz-answer-label">${q.photos.length ? "あなたが残したもの" : "あなたが入力したこと"}</div>
+        <div class="quiz-answer-label">${q.photos.length ? t("あなたが残したもの") : t("あなたが入力したこと")}</div>
         <div class="quiz-answer">${esc(q.answer).replace(/\n/g, "<br>")}</div>
-        ${q.photos.map(u => `<img class="quiz-photo" src="${u}" alt="この日の写真">`).join("")}`;
+        ${q.photos.map(u => `<img class="quiz-photo" src="${u}" alt="${t("この日の写真")}">`).join("")}`;
       // 最後の問題のあとは「もっと思い出す」＋「ホームへ／今日の食事を記録」
       const moreLeft = MORE_RECALL_MAX - moreRecallUsed();
       const canMore = isLast && flow.recallOnly && !moreRecallDoneToday();
@@ -3663,25 +3704,25 @@ function renderQuizStep(content) {
       // 今日の10問を使い切った人には、ボタンのかわりにひとこと
       const moreHtml = morePool.length
         ? `<div class="quiz-judge">
-            <button class="btn btn-secondary btn-xl" id="quiz-more">もっと思い出す<span class="btn-ico btn-ico-r">${balloonIconSvg("sprout")}</span></button>
+            <button class="btn btn-secondary btn-xl" id="quiz-more">${t("もっと思い出す")}<span class="btn-ico btn-ico-r">${balloonIconSvg("sprout")}</span></button>
           </div>
-          ${morePool.capped ? `<p class="quiz-more-note">1日10問までです</p>` : ""}`
+          ${morePool.capped ? `<p class="quiz-more-note">${t("1日10問までです")}</p>` : ""}`
         : (isLast && flow.recallOnly && (moreRecallDoneToday() || moreLeft <= 0)
-            ? `<p class="quiz-more-note">「もっと思い出す」は1日1回です。また明日どうぞ</p>` : "");
+            ? `<p class="quiz-more-note">${t("「もっと思い出す」は1日1回です。また明日どうぞ")}</p>` : "");
       content.querySelector(".quiz-actions").outerHTML = isLast
         ? `${moreHtml}
           <div class="quiz-judge quiz-judge-2">
-            <button class="btn btn-primary" id="quiz-next">ホームへ</button>
-            <button class="btn btn-soft" id="quiz-meal"><span class="btn-ico btn-ico-sm">${balloonIconSvg("daily")}</span><span class="nowrap">今日の</span><span class="nowrap">食事を記録</span></button>
+            <button class="btn btn-primary" id="quiz-next">${t("ホームへ")}</button>
+            <button class="btn btn-soft" id="quiz-meal"><span class="btn-ico btn-ico-sm">${balloonIconSvg("daily")}</span><span class="nowrap">${t("今日の")}</span><span class="nowrap">${t("食事を記録")}</span></button>
           </div>`
         : `<div class="quiz-judge">
-            <button class="btn btn-primary btn-xl" id="quiz-next">次の思い出し<span class="btn-ico btn-ico-r">${balloonIconSvg("sprout")}</span></button>
+            <button class="btn btn-primary btn-xl" id="quiz-next">${t("次の思い出し")}<span class="btn-ico btn-ico-r">${balloonIconSvg("sprout")}</span></button>
           </div>`;
       document.getElementById("quiz-next").addEventListener("click", () => {
         if (isLast) {
           // 区切りの一瞬にだけ広告（1日1回）。記録のついでのクイズでは出さない
           if (flow.recallOnly && !settings.adFree && !quizAdShownToday()) {
-            renderAdGate(() => { noteQuizAdShown(); goHome(); }, "思い出す", "本番アプリでは、広告のあとにホームへ戻ります。");
+            renderAdGate(() => { noteQuizAdShown(); goHome(); }, t("思い出す"), t("本番アプリでは、広告のあとにホームへ戻ります。"));
             return;
           }
           goHome(); return;
@@ -3704,13 +3745,13 @@ function renderQuizStep(content) {
   function renderAdGate(next, title, note) {
     content.scrollTop = 0; // いちばん上から見せる
     content.innerHTML = `
-      <div class="step-title"><span class="step-emoji step-ico">${balloonIconSvg("recall")}</span>${title || "もっと思い出す"}</div>
+      <div class="step-title"><span class="step-emoji step-ico">${balloonIconSvg("recall")}</span>${title || t("もっと思い出す")}</div>
       <div class="ad-gate">
-        <span class="ad-gate-tag">広告</span>
-        <div class="ad-gate-body">ここに短い広告が流れます（見本）</div>
+        <span class="ad-gate-tag">${t("広告")}</span>
+        <div class="ad-gate-body">${t("ここに短い広告が流れます（見本）")}</div>
       </div>
-      <p class="quiz-more-note">${note || "本番アプリでは、広告のあとに思い出しが始まります。"}<br>設定の「広告を消す」を購入すると、ここも出なくなります</p>
-      <button class="btn btn-primary btn-xl" id="ad-done">広告を見おわった</button>`;
+      <p class="quiz-more-note">${note || t("本番アプリでは、広告のあとに思い出しが始まります。")}<br>${t("設定の「広告を消す」を購入すると、ここも出なくなります")}</p>
+      <button class="btn btn-primary btn-xl" id="ad-done">${t("広告を見おわった")}</button>`;
     document.getElementById("ad-done").addEventListener("click", next);
   }
 
@@ -3724,25 +3765,25 @@ function renderQuizStep(content) {
       content.scrollTop = 0; // いちばん上から見せる
       content.innerHTML = `
         <div class="step-title"><span class="step-emoji step-ico">${balloonIconSvg("recall")}</span>思い出す</div>
-        <div class="quiz-count">${di + 1}問目 / 全${pool.length}問</div>
-        ${q.cue ? `<img class="quiz-photo quiz-cue" src="${q.cue}" alt="手がかりの写真">` : ""}
+        <div class="quiz-count">${t("{i}問目 / 全{n}問", { i: di + 1, n: pool.length })}</div>
+        ${q.cue ? `<img class="quiz-photo quiz-cue" src="${q.cue}" alt="${t("手がかりの写真")}">` : ""}
         <div class="quiz-q">${q.q}</div>
-        <div class="quiz-date-ref">${formatJP(q.dateStr, true)}の記録から</div>
-        <label class="field"><span class="field-label quiz-guess-label">頭の中で思い出すだけでOK</span>
-        <textarea id="quiz-guess" rows="1" placeholder="書きたい方はここをタップ"></textarea></label>
+        <div class="quiz-date-ref">${t("{d}の記録から", { d: formatJP(q.dateStr, true) })}</div>
+        <label class="field"><span class="field-label quiz-guess-label">${t("頭の中で思い出すだけでOK")}</span>
+        <textarea id="quiz-guess" rows="1" placeholder="${t("書きたい方はここをタップ")}"></textarea></label>
         <div class="quiz-reveal-slot" id="quiz-reveal-slot"></div>
         <div class="quiz-actions">
-          <button class="btn btn-primary btn-xl" id="quiz-reveal">答えを見る</button>
+          <button class="btn btn-primary btn-xl" id="quiz-reveal">${t("答えを見る")}</button>
         </div>`;
       document.getElementById("quiz-reveal").addEventListener("click", () => {
         document.getElementById("quiz-reveal-slot").innerHTML = `
-          <div class="quiz-answer-label">${q.photos.length ? "あなたが残したもの" : "あなたが入力したこと"}</div>
+          <div class="quiz-answer-label">${q.photos.length ? t("あなたが残したもの") : t("あなたが入力したこと")}</div>
           <div class="quiz-answer">${esc(q.answer).replace(/\n/g, "<br>")}</div>
-          ${q.photos.map(u => `<img class="quiz-photo" src="${u}" alt="この日の写真">`).join("")}`;
+          ${q.photos.map(u => `<img class="quiz-photo" src="${u}" alt="${t("この日の写真")}">`).join("")}`;
         content.querySelector(".quiz-actions").outerHTML = `
           <div class="quiz-judge quiz-judge-2">
-            <button class="btn btn-primary" id="quiz-next">${isLastD ? `おしまい<span class="btn-ico btn-ico-r">${balloonIconSvg("sprout")}</span>` : `次の思い出し<span class="btn-ico btn-ico-r">${balloonIconSvg("sprout")}</span>`}</button>
-            <button class="btn btn-soft" id="quiz-home">ホームへ</button>
+            <button class="btn btn-primary" id="quiz-next">${isLastD ? `${t("おしまい")}<span class="btn-ico btn-ico-r">${balloonIconSvg("sprout")}</span>` : `${t("次の思い出し")}<span class="btn-ico btn-ico-r">${balloonIconSvg("sprout")}</span>`}</button>
+            <button class="btn btn-soft" id="quiz-home">${t("ホームへ")}</button>
           </div>`;
         document.getElementById("quiz-next").addEventListener("click", () => {
           if (isLastD) { renderDeepEnd(); return; }
@@ -3758,10 +3799,10 @@ function renderQuizStep(content) {
         <div class="quiz-empty">
           <div class="big big-ico">${balloonIconSvg("sprout")}</div>
           ${pool.capped
-            ? "1日10問までです。<br>また明日、思い出しに来てください。"
-            : "全部思い出しました。<br>記録のある日は、すべて振り返りました。"}
+            ? `${t("1日10問までです。")}<br>${t("また明日、思い出しに来てください。")}`
+            : `${t("全部思い出しました。")}<br>${t("記録のある日は、すべて振り返りました。")}`}
         </div>
-        <button class="btn btn-primary btn-xl" id="quiz-home">ホームへ</button>`;
+        <button class="btn btn-primary btn-xl" id="quiz-home">${t("ホームへ")}</button>`;
       document.getElementById("quiz-home").addEventListener("click", goHome);
     }
     renderDeepQ();
@@ -3794,7 +3835,7 @@ function entryFields(e) {
   if (e.diary) {
     // 日記ロック中（未解除）は中身を見せない（タップで解除できる）
     const lockedDiary = settings.diaryPass && !diaryUnlocked;
-    fields.push({ label: "日記", text: lockedDiary ? "🔒 ロックされています（タップで解除）" : e.diary });
+    fields.push({ label: "日記", text: lockedDiary ? "🔒 " + t("ロックされています（タップで解除）") : e.diary });
   }
   return fields;
 }
@@ -3892,7 +3933,7 @@ function runSearch(q) {
   if (q === lastSearchQ) return;
   lastSearchQ = q;
   if (!q) {
-    box.innerHTML = `<p class="search-hint">ことばを入れると、書いた日が出てきます。<br>食べたもの・服装・行った場所・名前などから探せます。<br>スペースで区切ると、いくつかの言葉でしぼり込めます。<br>（例：牛丼　太郎）</p>`;
+    box.innerHTML = `<p class="search-hint">${t("ことばを入れると、書いた日が出てきます。")}<br>${t("食べたもの・服装・行った場所・名前などから探せます。")}<br>${t("スペースで区切ると、いくつかの言葉でしぼり込めます。")}<br>${t("（例：牛丼　太郎）")}</p>`;
     return;
   }
   // スペース区切りで最大5語（すべて含む日を表示＝AND検索）
@@ -3931,7 +3972,7 @@ function runSearch(q) {
   if (hits.length === 0) {
     box.innerHTML = searchDiaryHidden
       ? searchLockRowHtml()
-      : `<p class="search-hint">「${esc(q)}」は見つかりませんでした。</p>`;
+      : `<p class="search-hint">${t("「{q}」は見つかりませんでした。", { q: esc(q) })}</p>`;
     return;
   }
   // 何百件ヒットしても軽いよう、新しい順に30件ずつ表示
@@ -3949,8 +3990,8 @@ let searchHits = [], searchTerms = [], searchShown = 0, searchDiaryHidden = fals
 // 日記ロック中のお知らせ行（日付・件数は出さない）
 function searchLockRowHtml() {
   return `<div class="card search-lock-row">
-    <span class="search-lock-text">🔒 日記の中にも見つかりました</span>
-    <button type="button" class="btn btn-secondary" id="search-unlock">解除して見る</button>
+    <span class="search-lock-text">🔒 ${t("日記の中にも見つかりました")}</span>
+    <button type="button" class="btn btn-secondary" id="search-unlock">${t("解除して見る")}</button>
   </div>`;
 }
 function renderSearchResults() {
@@ -3958,14 +3999,14 @@ function renderSearchResults() {
   const shown = searchHits.slice(0, searchShown);
   const rest = searchHits.length - searchShown;
   const countNote = searchHits.length > SEARCH_PAGE
-    ? `<p class="search-count">${searchHits.length}件見つかりました（新しい順）</p>` : "";
+    ? `<p class="search-count">${t("{n}件見つかりました（新しい順）", { n: searchHits.length })}</p>` : "";
   box.innerHTML = (searchDiaryHidden ? searchLockRowHtml() : "") + countNote + shown.map(h => `
     <button class="result-card" data-date="${h.ds}">
       <div class="result-date">${formatJP(h.ds, true)}</div>
       ${h.matched.slice(0, 3).map(f =>
-        `<div class="result-snip"><b>${f.label}</b>${highlightTerms(f.text.replace(/\n/g, "　"), searchTerms)}</div>`).join("")}
+        `<div class="result-snip"><b>${t(f.label)}</b>${highlightTerms(f.text.replace(/\n/g, "　"), searchTerms)}</div>`).join("")}
     </button>`).join("")
-    + (rest > 0 ? `<button type="button" class="btn btn-secondary btn-xl" id="search-more" style="margin-top:14px;">さらに${Math.min(SEARCH_PAGE, rest)}件見る（あと${rest}件）</button>` : "");
+    + (rest > 0 ? `<button type="button" class="btn btn-secondary btn-xl" id="search-more" style="margin-top:14px;">${t("さらに{a}件見る（あと{b}件）", { a: Math.min(SEARCH_PAGE, rest), b: rest })}</button>` : "");
 }
 
 function openDayDetail(ds) {
@@ -3975,9 +4016,9 @@ function openDayDetail(ds) {
   document.getElementById("detail-cards").innerHTML = fields.length
     ? fields.map((f, i) =>
         `<div class="card detail-card tappable" data-idx="${i}" role="button" tabindex="0">
-          <div class="detail-label">${f.label}</div>${f.thumb ? `<img class="detail-thumb" src="${f.thumb}" alt="">` : ""}${linkify(f.text)}<span class="detail-chev">›</span>
+          <div class="detail-label">${t(f.label)}</div>${f.thumb ? `<img class="detail-thumb" src="${f.thumb}" alt="">` : ""}${linkify(f.text)}<span class="detail-chev">›</span>
         </div>`).join("")
-    : `<p class="search-hint">この日の記録はまだありません。</p>`;
+    : `<p class="search-hint">${t("この日の記録はまだありません。")}</p>`;
   // カードをタップすると、その項目の置き場所が開く
   document.querySelectorAll("#detail-cards .detail-card.tappable").forEach(card => {
     const go = e => {
@@ -4026,7 +4067,7 @@ function openSettings() {
   });
   const p = document.getElementById("settings-profile");
   const ageStr = ageGroupOf(profile) || "回答しない";
-  p.innerHTML = `年代：${esc(ageStr)}<br>性別：${esc(profile.gender || "回答しない")}`;
+  p.innerHTML = `${t("年代：{v}", { v: esc(t(ageStr)) })}<br>${t("性別：{v}", { v: esc(t(profile.gender || "回答しない")) })}`;
   refreshPasscodeStatus();
   renderResetArea();
   showScreen("screen-settings");
@@ -4081,7 +4122,7 @@ function buildKeypad() {
   const keys = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "blank", "0", "del"];
   document.getElementById("keypad").innerHTML = keys.map(k => {
     if (k === "blank") return `<button class="blank" tabindex="-1"></button>`;
-    if (k === "del") return `<button class="key-del" data-key="del" aria-label="消す">⌫</button>`;
+    if (k === "del") return `<button class="key-del" data-key="del" aria-label="${t("消す")}">⌫</button>`;
     return `<button data-key="${k}">${k}</button>`;
   }).join("");
   document.querySelectorAll("#keypad button[data-key]").forEach(b =>
@@ -4090,7 +4131,7 @@ function buildKeypad() {
 function onKeypad(k) {
   const msg = document.getElementById("lock-msg");
   msg.textContent = "";
-  if (isLockedOut()) { msg.textContent = "5時間後にお試しください"; return; }
+  if (isLockedOut()) { msg.textContent = t("5時間後にお試しください"); return; }
   if (k === "del") { pcEntry = pcEntry.slice(0, -1); renderLockDots(); return; }
   if (pcEntry.length >= 4) return;
   pcEntry += k;
@@ -4116,7 +4157,7 @@ function onKeypad(k) {
       const wrap = document.getElementById("lock-wrap");
       wrap.classList.add("shake");
       setTimeout(() => wrap.classList.remove("shake"), 350);
-      msg.textContent = noteLockFail() ? "5回まちがえました。5時間後にお試しください" : "ちがうようです。もう一度";
+      msg.textContent = noteLockFail() ? t("5回まちがえました。5時間後にお試しください") : t("ちがうようです。もう一度");
       pcEntry = "";
       setTimeout(renderLockDots, 200);
     }
@@ -4129,15 +4170,15 @@ function showLock(mode) {
   wrap.classList.remove("shake");
   wrap.innerHTML = `
     <div class="lock-logo">🔒</div>
-    <h2 class="lock-title">${lockMode === "diary" ? "日記のパスコード" : "パスコードを入力"}</h2>
+    <h2 class="lock-title">${lockMode === "diary" ? t("日記のパスコード") : t("パスコードを入力")}</h2>
     <div class="lock-dots" id="lock-dots"></div>
     <div class="lock-msg" id="lock-msg"></div>
     <div class="keypad" id="keypad"></div>
-    <button type="button" class="lock-forgot" id="lock-forgot">パスコードを忘れた方はこちら</button>
-    ${lockMode === "diary" ? `<button type="button" class="lock-forgot" id="lock-back-home">← ホームへ</button>` : ""}`;
+    <button type="button" class="lock-forgot" id="lock-forgot">${t("パスコードを忘れた方はこちら")}</button>
+    ${lockMode === "diary" ? `<button type="button" class="lock-forgot" id="lock-back-home">${t("← ホームへ")}</button>` : ""}`;
   renderLockDots();
   buildKeypad();
-  if (isLockedOut()) document.getElementById("lock-msg").textContent = "5時間後にお試しください";
+  if (isLockedOut()) document.getElementById("lock-msg").textContent = t("5時間後にお試しください");
   document.getElementById("lock-forgot").addEventListener("click", showRecovery);
   const backHome = document.getElementById("lock-back-home");
   if (backHome) backHome.addEventListener("click", goHome);
@@ -4147,12 +4188,12 @@ function showRecovery() {
   const wrap = document.getElementById("lock-wrap");
   wrap.innerHTML = `
     <div class="lock-logo">🔑</div>
-    <h2 class="lock-title">合言葉で確認</h2>
-    <p class="pc-note" style="text-align:center; margin-bottom:16px;">${esc(settings.recoveryQ) || "合言葉を入力してください"}</p>
-    <input type="text" id="rec-answer" placeholder="こたえ" style="max-width:300px;">
+    <h2 class="lock-title">${t("合言葉で確認")}</h2>
+    <p class="pc-note" style="text-align:center; margin-bottom:16px;">${esc(settings.recoveryQ) || t("合言葉を入力してください")}</p>
+    <input type="text" id="rec-answer" placeholder="${t("こたえ")}" style="max-width:300px;">
     <div class="lock-msg" id="rec-msg"></div>
-    <button type="button" class="btn btn-primary btn-xl" id="rec-submit" style="max-width:300px;">確認する</button>
-    <button type="button" class="lock-forgot" id="rec-cancel">パスコード入力にもどる</button>`;
+    <button type="button" class="btn btn-primary btn-xl" id="rec-submit" style="max-width:300px;">${t("確認する")}</button>
+    <button type="button" class="lock-forgot" id="rec-cancel">${t("パスコード入力にもどる")}</button>`;
   document.getElementById("rec-answer").focus();
   document.getElementById("rec-submit").addEventListener("click", () => {
     const ans = normalizeKana(document.getElementById("rec-answer").value.trim());
@@ -4164,10 +4205,10 @@ function showRecovery() {
       settings.lockUntil[lockMode] = 0;
       store.set("mn_settings", settings);
       document.getElementById("rec-msg").style.color = "var(--accent)";
-      document.getElementById("rec-msg").textContent = "解除しました。ホームにもどります…";
+      document.getElementById("rec-msg").textContent = t("解除しました。ホームにもどります…");
       setTimeout(goHome, 1200);
     } else {
-      document.getElementById("rec-msg").textContent = "合言葉がちがうようです。";
+      document.getElementById("rec-msg").textContent = t("合言葉がちがうようです。");
     }
   });
   document.getElementById("rec-cancel").addEventListener("click", () => showLock(lockMode));
@@ -4178,13 +4219,13 @@ function refreshPasscodeStatus() {
   const s = document.getElementById("pc-status");
   const btn = document.getElementById("pc-open");
   if (!settings.passcode && !settings.diaryPass) {
-    s.textContent = "今は設定されていません。アプリ全体、または日記だけをロックできます。";
+    s.textContent = t("今は設定されていません。アプリ全体、または日記だけをロックできます。");
     s.classList.remove("pc-status-set");
-    btn.textContent = "設定する";
+    btn.textContent = t("設定する");
   } else {
-    s.textContent = `アプリのロック：${settings.passcode ? "設定中 🔒" : "なし"} ／ 日記のロック：${settings.diaryPass ? "設定中 🔒" : "なし"}`;
+    s.textContent = t("アプリのロック：{a} ／ 日記のロック：{b}", { a: settings.passcode ? t("設定中 🔒") : t("なし"), b: settings.diaryPass ? t("設定中 🔒") : t("なし") });
     s.classList.add("pc-status-set");
-    btn.textContent = "変更・解除する";
+    btn.textContent = t("変更・解除する");
   }
 }
 function openPasscodeSetup() { renderPasscodeSetup(); showScreen("screen-passcode"); }
@@ -4193,15 +4234,15 @@ function renderPasscodeSetup(editTarget) {
   if (!editTarget) {
     const row = (name, note, has, target) => `
       <div class="card" style="margin-bottom:14px;">
-        <div class="settings-label">${name}</div>
-        <p class="pc-note" style="margin-top:0;">${has ? "設定されています 🔒" : note}</p>
-        <button type="button" class="btn btn-secondary btn-xl" data-pc-edit="${target}" style="margin-top:10px;">${has ? "変更する" : "設定する"}</button>
-        ${has ? `<button type="button" class="btn pc-danger btn-xl" data-pc-remove="${target}" style="margin-top:10px;">解除する</button>` : ""}
+        <div class="settings-label">${t(name)}</div>
+        <p class="pc-note" style="margin-top:0;">${has ? t("設定されています 🔒") : t(note)}</p>
+        <button type="button" class="btn btn-secondary btn-xl" data-pc-edit="${target}" style="margin-top:10px;">${has ? t("変更する") : t("設定する")}</button>
+        ${has ? `<button type="button" class="btn pc-danger btn-xl" data-pc-remove="${target}" style="margin-top:10px;">${t("解除する")}</button>` : ""}
       </div>`;
     body.innerHTML =
       row("アプリのロック", "アプリを開くときに4桁が必要になります。", !!settings.passcode, "app")
       + row("日記のロック", "日記を開くときだけ4桁が必要になります。", !!settings.diaryPass, "diary")
-      + `<p class="pc-note" style="text-align:center;">2つは別々の4桁で設定できます（同じ数字でも大丈夫）</p>`;
+      + `<p class="pc-note" style="text-align:center;">${t("2つは別々の4桁で設定できます（同じ数字でも大丈夫）")}</p>`;
     body.querySelectorAll("[data-pc-edit]").forEach(b =>
       b.addEventListener("click", () => renderPasscodeSetup(b.dataset.pcEdit)));
     body.querySelectorAll("[data-pc-remove]").forEach(b =>
@@ -4215,25 +4256,25 @@ function renderPasscodeSetup(editTarget) {
       }));
     return;
   }
-  const name = editTarget === "diary" ? "日記のロック" : "アプリのロック";
+  const name = editTarget === "diary" ? t("日記のロック") : t("アプリのロック");
   body.innerHTML = `
     <div class="card">
-      <div class="settings-label">${name}：4桁のパスコード</div>
-      <label class="field"><span class="field-label">数字4桁</span>
+      <div class="settings-label">${t("{n}：4桁のパスコード", { n: name })}</div>
+      <label class="field"><span class="field-label">${t("数字4桁")}</span>
       <input type="password" inputmode="numeric" maxlength="4" id="pc-1" placeholder="＊＊＊＊"></label>
-      <label class="field"><span class="field-label">もう一度</span>
+      <label class="field"><span class="field-label">${t("もう一度")}</span>
       <input type="password" inputmode="numeric" maxlength="4" id="pc-2" placeholder="＊＊＊＊"></label>
     </div>
     <div class="card">
-      <div class="settings-label">合言葉（忘れたとき用・2つのロックで共通）</div>
-      <p class="pc-note" style="margin-bottom:12px;">パスコードを忘れたとき、この合言葉で解除できます。かならず設定してください。</p>
-      <label class="field"><span class="field-label">質問（自分で決められます）</span>
-      <input type="text" id="pc-q" placeholder="例：好きな食べ物は？" value="${esc(settings.recoveryQ)}"></label>
-      <label class="field"><span class="field-label">こたえ</span>
-      <input type="text" id="pc-a" placeholder="${settings.recoveryA ? "（設定済み。変えるときだけ入力）" : "例：カレー"}"></label>
+      <div class="settings-label">${t("合言葉（忘れたとき用・2つのロックで共通）")}</div>
+      <p class="pc-note" style="margin-bottom:12px;">${t("パスコードを忘れたとき、この合言葉で解除できます。かならず設定してください。")}</p>
+      <label class="field"><span class="field-label">${t("質問（自分で決められます）")}</span>
+      <input type="text" id="pc-q" placeholder="${t("例：好きな食べ物は？")}" value="${esc(settings.recoveryQ)}"></label>
+      <label class="field"><span class="field-label">${t("こたえ")}</span>
+      <input type="text" id="pc-a" placeholder="${settings.recoveryA ? t("（設定済み。変えるときだけ入力）") : t("例：カレー")}"></label>
     </div>
     <div class="lock-msg" id="pc-err" style="min-height:0; text-align:center;"></div>
-    <button type="button" class="btn btn-primary btn-xl" id="pc-save">保存</button>`;
+    <button type="button" class="btn btn-primary btn-xl" id="pc-save">${t("保存")}</button>`;
   document.getElementById("pc-save").addEventListener("click", () => savePasscode(editTarget));
 }
 function savePasscode(target) {
@@ -4242,9 +4283,9 @@ function savePasscode(target) {
   const p2 = document.getElementById("pc-2").value.trim();
   const q = document.getElementById("pc-q").value.trim();
   const a = document.getElementById("pc-a").value.trim();
-  if (!/^\d{4}$/.test(p1)) { err.textContent = "数字4桁で入れてください。"; return; }
-  if (p1 !== p2) { err.textContent = "2つのパスコードがちがいます。"; return; }
-  if (!q || (!a && !settings.recoveryA)) { err.textContent = "合言葉の質問とこたえを入れてください。"; return; }
+  if (!/^\d{4}$/.test(p1)) { err.textContent = t("数字4桁で入れてください。"); return; }
+  if (p1 !== p2) { err.textContent = t("2つのパスコードがちがいます。"); return; }
+  if (!q || (!a && !settings.recoveryA)) { err.textContent = t("合言葉の質問とこたえを入れてください。"); return; }
   if (target === "diary") settings.diaryPass = p1;
   else settings.passcode = p1;
   settings.recoveryQ = q;
@@ -4273,20 +4314,20 @@ function openCodeEntry() {
 // 全消去（本当に消していいか2度たずねる）
 function renderResetArea() {
   const area = document.getElementById("reset-area");
-  area.innerHTML = `<button type="button" class="btn pc-danger btn-xl" id="reset-1">すべてのデータを消す</button>`;
+  area.innerHTML = `<button type="button" class="btn pc-danger btn-xl" id="reset-1">${t("すべてのデータを消す")}</button>`;
   document.getElementById("reset-1").addEventListener("click", () => {
     area.innerHTML = `
-      <p class="reset-warn">本当に消しますか？</p>
-      <button type="button" class="btn pc-danger btn-xl" id="reset-2">はい、消します</button>
-      <button type="button" class="btn btn-secondary btn-xl" id="reset-cancel" style="margin-top:10px;">やめる</button>`;
+      <p class="reset-warn">${t("本当に消しますか？")}</p>
+      <button type="button" class="btn pc-danger btn-xl" id="reset-2">${t("はい、消します")}</button>
+      <button type="button" class="btn btn-secondary btn-xl" id="reset-cancel" style="margin-top:10px;">${t("やめる")}</button>`;
     document.getElementById("reset-cancel").addEventListener("click", renderResetArea);
     document.getElementById("reset-2").addEventListener("click", () => {
       // 最後だけボタンの位置を入れ替える。前ステップで破壊ボタンがあった位置には
       // 安全な「やめる」を置き、「完全に消す」は下に離す（寝ぼけての連打で消えないように）
       area.innerHTML = `
-        <p class="reset-warn">もう一度だけ確認します。<br>すべての記録が消えて、元に戻せません。</p>
-        <button type="button" class="btn btn-secondary btn-xl" id="reset-cancel2">やめる</button>
-        <button type="button" class="btn pc-danger btn-xl" id="reset-3" style="margin-top:36px;">完全に消す</button>`;
+        <p class="reset-warn">${t("もう一度だけ確認します。")}<br>${t("すべての記録が消えて、元に戻せません。")}</p>
+        <button type="button" class="btn btn-secondary btn-xl" id="reset-cancel2">${t("やめる")}</button>
+        <button type="button" class="btn pc-danger btn-xl" id="reset-3" style="margin-top:36px;">${t("完全に消す")}</button>`;
       document.getElementById("reset-cancel2").addEventListener("click", renderResetArea);
       document.getElementById("reset-3").addEventListener("click", doResetAll);
     });
@@ -4350,26 +4391,26 @@ function renderOutfitMain() {
   outfitReturnTo = null;
   setBackLabel("outfit-back", false);
   setOneScreen("screen-outfit", true); // 下にずらっと並べず、1画面に収める
-  const t = todayStr();
-  const today = outfitOf(t);
+  const td = todayStr(); // ※ t は翻訳関数の名前なのでローカル変数に使わない
+  const today = outfitOf(td);
   document.getElementById("outfit-wrap").innerHTML = `
-    <p class="outfit-lead">特別な日に着た服を記録する</p>
+    <p class="outfit-lead">${t("特別な日に着た服を記録する")}</p>
     <div class="card outfit-today">
       <div id="outfit-today-body"></div>
       <input type="file" id="outfit-file" accept="image/*" style="display:none;">
       <div class="meal-line" style="margin-top:10px;">
-        <textarea id="outfit-note" class="outfit-note-input" rows="1" placeholder="紺スーツ　田中さん">${esc(today?.note || "")}</textarea>
+        <textarea id="outfit-note" class="outfit-note-input" rows="1" placeholder="${t("紺スーツ　田中さん")}">${esc(today?.note || "")}</textarea>
         ${micMini("outfit-note", "outfit-save")}
       </div>
-      <button type="button" class="btn btn-primary" id="outfit-save" style="margin-top:10px;">保存</button>
-      <div class="outfit-saved" id="outfit-saved" hidden>✓ 残しました</div>
-      <p class="outfit-hint outfit-hint-center">鏡の前で1枚。文字だけでも大丈夫</p>
+      <button type="button" class="btn btn-primary" id="outfit-save" style="margin-top:10px;">${t("保存")}</button>
+      <div class="outfit-saved" id="outfit-saved" hidden>✓ ${t("残しました")}</div>
+      <p class="outfit-hint outfit-hint-center">${t("鏡の前で1枚。文字だけでも大丈夫")}</p>
     </div>
     <div class="card cal-card outfit-cal outfit-album">
       <div class="cal-nav oalb-head">
-        <button class="icon-btn" id="ocal-prev" aria-label="前の月へ">◀</button>
+        <button class="icon-btn" id="ocal-prev" aria-label="${t("前の月へ")}">◀</button>
         <div class="oalb-title" id="ocal-label"></div>
-        <button class="icon-btn" id="ocal-next" aria-label="次の月へ">▶</button>
+        <button class="icon-btn" id="ocal-next" aria-label="${t("次の月へ")}">▶</button>
       </div>
       <div class="cal-grid outfit-grid-cal" id="ocal-grid"></div>
     </div>`;
@@ -4381,16 +4422,16 @@ function renderOutfitMain() {
   fileInput.addEventListener("change", () => {
     const f = fileInput.files && fileInput.files[0];
     if (!f) return;
-    resizePhotoToDataURL(f, 800, 0.7).then(url => { setOutfit(t, { photo: url }); renderOutfitMain(); });
+    resizePhotoToDataURL(f, 800, 0.7).then(url => { setOutfit(td, { photo: url }); renderOutfitMain(); });
   });
   const note = document.getElementById("outfit-note");
   const growNote = () => { if (CSS.supports && CSS.supports("field-sizing", "content")) return; note.style.height = "auto"; note.style.height = (note.scrollHeight + note.offsetHeight - note.clientHeight) + "px"; }; // 書くほど下にのびる（枠線ぶんも足す）
   growNote();
   regrowOutfitNotes(); // 画面が整ってから測り直す（保存済みの文が隠れないように）
-  note.addEventListener("input", () => { growNote(); setOutfit(t, { note: note.value.trim() }); }); // 書くたび自動保存
+  note.addEventListener("input", () => { growNote(); setOutfit(td, { note: note.value.trim() }); }); // 書くたび自動保存
   // 「保存」は安心の締めくくり（データは自動保存済み）。押すと✓を見せてキーボードを閉じる
   document.getElementById("outfit-save").addEventListener("click", () => {
-    setOutfit(t, { note: note.value.trim() });
+    setOutfit(td, { note: note.value.trim() });
     note.blur();
     const ok = document.getElementById("outfit-saved");
     ok.hidden = false;
@@ -4403,7 +4444,7 @@ function renderOutfitMain() {
 // 服のアルバム：月ごとのページに、その日の服の写真が小さく並ぶ（曜日の段は置かない）
 function renderOutfitCalendar(dir) {
   const y = outfitCursor.getFullYear(), m = outfitCursor.getMonth();
-  document.getElementById("ocal-label").innerHTML = `${m + 1}月の服<small class="oalb-y">${y}年</small>`;
+  document.getElementById("ocal-label").innerHTML = `${t("{m}月の服", { m: m + 1 })}<small class="oalb-y">${t("{y}年", { y })}</small>`;
   const grid = document.getElementById("ocal-grid");
   const all = loadOutfits();
   const today = todayStr();
@@ -4435,18 +4476,18 @@ function renderOutfitCalendar(dir) {
 function renderOutfitToday() {
   const box = document.getElementById("outfit-today-body");
   if (!box) return;
-  const t = todayStr();
-  const o = outfitOf(t);
+  const td = todayStr(); // ※ t は翻訳関数
+  const o = outfitOf(td);
   box.innerHTML = o?.photo
-    ? `<img class="outfit-today-img outfit-today-img-center" src="${o.photo}" alt="今日の服">
+    ? `<img class="outfit-today-img outfit-today-img-center" src="${o.photo}" alt="${t("今日の服")}">
        <div class="outfit-photo-actions">
-         <button type="button" class="btn btn-secondary" id="outfit-shot"><span class="btn-ico btn-ico-sm">${balloonIconSvg("camera")}</span>入れ替える</button>
-         <button type="button" class="btn btn-secondary" id="outfit-del">消す</button>
+         <button type="button" class="btn btn-secondary" id="outfit-shot"><span class="btn-ico btn-ico-sm">${balloonIconSvg("camera")}</span>${t("入れ替える")}</button>
+         <button type="button" class="btn btn-secondary" id="outfit-del">${t("消す")}</button>
        </div>`
-    : `<button type="button" class="btn btn-primary btn-xl" id="outfit-shot"><span class="btn-ico btn-ico-big">${balloonIconSvg("camera")}</span>今日の服</button>`;
+    : `<button type="button" class="btn btn-primary btn-xl" id="outfit-shot"><span class="btn-ico btn-ico-big">${balloonIconSvg("camera")}</span>${t("今日の服")}</button>`;
   document.getElementById("outfit-shot")?.addEventListener("click", () => document.getElementById("outfit-file")?.click());
   const del = document.getElementById("outfit-del");
-  if (del) del.addEventListener("click", () => { setOutfit(t, { photo: null }); renderOutfitMain(); });
+  if (del) del.addEventListener("click", () => { setOutfit(td, { photo: null }); renderOutfitMain(); });
 }
 // 1日を開く：服の写真＋その日どこへ・誰と
 function renderOutfitDay(ds) {
@@ -4454,21 +4495,21 @@ function renderOutfitDay(ds) {
   outfitDay = ds;
   setBackLabel("outfit-back", true);
   // 戻る先が分かる言葉に（重複していた下のもどるボタンは廃止）
-  document.getElementById("outfit-back").textContent = outfitReturnTo ? "← この日の記録へもどる" : "← もどる";
+  document.getElementById("outfit-back").textContent = outfitReturnTo ? t("← この日の記録へもどる") : t("← もどる");
   setOneScreen("screen-outfit", false); // 1日の詳細は内容に合わせて伸びる
   const o = outfitOf(ds) || {};
   document.getElementById("outfit-wrap").innerHTML = `
     <div class="outfit-day-date">${formatJP(ds, true)}</div>
-    ${o.photo ? `<img class="outfit-day-img" src="${o.photo}" alt="この日の服">` : ""}
+    ${o.photo ? `<img class="outfit-day-img" src="${o.photo}" alt="${t("この日の服")}">` : ""}
     <div class="card outfit-day-edit">
-      <button type="button" class="btn ${o.photo ? "btn-secondary" : "btn-primary"} btn-xl btn-shrink" id="oday-pick"><span class="btn-ico btn-ico-big">${balloonIconSvg("camera")}</span>${o.photo ? "写真を入れ替える" : "この日の服の写真"}</button>
+      <button type="button" class="btn ${o.photo ? "btn-secondary" : "btn-primary"} btn-xl btn-shrink" id="oday-pick"><span class="btn-ico btn-ico-big">${balloonIconSvg("camera")}</span>${o.photo ? t("写真を入れ替える") : t("この日の服の写真")}</button>
       <input type="file" id="oday-file-pick" accept="image/*" style="display:none;">
       <div class="meal-line" style="margin-top:12px;">
-        <textarea id="oday-note" class="outfit-note-input" rows="1" placeholder="ここに書いてもOK">${esc(o.note || "")}</textarea>
+        <textarea id="oday-note" class="outfit-note-input" rows="1" placeholder="${t("ここに書いてもOK")}">${esc(o.note || "")}</textarea>
         ${micMini("oday-note")}
       </div>
     </div>
-    ${(o.photo || o.note) ? `<button type="button" class="btn btn-secondary btn-xl" id="outfit-day-del" style="margin-top:14px;">この日の服を消す</button>` : ""}`;
+    ${(o.photo || o.note) ? `<button type="button" class="btn btn-secondary btn-xl" id="outfit-day-del" style="margin-top:14px;">${t("この日の服を消す")}</button>` : ""}`;
   // 写真えらび（1つの入口。押すとOSが「撮る／選ぶ」を出してくれる）
   const pickInto = (btnId, inputId) => {
     const input = document.getElementById(inputId);
@@ -4496,9 +4537,9 @@ function renderOutfitDay(ds) {
     const btn = ev.currentTarget;
     const wrap = document.createElement("div");
     wrap.className = "confirm-inline";
-    wrap.innerHTML = `<span class="confirm-ask">消しますか？</span>
-      <button type="button" class="confirm-yes">消す</button>
-      <button type="button" class="confirm-no">やめる</button>`;
+    wrap.innerHTML = `<span class="confirm-ask">${t("消しますか？")}</span>
+      <button type="button" class="confirm-yes">${t("消す")}</button>
+      <button type="button" class="confirm-no">${t("やめる")}</button>`;
     btn.replaceWith(wrap);
     wrap.querySelector(".confirm-no").addEventListener("click", () => renderOutfitDay(ds));
     wrap.querySelector(".confirm-yes").addEventListener("click", () => { deleteOutfit(ds); renderOutfitMain(); });
@@ -4526,6 +4567,9 @@ function randomPastYM() {
 function formatYM(ym) {
   if (!ym || !ym.includes("-")) return "";
   const [y, m] = ym.split("-");
+  if (uiLang !== "ja") {
+    try { return new Intl.DateTimeFormat(LOCALE_TAGS[uiLang] || uiLang, { year: "numeric", month: "short" }).format(new Date(Number(y), Number(m) - 1, 1)); } catch (e) {}
+  }
   return `${y}年${Number(m)}月`;
 }
 function formatYear(ym) {
@@ -4569,9 +4613,9 @@ function renderAlbumPhoto(reuse) {
     if (plug) {
       // アプリ版：本物のアルバムから1枚（初回は写真の許可を求める）
       document.getElementById("album-wrap").innerHTML = `
-        <div class="album-lead"><span class="lead-ico">${balloonIconSvg("album")}</span>スマホのアルバムから記憶をたどる</div>
+        <div class="album-lead"><span class="lead-ico">${balloonIconSvg("album")}</span>${t("スマホのアルバムから記憶をたどる")}</div>
         <div class="album-photo"><span class="ph-emoji"></span></div>
-        <p class="album-cap">アルバムから1枚えらんでいます…</p>`;
+        <p class="album-cap">${t("アルバムから1枚えらんでいます…")}</p>`;
       plug.getRandomPhoto().then(r => {
         currentAlbumPhoto = { emoji: r.dataUrl, photoDate: r.takenYM || "" };
         renderAlbumPhotoView();
@@ -4597,14 +4641,14 @@ function renderAlbumPhotoView() {
   const isReal = String(emoji).startsWith("data:");
   const memos = loadAlbumMemos();
   document.getElementById("album-wrap").innerHTML = `
-    <div class="album-lead"><span class="lead-ico">${balloonIconSvg("album")}</span>スマホのアルバムから記憶をたどる</div>
+    <div class="album-lead"><span class="lead-ico">${balloonIconSvg("album")}</span>${t("スマホのアルバムから記憶をたどる")}</div>
     <div class="album-photo${isReal ? " has-img" : ""}"><span class="ph-emoji">${albumPhotoHtml(emoji)}</span></div>
-    ${isReal ? "" : `<p class="album-cap">（本番アプリでは、あなたのアルバムから1枚出ます）</p>`}
-    <div class="album-q q-soft">思い出すだけでも大丈夫</div>
-    <div class="field meal-line"><textarea id="album-text" class="grow-input" rows="2" placeholder="沖縄旅行"></textarea>${micMini("album-text", "album-keep")}</div>
-    <button type="button" class="btn btn-primary btn-xl" id="album-keep">保存</button>
-    <button type="button" class="btn btn-secondary btn-xl" id="album-skip" style="margin-top:10px;">残さない（ホームへ）</button>
-    <button type="button" class="btn btn-secondary btn-xl" id="album-list" style="margin-top:10px;">残した思い出を見る（${memos.length}）</button>`;
+    ${isReal ? "" : `<p class="album-cap">${t("（本番アプリでは、あなたのアルバムから1枚出ます）")}</p>`}
+    <div class="album-q q-soft">${t("思い出すだけでも大丈夫")}</div>
+    <div class="field meal-line"><textarea id="album-text" class="grow-input" rows="2" placeholder="${t("沖縄旅行")}"></textarea>${micMini("album-text", "album-keep")}</div>
+    <button type="button" class="btn btn-primary btn-xl" id="album-keep">${t("保存")}</button>
+    <button type="button" class="btn btn-secondary btn-xl" id="album-skip" style="margin-top:10px;">${t("残さない（ホームへ）")}</button>
+    <button type="button" class="btn btn-secondary btn-xl" id="album-list" style="margin-top:10px;">${t("残した思い出を見る（{n}）", { n: memos.length })}</button>`;
   wireMics(document.getElementById("album-wrap")); // 話して書く
   document.getElementById("album-keep").addEventListener("click", () => {
     const note = document.getElementById("album-text").value.trim();
@@ -4631,10 +4675,10 @@ function renderAlbumDone(justSaved, reveal) {
   document.getElementById("album-wrap").innerHTML = `
     <div class="done-wrap" style="min-height:0;">
       <div class="done-emoji">${balloonIconSvg(justSaved ? "sprout" : "smile")}</div>
-      <div class="game-lead">${justSaved ? "残しました" : "今日の1枚は、見ました"}</div>
-      ${justSaved && reveal ? `<div class="album-reveal"><span class="row-ico">${balloonIconSvg("cal")}</span>${reveal}ごろの写真</div>` : ""}
-      <p class="album-note album-note-lg">また明日、あたらしい1枚を思い出そう。</p>
-      <button type="button" class="btn btn-primary btn-xl" id="album-list">残した思い出を見る（${memos.length}）</button>
+      <div class="game-lead">${justSaved ? t("残しました") : t("今日の1枚は、見ました")}</div>
+      ${justSaved && reveal ? `<div class="album-reveal"><span class="row-ico">${balloonIconSvg("cal")}</span>${t("{d}ごろの写真", { d: reveal })}</div>` : ""}
+      <p class="album-note album-note-lg">${t("また明日、あたらしい1枚を思い出そう。")}</p>
+      <button type="button" class="btn btn-primary btn-xl" id="album-list">${t("残した思い出を見る（{n}）", { n: memos.length })}</button>
     </div>`;
   document.getElementById("album-list").addEventListener("click", renderAlbumList);
 }
@@ -4649,22 +4693,22 @@ function renderAlbumList(keep) {
   const shown = a.slice(0, albumListShown);
   const rest = a.length - shown.length;
   const items = a.length === 0
-    ? `<p class="album-note" style="margin-top:20px;">まだありません。<br>写真を見て「残す」を押すと、ここにたまります。</p>`
+    ? `<p class="album-note" style="margin-top:20px;">${t("まだありません。")}<br>${t("写真を見て「残す」を押すと、ここにたまります。")}</p>`
     : shown.map((m, idx) => `
         <div class="album-item album-item-tappable" data-idx="${idx}">
           <span class="album-item-photo">${albumPhotoHtml(m.photo)}</span>
           <div class="album-item-body">
-            <div class="album-item-note">${m.note ? esc(m.note) : "（メモなし）"}</div>
-            <div class="album-item-date"><span class="row-ico">${balloonIconSvg("cal")}</span>${m.photoDate ? formatYM(m.photoDate) + "ごろ" : "撮影した年月なし"}<span class="album-rec">・記録 ${m.date}</span></div>
+            <div class="album-item-note">${m.note ? esc(m.note) : t("（メモなし）")}</div>
+            <div class="album-item-date"><span class="row-ico">${balloonIconSvg("cal")}</span>${m.photoDate ? t("{d}ごろ", { d: formatYM(m.photoDate) }) : t("撮影した年月なし")}<span class="album-rec">${t("・記録 {d}", { d: m.date })}</span></div>
           </div>
-          <button type="button" class="album-edit" data-idx="${idx}" aria-label="追記する">${balloonIconSvg("pencil")}</button>
-          <button type="button" class="album-del" data-idx="${idx}" aria-label="消す">${balloonIconSvg("trash")}</button>
+          <button type="button" class="album-edit" data-idx="${idx}" aria-label="${t("追記する")}">${balloonIconSvg("pencil")}</button>
+          <button type="button" class="album-del" data-idx="${idx}" aria-label="${t("消す")}">${balloonIconSvg("trash")}</button>
         </div>`).join("");
   document.getElementById("album-wrap").innerHTML = `
-    <div class="album-list-head">残した思い出（${a.length}）</div>
-    <p class="album-cap">日付は写真を撮影した年月（答え合わせ）<br>えんぴつのボタンで追記できます</p>
+    <div class="album-list-head">${t("残した思い出（{n}）", { n: a.length })}</div>
+    <p class="album-cap">${t("日付は写真を撮影した年月（答え合わせ）")}<br>${t("えんぴつのボタンで追記できます")}</p>
     ${items}
-    ${rest > 0 ? `<button type="button" class="btn btn-secondary btn-xl" id="album-more" style="margin-top:10px;">さらに${Math.min(30, rest)}件見る（あと${rest}件）</button>` : ""}`;
+    ${rest > 0 ? `<button type="button" class="btn btn-secondary btn-xl" id="album-more" style="margin-top:10px;">${t("さらに{a}件見る（あと{b}件）", { a: Math.min(30, rest), b: rest })}</button>` : ""}`;
   const more = document.getElementById("album-more");
   if (more) more.addEventListener("click", () => { albumListShown += 30; renderAlbumList(true); });
   // カードをタップ → 写真とメモを大きく開く（えんぴつ・ごみ箱のタップは除く）
@@ -4680,8 +4724,8 @@ function renderAlbumList(keep) {
       const idx = Number(btn.dataset.idx);
       const wrap = document.createElement("span");
       wrap.className = "confirm-inline confirm-stack"; // 縦に重ねて行をつぶさない
-      wrap.innerHTML = `<button type="button" class="confirm-yes">消す</button>
-        <button type="button" class="confirm-no">やめる</button>`;
+      wrap.innerHTML = `<button type="button" class="confirm-yes">${t("消す")}</button>
+        <button type="button" class="confirm-no">${t("やめる")}</button>`;
       const pencil = btn.closest(".album-item")?.querySelector(".album-edit");
       if (pencil) pencil.style.display = "none"; // 確認中はえんぴつを隠して文章の場所を空ける
       btn.replaceWith(wrap);
@@ -4706,9 +4750,9 @@ function renderAlbumView(idx) {
   const isReal = String(m.photo).startsWith("data:");
   document.getElementById("album-wrap").innerHTML = `
     <div class="album-photo${isReal ? " has-img" : ""}"><span class="ph-emoji">${albumPhotoHtml(m.photo)}</span></div>
-    <div class="album-view-note">${m.note ? esc(m.note).replace(/\n/g, "<br>") : "（メモなし）"}</div>
-    <div class="album-item-date album-view-date"><span class="row-ico">${balloonIconSvg("cal")}</span>${m.photoDate ? formatYM(m.photoDate) + "ごろの写真" : "撮影した年月なし"}<span class="album-rec">・記録 ${m.date}</span></div>
-    <button type="button" class="btn btn-secondary btn-xl" id="view-edit" style="margin-top:16px;"><span class="btn-ico">${balloonIconSvg("pencil")}</span>追記する</button>`;
+    <div class="album-view-note">${m.note ? esc(m.note).replace(/\n/g, "<br>") : t("（メモなし）")}</div>
+    <div class="album-item-date album-view-date"><span class="row-ico">${balloonIconSvg("cal")}</span>${m.photoDate ? t("{d}ごろの写真", { d: formatYM(m.photoDate) }) : t("撮影した年月なし")}<span class="album-rec">${t("・記録 {d}", { d: m.date })}</span></div>
+    <button type="button" class="btn btn-secondary btn-xl" id="view-edit" style="margin-top:16px;"><span class="btn-ico">${balloonIconSvg("pencil")}</span>${t("追記する")}</button>`;
   document.getElementById("view-edit").addEventListener("click", () => renderAlbumEdit(idx));
 }
 
@@ -4720,13 +4764,13 @@ function renderAlbumEdit(idx) {
   if (!m) { renderAlbumList(); return; }
   document.getElementById("album-wrap").innerHTML = `
     <div class="album-photo${String(m.photo).startsWith("data:") ? " has-img" : ""}"><span class="ph-emoji">${albumPhotoHtml(m.photo)}</span></div>
-    <div class="album-q">思い出を追記</div>
-    <label class="field"><span class="album-field-label">メモ</span>
+    <div class="album-q">${t("思い出を追記")}</div>
+    <label class="field"><span class="album-field-label">${t("メモ")}</span>
       <textarea id="edit-note" rows="3">${esc(m.note || "")}</textarea></label>
-    <label class="field"><span class="album-field-label">撮影した年月</span>
+    <label class="field"><span class="album-field-label">${t("撮影した年月")}</span>
       <input type="month" id="edit-date" value="${m.photoDate || ""}"></label>
-    <button type="button" class="btn btn-primary btn-xl" id="edit-save">保存</button>
-    <button type="button" class="btn btn-secondary btn-xl" id="edit-cancel" style="margin-top:10px;">やめる</button>`;
+    <button type="button" class="btn btn-primary btn-xl" id="edit-save">${t("保存")}</button>
+    <button type="button" class="btn btn-secondary btn-xl" id="edit-cancel" style="margin-top:10px;">${t("やめる")}</button>`;
   document.getElementById("edit-save").addEventListener("click", () => {
     const list = loadAlbumMemos();
     if (!list[idx]) { renderAlbumList(); return; }
@@ -4801,8 +4845,8 @@ function moonVisits() {
   const cycle = Math.floor(((Date.now() - epoch) / 86400000) / MOON_SYNODIC);
   let m = store.get("mn_moon", null);
   if (!m || m.cycle !== cycle) m = { cycle, nights: [], prev: m ? (m.nights || []).length : 0 };
-  const t = todayStr();
-  if (!m.nights.includes(t)) m.nights.push(t);
+  const td = todayStr();
+  if (!m.nights.includes(td)) m.nights.push(td);
   store.set("mn_moon", m);
   return { count: m.nights.length, prev: m.prev || 0, cycle: m.cycle };
 }
@@ -4900,14 +4944,14 @@ function moonTonight() {
   const stars = baseStars + constLines + visitStars;
   // 夜空の中は月の名前とその由来、星の数まで。残りの説明は夜空の外（below）に出す
   const inSky = `
-    <div class="moon-caption">今夜は ${name}</div>
-    ${lore ? `<div class="moon-lore">${lore}</div>` : ""}
-    <div class="moon-stars-note">⭐ 今宵で${v.count}夜目 ・ ${constDone && fullReached && isFull ? `${C.name}がむすばれました` : C.name}${v.count === 1 && v.prev > 0 ? `（先月は${v.prev}夜、月を見上げました）` : ""}</div>`;
+    <div class="moon-caption">${t("今夜は {n}", { n: t(name) })}</div>
+    ${lore ? `<div class="moon-lore">${t(lore)}</div>` : ""}
+    <div class="moon-stars-note">⭐ ${t("今宵で{n}夜目", { n: v.count })} ・ ${constDone && fullReached && isFull ? t("{c}がむすばれました", { c: t(C.name) }) : t(C.name)}${v.count === 1 && v.prev > 0 ? t("（先月は{n}夜、月を見上げました）", { n: v.prev }) : ""}</div>`;
   const below = `
-    ${isFull ? "" : `<div>満月まで あと${Math.round(toFull)}日</div>`}
-    <div>開いた夜の分だけ星が灯っていきます</div>`;
+    ${isFull ? "" : `<div>${t("満月まで あと{n}日", { n: Math.round(toFull) })}</div>`}
+    <div>${t("開いた夜の分だけ星が灯っていきます")}</div>`;
   const svg = `
-    <svg viewBox="-160 -70 320 140" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="今夜の月と星座">
+    <svg viewBox="-160 -70 320 140" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="${t("今夜の月と星座")}">
       <defs>
         <radialGradient id="moon-surface" cx="38%" cy="35%" r="80%">
           <stop offset="0%" stop-color="#fffbe9"/><stop offset="55%" stop-color="#f5ead0"/><stop offset="100%" stop-color="#ddcda3"/>
@@ -4954,33 +4998,33 @@ function renderGratitude(justSaved) {
   const memos = loadGratitude();
   const moon = moonTonight();
   document.getElementById("sleep-wrap").innerHTML = `
-    <div class="sleep-lead grat-lead">「ありがとう」を思い出して眠りにつく時間です</div>
+    <div class="sleep-lead grat-lead">${t("「ありがとう」を思い出して眠りにつく時間です")}</div>
     <div class="moon-sky">${moon.svg}${moon.inSky}</div>
     <div class="moon-under">${moon.below}</div>
-    ${justSaved ? `<div class="album-saved">✓ 残しました。おやすみなさい。</div>` : ""}
+    ${justSaved ? `<div class="album-saved">✓ ${t("残しました。おやすみなさい。")}</div>` : ""}
     <div class="field meal-line" style="margin-bottom:12px;">
-      <textarea id="grat-input" class="grow-input" rows="2" placeholder="特別な感謝は残せます"></textarea>
+      <textarea id="grat-input" class="grow-input" rows="2" placeholder="${t("特別な感謝は残せます")}"></textarea>
       ${micMini("grat-input", "grat-save")}
     </div>
-    <button type="button" class="btn btn-green btn-xl" id="grat-save">保存</button>
-    <button type="button" class="btn btn-secondary btn-xl" id="grat-list" style="margin-top:10px;">残したありがとうを見る（${memos.length}）</button>
+    <button type="button" class="btn btn-green btn-xl" id="grat-save">${t("保存")}</button>
+    <button type="button" class="btn btn-secondary btn-xl" id="grat-list" style="margin-top:10px;">${t("残したありがとうを見る（{n}）", { n: memos.length })}</button>
     <div class="card grat-notify">
-      <div class="settings-label">おやすみの通知</div>
+      <div class="settings-label">${t("おやすみの通知")}</div>
       <div class="seg-group" id="grat-onoff">
-        <button class="seg${notify.on ? " selected" : ""}" data-v="1">オン</button>
-        <button class="seg${notify.on ? "" : " selected"}" data-v="0">オフ</button>
+        <button class="seg${notify.on ? " selected" : ""}" data-v="1">${t("オン")}</button>
+        <button class="seg${notify.on ? "" : " selected"}" data-v="0">${t("オフ")}</button>
       </div>
       <div class="grat-time-row" id="grat-time-row" ${notify.on ? "" : 'style="display:none;"'}>
-        <span class="grat-time-label">毎晩</span>
+        <span class="grat-time-label">${t("毎晩")}</span>
         <input type="time" id="grat-time" value="${notify.time}">
-        <span class="grat-time-label">に、そっとお知らせします</span>
+        <span class="grat-time-label">${t("に、そっとお知らせします")}</span>
       </div>
     </div>`;
   document.getElementById("grat-save").addEventListener("click", () => {
-    const t = document.getElementById("grat-input").value.trim();
-    if (!t) return;
+    const text = document.getElementById("grat-input").value.trim();
+    if (!text) return;
     const a = loadGratitude();
-    a.unshift({ date: todayStr(), text: t });
+    a.unshift({ date: todayStr(), text });
     saveGratitude(a);
     renderGratitude(true);
   });
@@ -5015,20 +5059,20 @@ function renderGratitudeList(keep) {
   const shown = a.slice(0, gratListShown);
   const rest = a.length - shown.length;
   const items = a.length === 0
-    ? `<p class="album-note" style="margin-top:20px;">まだありません。<br>今日の「ありがとう」から始めませんか。</p>`
+    ? `<p class="album-note" style="margin-top:20px;">${t("まだありません。")}<br>${t("今日の「ありがとう」から始めませんか。")}</p>`
     : shown.map((m, idx) => `
         <div class="album-item">
           <div class="album-item-body">
             <div class="album-item-note">${esc(m.text)}</div>
             <div class="album-item-date">${m.date}</div>
           </div>
-          <button type="button" class="album-del" data-idx="${idx}" aria-label="消す">${balloonIconSvg("trash")}</button>
+          <button type="button" class="album-del" data-idx="${idx}" aria-label="${t("消す")}">${balloonIconSvg("trash")}</button>
         </div>`).join("");
   document.getElementById("sleep-wrap").innerHTML = `
-    <div class="album-list-head">残したありがとう（${a.length}）</div>
-    <p class="album-cap">毎晩ひとつ、感謝が積もっていきます。</p>
+    <div class="album-list-head">${t("残したありがとう（{n}）", { n: a.length })}</div>
+    <p class="album-cap">${t("毎晩ひとつ、感謝が積もっていきます。")}</p>
     ${items}
-    ${rest > 0 ? `<button type="button" class="btn btn-secondary btn-xl" id="grat-more" style="margin-top:10px;">さらに${Math.min(30, rest)}件見る（あと${rest}件）</button>` : ""}`;
+    ${rest > 0 ? `<button type="button" class="btn btn-secondary btn-xl" id="grat-more" style="margin-top:10px;">${t("さらに{a}件見る（あと{b}件）", { a: Math.min(30, rest), b: rest })}</button>` : ""}`;
   const more = document.getElementById("grat-more");
   if (more) more.addEventListener("click", () => { gratListShown += 30; renderGratitudeList(true); });
   document.querySelectorAll(".album-del").forEach(btn => {
@@ -5036,8 +5080,8 @@ function renderGratitudeList(keep) {
       const idx = Number(btn.dataset.idx);
       const wrap = document.createElement("span");
       wrap.className = "confirm-inline";
-      wrap.innerHTML = `<button type="button" class="confirm-yes">消す</button>
-        <button type="button" class="confirm-no">やめる</button>`;
+      wrap.innerHTML = `<button type="button" class="confirm-yes">${t("消す")}</button>
+        <button type="button" class="confirm-no">${t("やめる")}</button>`;
       btn.replaceWith(wrap);
       wrap.querySelector(".confirm-no").addEventListener("click", () => renderGratitudeList(true));
       wrap.querySelector(".confirm-yes").addEventListener("click", () => {
@@ -5090,11 +5134,11 @@ function nextNightNotifyMessage() {
   if (typeof idx !== "number" || idx < 0) idx = 0;
   const msg = NIGHT_NOTIFY_MSGS[idx % NIGHT_NOTIFY_MSGS.length];
   store.set("mn_notify_idx", (idx + 1) % NIGHT_NOTIFY_MSGS.length);
-  return msg;
+  return t(msg); // 翻訳時：30種は言語ごとに1文ずつ訳す（機械的な直訳にしない）
 }
 // 今夜の通知本文（満月の夜は特別文言）
 function nightNotifyBody() {
-  return isFullMoonTonight() ? FULLMOON_NOTIFY_MSG : nextNightNotifyMessage();
+  return isFullMoonTonight() ? t(FULLMOON_NOTIFY_MSG) : nextNightNotifyMessage();
 }
 
 // ---------- 広告を消す（買い切り。プレビューは見本＝押すと購入済みの動きを確かめられる） ----------
@@ -5103,10 +5147,10 @@ function renderIapCard() {
   const buy = document.getElementById("iap-buy");
   if (!st || !buy) return;
   const owned = !!settings.adFree;
-  st.textContent = owned ? "購入済み" : "未購入";
+  st.textContent = owned ? t("購入済み") : t("未購入");
   st.classList.toggle("owned", owned);
   buy.disabled = owned;
-  buy.textContent = owned ? "購入済み" : "購入する";
+  buy.textContent = owned ? t("購入済み") : t("購入する");
 }
 function wireIap() {
   const buy = document.getElementById("iap-buy");
@@ -5119,12 +5163,12 @@ function wireIap() {
     settings.adFree = true;
     store.set("mn_settings", settings);
     renderIapCard();
-    if (hint) hint.textContent = "ありがとうございます。広告は表示されなくなりました。（見本の動きです）";
+    if (hint) hint.textContent = t("ありがとうございます。広告は表示されなくなりました。（見本の動きです）");
   });
   restore?.addEventListener("click", () => {
     if (hint) hint.textContent = settings.adFree
-      ? "購入をたしかめました。広告は表示されません。"
-      : "購入の記録は見つかりませんでした。（見本の動きです）";
+      ? t("購入をたしかめました。広告は表示されません。")
+      : t("購入の記録は見つかりませんでした。（見本の動きです）");
     renderIapCard();
   });
 }
@@ -5194,10 +5238,10 @@ const LEGAL_TEXTS = {
   },
 };
 function openLegal(kind) {
-  const t = LEGAL_TEXTS[kind];
-  if (!t) return;
-  document.getElementById("legal-title").textContent = t.title;
-  document.getElementById("legal-wrap").innerHTML = t.body;
+  const doc = LEGAL_TEXTS[kind]; // ※ t は翻訳関数。規約・プライバシーの本文は言語ごとの差し替えデータにする（文単位の翻訳はしない）
+  if (!doc) return;
+  document.getElementById("legal-title").textContent = doc.title;
+  document.getElementById("legal-wrap").innerHTML = doc.body;
   window.scrollTo(0, 0);
   showScreen("screen-legal");
 }
@@ -5219,7 +5263,7 @@ function scheduleGratNotify() {
     gratNotifyTimer = setTimeout(() => {
       try {
         if (Notification.permission === "granted") {
-          const n = new Notification("おやすみの記憶", { body: nightNotifyBody() });
+          const n = new Notification(t("おやすみの記憶"), { body: nightNotifyBody() });
           // タップしたら、おやすみの記憶画面へ（本番アプリでも同じ動きにする）
           n.onclick = () => { try { window.focus(); openSleep(); n.close(); } catch (e) {} };
         }
@@ -5277,7 +5321,7 @@ function undoShopDone(idx) {
 // 「今日買ったもの」の静かな帯（常時表示。場所が毎日同じだと迷わない）
 function shopDoneBarHtml() {
   const n = loadShopDone().length;
-  return `<button type="button" class="memo-open" id="shop-done-open">今日買ったもの（${n ? n : "まだなし"}）</button>`;
+  return `<button type="button" class="memo-open" id="shop-done-open">${t("今日買ったもの（{n}）", { n: n ? n : t("まだなし") })}</button>`;
 }
 function openShopDonePop() {
   renderShopDonePop();
@@ -5288,12 +5332,12 @@ function renderShopDonePop() {
   const rows = items.map((m, i) => `
     <div class="memo-row">
       <span class="memo-text">${esc(m.t)}</span>
-      <button type="button" class="shop-undo" data-shop-undo="${i}">戻す</button>
+      <button type="button" class="shop-undo" data-shop-undo="${i}">${t("戻す")}</button>
     </div>`).join("");
   document.getElementById("shop-pop-wrap").innerHTML = items.length
-    ? `<p class="memo-lead">今日買ったもの</p>${rows}
-       <p class="memo-note">まちがえて消したときは「戻す」<br>明日になると自然に消えます</p>`
-    : `<p class="memo-lead" style="margin:16px 0 26px;">今日買ったものはまだありません</p>`;
+    ? `<p class="memo-lead">${t("今日買ったもの")}</p>${rows}
+       <p class="memo-note">${t("まちがえて消したときは「戻す」")}<br>${t("明日になると自然に消えます")}</p>`
+    : `<p class="memo-lead" style="margin:16px 0 26px;">${t("今日買ったものはまだありません")}</p>`;
   document.querySelectorAll("#shop-pop-wrap [data-shop-undo]").forEach(b =>
     b.addEventListener("click", () => { undoShopDone(Number(b.dataset.shopUndo)); renderShopDonePop(); }));
 }
@@ -5317,14 +5361,14 @@ function renderShopPop() {
     if (!items.length) return "";
     const rows = items.map((t, i) => `
       <div class="memo-row">
-        <button type="button" class="memo-done" data-shop-done="${k}:${i}" aria-label="買えた（消す）">${check}</button>
+        <button type="button" class="memo-done" data-shop-done="${k}:${i}" aria-label="${t("買えた（消す）")}">${check}</button>
         <span class="memo-text">${esc(t)}</span>
       </div>`).join("");
-    return `<div class="shop-pop-sec"><div class="shop-cat">${shopIconHtml(c)}${c.short || c.name}</div>${rows}</div>`;
+    return `<div class="shop-pop-sec"><div class="shop-cat">${shopIconHtml(c)}${t(c.short || c.name)}</div>${rows}</div>`;
   }).join("");
   document.getElementById("shop-pop-wrap").innerHTML = secs
-    ? `${secs}<p class="memo-note">買えたらチェックで消せます</p>`
-    : `<p class="memo-lead" style="margin:16px 0 26px;">ぜんぶ買えました</p>`;
+    ? `${secs}<p class="memo-note">${t("買えたらチェックで消せます")}</p>`
+    : `<p class="memo-lead" style="margin:16px 0 26px;">${t("ぜんぶ買えました")}</p>`;
   document.querySelectorAll("#shop-pop-wrap [data-shop-done]").forEach(b =>
     b.addEventListener("click", () => {
       const [k, i] = b.dataset.shopDone.split(":");
@@ -5351,19 +5395,19 @@ function renderShoppingHub() {
   const s = loadShopping();
   const cards = SHOP_CATS.map(c => `
     <div class="shop-edit-card shop-edit-${c.key}">
-      <div class="shop-cat">${shopIconHtml(c)}${c.name}</div>
+      <div class="shop-cat">${shopIconHtml(c)}${t(c.name)}</div>
       <div class="meal-line">
         <textarea class="shop-edit-input grow-input" id="shop-${c.key}" data-key="${c.key}" rows="2">${esc(s[c.key] || "")}</textarea>
         ${micMini("shop-" + c.key, "shop-hide")}
       </div>
     </div>`);
   // 先頭（まとめて）と分類の間の一言
-  const cardHtml = cards[0] + `<p class="shop-divider">ここから下は、分けて思い出したい人用</p>` + cards.slice(1).join("");
+  const cardHtml = cards[0] + `<p class="shop-divider">${t("ここから下は、分けて思い出したい人用")}</p>` + cards.slice(1).join("");
   document.getElementById("shopping-wrap").innerHTML = `
     ${shopDoneBarHtml()}
     <div class="shop-hub-list">${cardHtml}</div>
     <div class="shop-fab-spacer"></div>
-    <button type="button" class="btn btn-primary shop-fab btn-shrink" id="shop-hide">保存して買い物へ</button>`;
+    <button type="button" class="btn btn-primary shop-fab btn-shrink" id="shop-hide">${t("保存して買い物へ")}</button>`;
   const fab = document.getElementById("shop-hide");
   const updateFab = () => { fab.style.display = shoppingHasAny() ? "" : "none"; };
   // 高さの自動調整は他の欄と同じ仕組み（枠線ぶんも足すので文字が切れない）
@@ -5390,18 +5434,18 @@ function renderShoppingRecall() {
   const cards = cats.map(c => `
     <button type="button" class="shop-reveal" data-key="${c.key}">
       <div class="shop-head">
-        <span class="shop-cat">${shopIconHtml(c)}${c.short || c.name}</span>
-        <span class="shop-check">答え合わせ</span>
+        <span class="shop-cat">${shopIconHtml(c)}${t(c.short || c.name)}</span>
+        <span class="shop-check">${t("答え合わせ")}</span>
       </div>
     </button>`).join("");
   document.getElementById("shopping-wrap").innerHTML = `
-    <p class="shop-lead"><span class="lead-ico">${balloonIconSvg("shopping")}</span>思い出しながら、お買い物</p>
-    <p class="shop-note">先に思い出してから、タップで答え合わせ。</p>
+    <p class="shop-lead"><span class="lead-ico">${balloonIconSvg("shopping")}</span>${t("思い出しながら、お買い物")}</p>
+    <p class="shop-note">${t("先に思い出してから、タップで答え合わせ。")}</p>
     ${shopDoneBarHtml()}
-    <button type="button" class="btn btn-green btn-xl" id="shop-openall">ぜんぶ答え合わせ</button>
+    <button type="button" class="btn btn-green btn-xl" id="shop-openall">${t("ぜんぶ答え合わせ")}</button>
     ${cards}
     <div class="shop-fab-spacer"></div>
-    <button type="button" class="btn btn-secondary shop-fab" id="shop-edit">書き足す・修正</button>`;
+    <button type="button" class="btn btn-secondary shop-fab" id="shop-edit">${t("書き足す・修正")}</button>`;
   document.querySelectorAll(".shop-reveal").forEach(btn =>
     btn.addEventListener("click", () => openShopPop([btn.dataset.key])));
   document.getElementById("shop-openall").addEventListener("click", () =>
@@ -5422,13 +5466,13 @@ function micIconSvg() {
 }
 function micHtml(targetId) {
   if (!SpeechRec) return "";
-  return `<button type="button" class="mic-btn" data-mic="${targetId}">${micIconSvg()}<span class="mic-label">話して書く</span></button>`;
+  return `<button type="button" class="mic-btn" data-mic="${targetId}">${micIconSvg()}<span class="mic-label">${t("話して書く")}</span></button>`;
 }
 // 欄の右に置く小さな丸マイク（1行の入力欄むけ）
 function micMini(targetId, saveBtnId) {
   if (!SpeechRec) return "";
   const saveAttr = saveBtnId ? ` data-voice-save="${saveBtnId}"` : "";
-  return `<button type="button" class="mic-btn mic-mini" data-mic="${targetId}" data-idle="1"${saveAttr} aria-label="話して書く">${micIconSvg()}</button>`;
+  return `<button type="button" class="mic-btn mic-mini" data-mic="${targetId}" data-idle="1"${saveAttr} aria-label="${t("話して書く")}">${micIconSvg()}</button>`;
 }
 // アプリから離れたら（他のアプリを見る・タブを替える・画面が消える）マイクは止める
 document.addEventListener("visibilitychange", () => { if (document.hidden) stopMic(); });
@@ -5440,7 +5484,7 @@ function stopMic() {
   if (m.cleanup) m.cleanup();
   try { m.rec.stop(); } catch (e) {}
   m.btn.classList.remove("listening");
-  m.btn.innerHTML = m.btn.dataset.idle ? micIconSvg() : `${micIconSvg()}<span class="mic-label">話して書く</span>`;
+  m.btn.innerHTML = m.btn.dataset.idle ? micIconSvg() : `${micIconSvg()}<span class="mic-label">${t("話して書く")}</span>`;
 }
 function wireMics(root) {
   (root || document).querySelectorAll(".mic-btn[data-mic]").forEach(btn => {
@@ -5466,9 +5510,9 @@ function wireMics(root) {
         // （間を空けて話すと別々の文として確定するので、つなぎ目に区切りを入れる）
         const parts = []; let interim = "";
         for (let i = 0; i < ev.results.length; i++) {
-          const t = ev.results[i][0].transcript.trim();
-          if (!t) continue;
-          if (ev.results[i].isFinal) parts.push(t); else interim += t;
+          const tx = ev.results[i][0].transcript.trim();
+          if (!tx) continue;
+          if (ev.results[i].isFinal) parts.push(tx); else interim += tx;
         }
         let finals = parts.join("　");
         if (interim) interim = (finals ? "　" : "") + interim;
@@ -5493,7 +5537,7 @@ function wireMics(root) {
       try { rec.start(); } catch (e) { target.removeEventListener("input", onUserEdit); return; }
       micActive = { rec, btn, target, cleanup: () => target.removeEventListener("input", onUserEdit) };
       btn.classList.add("listening");
-      btn.innerHTML = btn.dataset.idle ? micIconSvg() : `${micIconSvg()}<span class="mic-label">聞いています…（押すと止まる）</span>`;
+      btn.innerHTML = btn.dataset.idle ? micIconSvg() : `${micIconSvg()}<span class="mic-label">${t("聞いています…（押すと止まる）")}</span>`;
     });
   });
 }
@@ -5593,7 +5637,7 @@ function wireEvents() {
   const calYear = document.getElementById("cal-year");
   const thisY = new Date().getFullYear();
   for (let y = thisY; y >= thisY - 20; y--) {
-    calYear.insertAdjacentHTML("beforeend", `<option value="${y}">${y}年</option>`);
+    calYear.insertAdjacentHTML("beforeend", `<option value="${y}">${t("{y}年", { y })}</option>`);
   }
   calYear.addEventListener("change", () => { calCursor.setFullYear(Number(calYear.value)); renderCalendar(); });
 
@@ -5615,7 +5659,7 @@ function wireEvents() {
       if (kind === "privacy" || kind === "terms") { openLegal(kind); return; }
       const note = document.getElementById("about-note");
       if (!note) return;
-      note.textContent = aboutMsgs[kind] || "";
+      note.textContent = t(aboutMsgs[kind] || "");
       note.style.display = "";
     });
   });
@@ -5695,7 +5739,7 @@ function wireEvents() {
       try { rec.start(); } catch (e) { return; }
       micActive = { rec, btn: searchMic, target: searchInput };
       searchMic.classList.add("listening");
-      searchInput.placeholder = "聞いています…";
+      searchInput.placeholder = t("聞いています…");
     });
   }
   // 検索結果のクリックは親で受ける（タップ中に一覧が作り直されても開けるように）
@@ -5721,7 +5765,7 @@ function wireEvents() {
   document.getElementById("ob-code-link").addEventListener("click", openCodeEntry);
   document.getElementById("ce-back").addEventListener("click", () => showScreen("screen-onboarding"));
   document.getElementById("ce-submit").addEventListener("click", () => {
-    document.getElementById("ce-msg").textContent = "この画面は見本です。本番アプリで、前のスマホの記録を引き継げます。";
+    document.getElementById("ce-msg").textContent = t("この画面は見本です。本番アプリで、前のスマホの記録を引き継げます。");
   });
 
 }
