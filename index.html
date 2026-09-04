@@ -1584,6 +1584,8 @@ mark {
   border-radius: 12px; border: 1.5px solid var(--border);
 }
 .outfit-photo-actions { display: flex; gap: 8px; justify-content: center; margin-top: 8px; }
+/* 服装の日別ページ：その日の記録カード（見返すと同じ見た目で並ぶ） */
+.outfit-day-recs { display: flex; flex-direction: column; gap: 14px; margin-top: 14px; }
 /* 保存（左）と今日の服（右）をひと並びに（カードをコンパクトに。2026-09-04） */
 .outfit-btn-row { display: flex; gap: 10px; margin-top: 10px; }
 .outfit-btn-row #outfit-save { flex: 0 0 34%; }
@@ -3862,7 +3864,11 @@ function dayFields(ds) {
   const of = outfitText(ds);
   // 服の写真があれば小さなサムネイルも添える（写真だけの日も見つけやすいように）
   const outfitField = of ? [{ label: "服装など", text: of, thumb: outfitOf(ds)?.photo || null }] : [];
-  return [...entryFields(entries[ds] || {}), ...outfitField, ...albumFieldsFor(ds), ...gratitudeFieldsFor(ds)];
+  // 表示順：服装→外食→食事→おやすみ（ありがとう）→日記→アルバム→（旧データの行った場所）2026-09-04
+  const ef = entryFields(entries[ds] || {});
+  const pick = label => ef.filter(f => f.label === label);
+  return [...outfitField, ...pick("外食"), ...pick("食事"), ...gratitudeFieldsFor(ds),
+          ...pick("日記"), ...albumFieldsFor(ds), ...pick("行った場所")];
 }
 
 function openSearch() {
@@ -4510,6 +4516,13 @@ function renderOutfitDay(ds) {
   document.getElementById("outfit-back").textContent = outfitReturnTo ? t("← この日の記録へもどる") : t("← もどる");
   setOneScreen("screen-outfit", false); // 1日の詳細は内容に合わせて伸びる
   const o = outfitOf(ds) || {};
+  // その日の他の記録も見返すと同じ形で並べる（服装は上の編集欄が担当。順は外食→食事→おやすみ…）2026-09-04
+  const recs = dayFields(ds).filter(f => f.label !== "服装など");
+  const recHtml = recs.length ? `
+    <div class="outfit-day-recs">${recs.map((f, i) => `
+      <div class="card detail-card tappable" data-oidx="${i}" role="button" tabindex="0">
+        <div class="detail-label">${t(f.label)}</div>${linkify(f.text)}<span class="detail-chev">›</span>
+      </div>`).join("")}</div>` : "";
   document.getElementById("outfit-wrap").innerHTML = `
     <div class="outfit-day-date">${formatJP(ds, true)}</div>
     ${o.photo ? `<img class="outfit-day-img" src="${o.photo}" alt="${t("この日の服")}">` : ""}
@@ -4521,7 +4534,17 @@ function renderOutfitDay(ds) {
         ${micMini("oday-note")}
       </div>
     </div>
+    ${recHtml}
     ${(o.photo || o.note) ? `<button type="button" class="btn btn-secondary btn-xl" id="outfit-day-del" style="margin-top:14px;">${t("この日の服を消す")}</button>` : ""}`;
+  // 記録カードをタップ → その項目の置き場所へ（見返すの日別画面と同じ動き）
+  document.querySelectorAll("#outfit-wrap .detail-card.tappable").forEach(card => {
+    const go = e => {
+      if (e.target.closest("a")) return; // 本文中のリンクはそのまま開かせる
+      openDayField(ds, recs[Number(card.dataset.oidx)].label);
+    };
+    card.addEventListener("click", go);
+    card.addEventListener("keydown", e => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); go(e); } });
+  });
   // 写真えらび（1つの入口。押すとOSが「撮る／選ぶ」を出してくれる）
   const pickInto = (btnId, inputId) => {
     const input = document.getElementById(inputId);
