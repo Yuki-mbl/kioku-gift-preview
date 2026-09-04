@@ -3387,12 +3387,15 @@ function prevStep() {
   }
   // 思い出すだけのとき：もどる＝ホームへ（①〜③には入らない）
   if (flow.recallOnly) { goHome(); return; }
-  // 選択画面 → 前のステップ or ホーム
+  // 選択画面 → 前のステップ or 来た画面（日別ページから来たならそこへ／ふつうはホーム）
   if (flow.step > 0) {
     flow.step--;
     flow.sub = "select";
     flow.mode = null;
     renderStep();
+  } else if (flow.returnTo) {
+    const r = flow.returnTo; flow.returnTo = null;
+    goBackTo(r);
   } else {
     goHome();
   }
@@ -3823,7 +3826,8 @@ function renderQuizStep(content) {
 // =========================================================
 function finishFlow() {
   if (flow.recallOnly) { goHome(); return; } // 思い出しの終わりはホームへ
-  const e = entries[flow.date] || {};
+  // 日別ページから来たときは、保存後そのページへ帰る（直したカードがすぐ見える）
+  if (flow.returnTo) { const r = flow.returnTo; flow.returnTo = null; goBackTo(r); return; }
   goHome();                        // 完了ページは出さず、そのままホームへ
 }
 
@@ -4043,21 +4047,29 @@ function openDayDetail(ds) {
 }
 
 // 「この日の記録」のカードから、その項目の置き場所へ
-function openDayField(ds, label) {
+// 「来た道を戻る」：日別ページ（この日の記録／服装の1日）から開いた画面は、戻る・保存で元のページへ帰る（2026-09-04）
+function goBackTo(ret) {
+  if (!ret) { goHome(); return; }
+  if (ret.screen === "outfitday") { renderOutfitDay(ret.ds); showScreen("screen-outfit"); return; }
+  openDayDetail(ret.ds);
+}
+function openDayField(ds, label, from) {
+  const ret = { screen: from || "detail", ds }; // 戻り先（既定＝この日の記録）
   if (label.startsWith("服装")) {
     outfitReturnTo = ds; // もどるで「この日の記録」に帰る
     renderOutfitDay(ds);
     showScreen("screen-outfit");
     return;
   }
-  if (label.startsWith("アルバム")) { renderAlbumList(); showScreen("screen-album"); return; }
-  if (label.startsWith("ありがとう")) { renderGratitudeList(); showScreen("screen-sleep"); return; }
-  if (label.startsWith("食事") || label.startsWith("外食")) { startMeal(ds); return; }
+  if (label.startsWith("アルバム")) { albumReturnTo = ret; renderAlbumList(); showScreen("screen-album"); return; }
+  if (label.startsWith("ありがとう")) { gratReturnTo = ret; renderGratitudeList(); showScreen("screen-sleep"); return; }
+  if (label.startsWith("食事") || label.startsWith("外食")) { startMeal(ds); flow.returnTo = ret; return; }
   if (label.startsWith("日記")) {
     if (settings.diaryPass && !diaryUnlocked) { pendingUnlock = { type: "detail", ds }; showLock("diary"); return; }
-    startDiary(ds); return;
+    startDiary(ds); flow.returnTo = ret; return;
   }
   startFlow(ds); // 旧データ（行った場所など）→ 食事＋日々の出来事の書き足しへ
+  flow.returnTo = ret;
 }
 
 // =========================================================
@@ -4513,7 +4525,7 @@ function renderOutfitDay(ds) {
   outfitDay = ds;
   setBackLabel("outfit-back", true);
   // 戻る先が分かる言葉に（重複していた下のもどるボタンは廃止）
-  document.getElementById("outfit-back").textContent = outfitReturnTo ? t("← この日の記録へもどる") : t("← もどる");
+  document.getElementById("outfit-back").textContent = outfitReturnTo ? t("← 前に戻る") : t("← もどる"); // 文言を全画面で統一（2026-09-04）
   setOneScreen("screen-outfit", false); // 1日の詳細は内容に合わせて伸びる
   const o = outfitOf(ds) || {};
   // その日の他の記録も見返すと同じ形で並べる（服装は上の編集欄が担当。順は外食→食事→おやすみ…）2026-09-04
@@ -4540,7 +4552,7 @@ function renderOutfitDay(ds) {
   document.querySelectorAll("#outfit-wrap .detail-card.tappable").forEach(card => {
     const go = e => {
       if (e.target.closest("a")) return; // 本文中のリンクはそのまま開かせる
-      openDayField(ds, recs[Number(card.dataset.oidx)].label);
+      openDayField(ds, recs[Number(card.dataset.oidx)].label, "outfitday"); // 戻るはこの服装ページへ
     };
     card.addEventListener("click", go);
     card.addEventListener("keydown", e => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); go(e); } });
@@ -4612,11 +4624,13 @@ function formatYear(ym) {
   return `${ym.split("-")[0]}年`;
 }
 function openAlbum() {
+  albumReturnTo = null; // ふつうの入口から来たときは、戻るは従来どおり
   if (albumDoneToday()) renderAlbumDone(false); else renderAlbumPhoto();
   showScreen("screen-album");
 }
 
 let albumView = "photo"; // photo | done | list | edit（戻るボタンの階層判定用）
+let albumReturnTo = null; // 日別ページから来たとき、一覧の戻るで帰る先
 let currentAlbumPhoto = null; // 一覧から戻っても同じ写真を出すために保持
 
 // アプリ版（Capacitor）ではネイティブの写真ライブラリから1枚もらえる
@@ -4826,8 +4840,9 @@ function loadGratitude() { return store.get("mn_gratitude", []); }
 function saveGratitude(a) { store.set("mn_gratitude", a); }
 let notify = store.get("mn_notify", { on: true, time: "21:30" });
 let gratView = "main"; // main | list
+let gratReturnTo = null; // 日別ページから来たとき、一覧の戻るで帰る先
 
-function openSleep() { renderGratitude(false); showScreen("screen-sleep"); }
+function openSleep() { gratReturnTo = null; renderGratitude(false); showScreen("screen-sleep"); }
 
 // ---------- 今夜の月（実際の月の周期 約29.5日に同期して満ち欠け） ----------
 const MOON_SYNODIC = 29.530588853; // 朔望月（日）
@@ -5604,6 +5619,8 @@ function wireEvents() {
   document.getElementById("album-back").addEventListener("click", () => {
     if (albumView === "edit" || albumView === "view") { renderAlbumList(); return; }
     if (albumView === "list") {
+      // 日別ページから来ていたら、そこへ帰る（来た道を戻る）
+      if (albumReturnTo) { const r = albumReturnTo; albumReturnTo = null; goBackTo(r); return; }
       if (albumDoneToday()) renderAlbumDone(false); else renderAlbumPhoto(true);
       return;
     }
@@ -5617,7 +5634,12 @@ function wireEvents() {
     }
   });
   document.getElementById("sleep-back").addEventListener("click", () => {
-    if (gratView === "list") renderGratitude(false); else goHome();
+    if (gratView === "list") {
+      // 日別ページから来ていたら、そこへ帰る（来た道を戻る）
+      if (gratReturnTo) { const r = gratReturnTo; gratReturnTo = null; goBackTo(r); return; }
+      renderGratitude(false); return;
+    }
+    goHome();
   });
   scheduleGratNotify(); // 起動時に通知を予約（設定オンなら）
   document.getElementById("btn-settings").addEventListener("click", openSettings);
