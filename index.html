@@ -1834,8 +1834,9 @@ html[data-fontsize="xlarge"] .balloon-k-sleep { width: min(112px, 29vw, 14.2vh);
   box-shadow: 0 -3px 12px rgba(0, 0, 0, .06);
 }
 #tab-bar[hidden] { display: none; }
-/* タブは一番下に固定。広告はタブのすぐ上に乗せる */
-#app.has-tabs .ad-banner { bottom: 72px; box-shadow: none; }
+/* 広告は一番下に固定。タブは広告のすぐ上（2026-09-04 上下入れ替え） */
+#app.has-ad #tab-bar { bottom: 60px; }
+#app.has-tabs .ad-banner { bottom: 0; box-shadow: none; }
 .tabb {
   flex: 1; min-width: 0;
   display: flex; flex-direction: column; align-items: center; gap: 1px;
