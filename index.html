@@ -1694,13 +1694,6 @@ mark {
   background-repeat: no-repeat; background-position: right 18px center; background-size: 20px;
   padding-right: 46px;
 }
-/* 淡い配色だけ：＋ボタンのてっぺんに小さなリボン（プレゼントの結び） */
-[data-theme="pastel"] .tab-quick-circle::before {
-  content: ""; position: absolute; top: -13px; left: 50%; transform: translateX(-50%);
-  width: 28px; height: 15px; pointer-events: none;
-  background: url("data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%20viewBox%3D%270%200%2028%2014%27%20fill%3D%27none%27%20stroke%3D%27%23d98a9a%27%20stroke-width%3D%271.7%27%20stroke-linecap%3D%27round%27%20stroke-linejoin%3D%27round%27%3E%3Cpath%20d%3D%27M14%209%20C%2011%202%204%202%203.5%206%20C%203%209.5%2010%2010.5%2014%209%20Z%27%2F%3E%3Cpath%20d%3D%27M14%209%20C%2017%202%2024%202%2024.5%206%20C%2025%209.5%2018%2010.5%2014%209%20Z%27%2F%3E%3Cpath%20d%3D%27M12.2%2012.8%20L%2014%209%20L%2015.8%2012.8%27%2F%3E%3C%2Fsvg%3E") center / contain no-repeat;
-}
-
 /* 手で置いたような有機的な傾き：左上は高く遠め、右上は低め、右下はきゅっと近く（2026-09-06） */
 .b-tl { transform: translate(-126%, -111%); }
 .b-tr { transform: translate(35%, -106%); }
@@ -1940,13 +1933,13 @@ html[data-fontsize="xlarge"] .balloon-k-sleep { width: min(112px, 29vw, 14.2vh);
 }
 .tab-quick-circle {
   position: relative;
-  width: 62px; height: 62px; border-radius: 50%;
+  width: 68px; height: 68px; border-radius: 50%; /* 少し大きく（2026-09-06） */
   background: var(--accent-grad); color: var(--accent-text);
   display: flex; align-items: center; justify-content: center;
   box-shadow: var(--btn-glow), 0 6px 16px rgba(0, 0, 0, .22);
   border: 3px solid var(--card); /* タブの白と縁取りしてくっきり浮かせる */
 }
-.tab-quick-circle svg { width: 30px; height: 30px; }
+.tab-quick-circle svg { width: 33px; height: 33px; }
 .tab-quick:active .tab-quick-circle { transform: scale(.94); }
 .tab-quick-badge {
   position: absolute; top: -4px; right: -6px;
