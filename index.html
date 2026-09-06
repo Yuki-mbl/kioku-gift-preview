@@ -345,6 +345,16 @@ button { color: inherit; } /* 色未指定のボタンがブラウザ標準の�
 /* 明朝体のページ題字（〜の記憶）は全廃。バーには戻るボタンだけ残す */
 .top-title { display: none; }
 
+/* 設定だけ例外：左上に「← ホームへ」を浮かせて固定（画面が長く、戻り方に迷う声があったため。2026-09-07） */
+#screen-settings .top-bar {
+  display: block; position: fixed; top: 10px; left: 50%; transform: translateX(-50%);
+  width: 100%; max-width: 480px; box-sizing: border-box;
+  padding: 0 10px; z-index: 95;
+  pointer-events: none; background: none; box-shadow: none;
+}
+#screen-settings .top-bar .back-btn { pointer-events: auto; }
+#screen-settings .settings-wrap { padding-top: 68px; } /* 浮きボタンの下に最初のカードが隠れないように */
+
 .home-wrap {
   flex: 1;
   display: flex; flex-direction: column;
