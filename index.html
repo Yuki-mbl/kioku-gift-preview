@@ -2817,9 +2817,9 @@ function applyStart() {
 // ---------- ホームの風船（5つ固定・食事はいつも真ん中） ----------
 const FAV_DEFS = {
   daily: { emoji: "🍚", name: "食事の記憶", short: "食事", cc: "#18b5a2", pale: ["#f9e2c8", "#ecb98c"], open: () => startMeal(todayStr()) }, // 食事の記入だけ
-  shopping: { emoji: "🛒", name: "買い物の記憶", short: "買い物", cc: "#6fc244", pale: ["#ddecd2", "#b3d19f"], open: () => openShopping() },
+  shopping: { emoji: "🛒", name: "買い物の記憶", short: "買い物", cc: "#a774e8", pale: ["#e8dcf2", "#c3a9dd"], open: () => openShopping() }, // 左下＝薄紫（2026-09-06 位置交換。色は場所に残す）
   outfit: { emoji: "👕", name: "服装の記憶", short: "服装", cc: "#f0a72c", pale: ["#f8e7bd", "#e3c077"], open: () => openOutfit() },
-  album: { emoji: "📷", name: "アルバムの記憶", short: "アルバム", cc: "#a774e8", pale: ["#e8dcf2", "#c3a9dd"], open: () => openAlbum() },
+  album: { emoji: "📷", name: "アルバムの記憶", short: "アルバム", cc: "#6fc244", pale: ["#ddecd2", "#b3d19f"], open: () => openAlbum() }, // 左上＝薄緑
   sleep: { emoji: "🌙", name: "おやすみの記憶", short: "おやすみ", cc: "#4b83e8", pale: ["#d8e6f4", "#a3c4e4"], open: () => openSleep() },
 };
 // 風船の中の線画アイコン（一新デザイン。絵文字は使わない）
@@ -2997,7 +2997,7 @@ function renderHome() {
 
   // 風船のように浮かぶ扉。毎日同じ配置（場所で覚えられる）：四隅＋食事は真ん中
   const box = document.getElementById("home-doors");
-  const sats = Object.keys(FAV_DEFS).filter(k => k !== "daily");
+  const sats = ["album", "outfit", "shopping", "sleep"]; // 左上・右上・左下・右下（2026-09-06 買い物とアルバムを交換）
   const slots = ["b-tl", "b-tr", "b-bl", "b-br"];
   const centerCls = "b-center";
   // 一新デザインの風船：テーマ色の円＋線画アイコン＋名前（CSSで描く。画像なし）
