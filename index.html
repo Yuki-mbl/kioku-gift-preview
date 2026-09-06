@@ -1694,11 +1694,11 @@ mark {
   background-repeat: no-repeat; background-position: right 18px center; background-size: 20px;
   padding-right: 46px;
 }
-/* ふちがくっつくぐらい（重ねない。2026-09-06 Yukiさん指定で重なり撤回） */
-.b-tl { transform: translate(-141%, -117%); }
-.b-tr { transform: translate(47%, -108%); }
-.b-bl { transform: translate(-130%, 30%); }
-.b-br { transform: translate(42%, 15%); }
+/* ふちの間のすき間は4つとも同じ7px（2026-09-06 Yukiさん指定。小数まで詰めて均一に） */
+.b-tl { transform: translate(-151.8%, -117%); }
+.b-tr { transform: translate(57.8%, -106.3%); }
+.b-bl { transform: translate(-130.3%, 37.2%); }
+.b-br { transform: translate(43.6%, 23.3%); }
 
 /* ---------- ふんわり装飾（動きなし・押せない飾り） ---------- */
 /* 房のまわり：淡い水彩のにじみ＋軌道の輪2本＋色とりどりの真珠玉＋きらきらの光
@@ -1740,7 +1740,7 @@ mark {
   pointer-events: none;
 }
 /* 子玉の置き場所は風船ごとに変える（外側の空きへ。名前の文字にはかからない） */
-.b-center .balloon::after { right: -7%; top: 4%; width: 15%; height: 15%; }
+.b-center .balloon::after { right: -10%; top: 48%; width: 15%; height: 15%; } /* 右横（服装とおやすみの間）。上だと服装にかかる */
 .b-tl .balloon::after { left: -10%; top: 16%; }
 .b-tr .balloon::after { right: -8%; top: 30%; width: 18%; height: 18%; }
 .b-bl .balloon::after { left: 2%; bottom: -10%; width: 18%; height: 18%; }
