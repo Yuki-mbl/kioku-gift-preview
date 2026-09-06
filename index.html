@@ -2541,9 +2541,14 @@ function applySettings() {
 function saveEntries() { store.set("mn_entries", entries); }
 
 // 保存の手ごたえ：スマホを強めにひと震わせ（2026-09-07 Yukiさん指定）
-// 対応端末のみ。iPhoneのブラウザはバイブ非対応＝黙って何もしない
+// アプリ版はネイティブの振動（Capacitor Haptics＝iPhoneでも震える）、
+// ブラウザ版は navigator.vibrate（Android Chromeで震える。iPhoneのブラウザだけは非対応で無反応）
 function buzzSave() {
-  try { if (navigator.vibrate) navigator.vibrate(200); } catch (e) {}
+  try {
+    const H = window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.Haptics;
+    if (H) { H.vibrate({ duration: 200 }); return; }
+    if (navigator.vibrate) navigator.vibrate(200);
+  } catch (e) {}
 }
 
 // ---------- 日付ユーティリティ ----------
