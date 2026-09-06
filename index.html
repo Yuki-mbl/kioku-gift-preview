@@ -1694,11 +1694,11 @@ mark {
   background-repeat: no-repeat; background-position: right 18px center; background-size: 20px;
   padding-right: 46px;
 }
-/* 手で置いたような有機的な傾き：左上は高く遠め、右上は低め、右下はきゅっと近く（2026-09-06） */
-.b-tl { transform: translate(-126%, -111%); }
-.b-tr { transform: translate(35%, -106%); }
-.b-bl { transform: translate(-126%, 22%); }
-.b-br { transform: translate(39%, 8%); }
+/* ふちがくっつくぐらい（重ねない。2026-09-06 Yukiさん指定で重なり撤回） */
+.b-tl { transform: translate(-141%, -117%); }
+.b-tr { transform: translate(47%, -108%); }
+.b-bl { transform: translate(-130%, 30%); }
+.b-br { transform: translate(42%, 15%); }
 
 /* ---------- ふんわり装飾（動きなし・押せない飾り） ---------- */
 /* 房のまわり：淡い水彩のにじみ＋軌道の輪2本＋色とりどりの真珠玉＋きらきらの光
@@ -1861,12 +1861,7 @@ html[data-fontsize="large"] .balloon-lg .balloon-name { font-size: min(1.2rem, 4
 html[data-fontsize="xlarge"] .balloon-name { font-size: min(1.16rem, 4.8vw); }
 html[data-fontsize="xlarge"] .balloon-lg .balloon-name { font-size: min(1.3rem, 5.3vw); }
 /* 風船の個別サイズ：買い物は少し大きく（食事よりは小さい）、おやすみは少し小さく（2026-08-30 Yukiさん指定） */
-.balloon-k-shopping { width: min(128px, 33.5vw, 16.6vh); height: min(128px, 33.5vw, 16.6vh); }
-.balloon-k-sleep { width: min(102px, 27vw, 13.8vh); height: min(102px, 27vw, 13.8vh); }
-html[data-fontsize="large"] .balloon-k-shopping { width: min(134px, 34vw, 16.8vh); height: min(134px, 34vw, 16.8vh); }
-html[data-fontsize="xlarge"] .balloon-k-shopping { width: min(140px, 35vw, 17vh); height: min(140px, 35vw, 17vh); }
-html[data-fontsize="large"] .balloon-k-sleep { width: min(107px, 28vw, 14vh); height: min(107px, 28vw, 14vh); }
-html[data-fontsize="xlarge"] .balloon-k-sleep { width: min(112px, 29vw, 14.2vh); height: min(112px, 29vw, 14.2vh); }
+/* 個別サイズは廃止：食事だけ大きく、他の4つは同じ大きさ（2026-09-06 Yukiさん指定） */
 /* ライト：深緑の球×金の細リング */
 [data-theme="light"] .balloon {
   color: #eef5e8;
