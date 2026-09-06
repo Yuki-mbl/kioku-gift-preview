@@ -2540,6 +2540,12 @@ function applySettings() {
 
 function saveEntries() { store.set("mn_entries", entries); }
 
+// 保存の手ごたえ：スマホを強めにひと震わせ（2026-09-07 Yukiさん指定）
+// 対応端末のみ。iPhoneのブラウザはバイブ非対応＝黙って何もしない
+function buzzSave() {
+  try { if (navigator.vibrate) navigator.vibrate(200); } catch (e) {}
+}
+
 // ---------- 日付ユーティリティ ----------
 function toDateStr(d) {
   const y = d.getFullYear();
@@ -2963,7 +2969,9 @@ function renderMemoScreen() {
   wireGrowInputs(document.getElementById("memo-wrap"));
   const save = document.getElementById("memo-save");
   if (save) save.addEventListener("click", () => {
-    addMemo(document.getElementById("memo-input").value);
+    const v = document.getElementById("memo-input").value;
+    addMemo(v);
+    if (v.trim()) buzzSave();
     renderMemoScreen();
     updateMemoBadge();
   });
@@ -3425,7 +3433,7 @@ function nextStep() {
 // 大きい方のボタン（保存して戻る／次へ。今日の選択画面では思い出す問題へ）
 function flowSkip() {
   if (flow.sub === "select" && flow.steps.length === 1 && !flow.recallOnly) { startRecall(); return; }
-  if (collectStep) collectStep();
+  if (collectStep) { collectStep(); buzzSave(); }
   saveEntries();
   nextStep();
 }
@@ -4371,6 +4379,7 @@ function savePasscode(target) {
   settings.recoveryQ = q;
   if (a) settings.recoveryA = normalizeKana(a);
   store.set("mn_settings", settings);
+  buzzSave();
   refreshPasscodeStatus();
   renderPasscodeSetup(); // 2本立ての一覧にもどる
 }
@@ -4516,6 +4525,7 @@ function renderOutfitMain() {
   // 「保存」は安心の締めくくり（データは自動保存済み）。押すと✓を見せてキーボードを閉じる
   document.getElementById("outfit-save").addEventListener("click", () => {
     setOutfit(td, { note: note.value.trim() });
+    buzzSave();
     note.blur();
     const ok = document.getElementById("outfit-saved");
     ok.hidden = false;
@@ -4763,6 +4773,7 @@ function renderAlbumPhotoView() {
       a.unshift({ photo, note, date: todayStr(), photoDate });
       saveAlbumMemos(a);
       markAlbumDone();
+      buzzSave();
       renderAlbumDone(true, formatYM(photoDate));
     };
     if (isReal) shrinkDataUrl(emoji, 480, 0.6).then(finish); // 実写真は小さくして保存
@@ -4884,6 +4895,7 @@ function renderAlbumEdit(idx) {
     const d = document.getElementById("edit-date").value;
     if (d) list[idx].photoDate = d;
     saveAlbumMemos(list);
+    buzzSave();
     renderAlbumList();
   });
   document.getElementById("edit-cancel").addEventListener("click", renderAlbumList);
@@ -5133,6 +5145,7 @@ function renderGratitude(justSaved) {
     const a = loadGratitude();
     a.unshift({ date: todayStr(), text });
     saveGratitude(a);
+    buzzSave();
     renderGratitude(true);
   });
   document.getElementById("grat-list").addEventListener("click", renderGratitudeList);
@@ -5528,7 +5541,7 @@ function renderShoppingHub() {
   });
   updateFab();
   wireShopDoneBar();
-  fab.addEventListener("click", renderShoppingRecall);
+  fab.addEventListener("click", () => { buzzSave(); renderShoppingRecall(); });
 }
 
 // 思い出しながら開ける
