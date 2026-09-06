@@ -1882,7 +1882,10 @@ html[data-fontsize="xlarge"] .balloon-lg .balloon-name { font-size: min(1.3rem, 
   background: radial-gradient(circle at 35% 28%, #ffffff 0%, var(--p1) 40%, var(--p2) 100%);
   /* 輪郭線なし：1pxの薄い線は実機で描けたり消えたりしてかえって汚く見えた（2026-08-30） */
   border: none;
-  box-shadow: 0 10px 22px rgba(160, 148, 126, .32), inset 0 2px 6px rgba(255, 255, 255, .8);
+  /* 浮遊感：本体近くの淡い影＋下に離れた落ち影の2枚重ね（浮くほど影は離れて薄く落ちる。2026-09-06） */
+  box-shadow: 0 6px 14px rgba(160, 148, 126, .18),
+              0 26px 24px -14px rgba(140, 124, 98, .38),
+              inset 0 2px 6px rgba(255, 255, 255, .85);
 }
 [data-theme="pastel"] .balloon-ico { stroke-width: 1.5; }
 [data-theme="pastel"] .balloon-name { color: #635b4e; }
