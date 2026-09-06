@@ -1416,8 +1416,11 @@ mark {
   gap: clamp(7px, 1.2vh, 14px);
   padding: clamp(4px, .9vh, 12px) 20px clamp(8px, 1.4vh, 16px);
 }
-#screen-home .home-date { font-size: clamp(1.2rem, 2.8vh, 1.7rem); margin: 0; line-height: 1.25; }
-#screen-home .home-date small { display: inline; margin-left: 8px; font-size: clamp(.75rem, 1.7vh, .95rem); }
+#screen-home .home-date { font-size: min(clamp(1.5rem, 3.6vh, 2rem), 8vw); margin: 0; line-height: 1.25; } /* 大きな日付（2026-09-06。狭い端末では1行に収まる幅まで縮む） */
+#screen-home .home-date small { display: inline; margin-left: 8px; font-size: clamp(.8rem, 1.8vh, 1rem); }
+/* 曜日にほんのり色（日曜＝あたたかい色、土曜＝みどり） */
+.home-date .wd-sun { color: var(--accent2); }
+.home-date .wd-sat { color: var(--accent); }
 #screen-nokosu #home-write { min-height: clamp(48px, 7vh, 64px); padding: clamp(8px, 1.4vh, 16px) 24px; }
 #screen-nokosu .search-trigger { margin-bottom: 0; padding: clamp(9px, 1.5vh, 14px) 20px; font-size: clamp(.95rem, 2vh, 1.12rem); }
 #screen-nokosu .home-note { margin-top: 0; font-size: clamp(.8rem, 1.6vh, .9rem); }
@@ -1677,10 +1680,78 @@ mark {
    四隅固定だと画面幅で偶然重なったり離れたりしたため、中央基準＋自分のサイズ比の移動に変更。
    どの画面幅・文字サイズでも同じ重なり具合になる。食事が最前面（z-index:2）で衛星はその下に潜る */
 .b-tl, .b-tr, .b-bl, .b-br { left: 50%; top: 50%; }
-.b-tl { transform: translate(-127%, -110%); }
-.b-tr { transform: translate(28%, -120%); }
-.b-bl { transform: translate(-130%, 17%); }
-.b-br { transform: translate(40%, 13%); }
+/* 淡い配色だけ：題字と風船の間に、リボンがなびくような淡い波（画像なし・SVGの線2本） */
+#screen-home { position: relative; z-index: 0; } /* z-index:0＝波(z:-1)を#appの背景より手前・中身より奥に挟む */
+[data-theme="pastel"] #screen-home::before {
+  content: ""; position: absolute; z-index: -1;
+  top: clamp(84px, 12vh, 118px); left: 0; right: 0; height: 60px;
+  pointer-events: none; opacity: .55;
+  background: url("data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%20viewBox%3D%270%200%20375%2060%27%20fill%3D%27none%27%3E%3Cpath%20d%3D%27M-5%2038%20C%2060%208%20130%2056%20190%2032%20S%20320%2012%20380%2040%27%20stroke%3D%27%23f2ccd6%27%20stroke-width%3D%279%27%20stroke-linecap%3D%27round%27%2F%3E%3Cpath%20d%3D%27M-5%2046%20C%2070%2020%20140%2062%20205%2040%20S%20330%2022%20380%2048%27%20stroke%3D%27%23f7e6d4%27%20stroke-width%3D%275%27%20stroke-linecap%3D%27round%27%2F%3E%3C%2Fsvg%3E") center / 100% 100% no-repeat;
+}
+/* 淡い配色だけ：検索バーの右に虫めがね */
+[data-theme="pastel"] .search-trigger {
+  background-image: url("data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%20viewBox%3D%270%200%2024%2024%27%20fill%3D%27none%27%20stroke%3D%27%23746c5c%27%20stroke-width%3D%272%27%20stroke-linecap%3D%27round%27%3E%3Ccircle%20cx%3D%2711%27%20cy%3D%2711%27%20r%3D%277%27%2F%3E%3Cpath%20d%3D%27M16.5%2016.5%2021%2021%27%2F%3E%3C%2Fsvg%3E");
+  background-repeat: no-repeat; background-position: right 18px center; background-size: 20px;
+  padding-right: 46px;
+}
+/* 淡い配色だけ：＋ボタンのてっぺんに小さなリボン（プレゼントの結び） */
+[data-theme="pastel"] .tab-quick-circle::before {
+  content: ""; position: absolute; top: -13px; left: 50%; transform: translateX(-50%);
+  width: 28px; height: 15px; pointer-events: none;
+  background: url("data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%20viewBox%3D%270%200%2028%2014%27%20fill%3D%27none%27%20stroke%3D%27%23d98a9a%27%20stroke-width%3D%271.7%27%20stroke-linecap%3D%27round%27%20stroke-linejoin%3D%27round%27%3E%3Cpath%20d%3D%27M14%209%20C%2011%202%204%202%203.5%206%20C%203%209.5%2010%2010.5%2014%209%20Z%27%2F%3E%3Cpath%20d%3D%27M14%209%20C%2017%202%2024%202%2024.5%206%20C%2025%209.5%2018%2010.5%2014%209%20Z%27%2F%3E%3Cpath%20d%3D%27M12.2%2012.8%20L%2014%209%20L%2015.8%2012.8%27%2F%3E%3C%2Fsvg%3E") center / contain no-repeat;
+}
+
+/* 手で置いたような有機的な傾き：左上は高く遠め、右上は低め、右下はきゅっと近く（2026-09-06） */
+.b-tl { transform: translate(-126%, -111%); }
+.b-tr { transform: translate(35%, -106%); }
+.b-bl { transform: translate(-126%, 22%); }
+.b-br { transform: translate(39%, 8%); }
+
+/* ---------- ふんわり装飾（動きなし・押せない飾り） ---------- */
+/* 房のまわり：淡い水彩のにじみ＋軌道の輪2本＋色とりどりの真珠玉＋きらきらの光
+   すべて背景グラデーションの重ね塗り（画像なし・アニメなし。2026-09-06） */
+#home-doors::before {
+  content: ""; position: absolute; inset: -8% -5%;
+  pointer-events: none;
+  background: radial-gradient(ellipse at 46% 44%, color-mix(in srgb, var(--accent) 9%, transparent) 0%, transparent 62%);
+}
+/* 飾りは淡い配色だけ（Yukiさん指定 2026-09-06）。ライト・ダークはにじみのみ */
+[data-theme="pastel"] #home-doors::before {
+  background:
+    /* きらきら（白いぼかし玉） */
+    radial-gradient(9px circle at 84% 10%, rgba(255, 255, 255, .9), transparent 70%),
+    radial-gradient(6px circle at 14% 62%, rgba(255, 255, 255, .8), transparent 70%),
+    radial-gradient(7px circle at 68% 95%, rgba(255, 255, 255, .85), transparent 70%),
+    radial-gradient(5px circle at 42% 3%, rgba(255, 255, 255, .8), transparent 70%),
+    /* 真珠玉（白い芯→パステルのふち） */
+    radial-gradient(7px circle at 4% 34%, #fff 18%, #f3c9d3 62%, transparent 74%),
+    radial-gradient(5px circle at 93% 24%, #fff 18%, #f0dfab 62%, transparent 74%),
+    radial-gradient(6px circle at 97% 56%, #fff 18%, #f3c9d3 62%, transparent 74%),
+    radial-gradient(5px circle at 28% 98%, #fff 18%, #f0dfab 62%, transparent 74%),
+    radial-gradient(6px circle at 88% 91%, #fff 18%, #bcd6f0 62%, transparent 74%),
+    radial-gradient(4px circle at 9% 6%, #fff 18%, #cfe6c2 62%, transparent 74%),
+    radial-gradient(5px circle at 55% 101%, #fff 18%, #ddd0ec 62%, transparent 74%),
+    /* 軌道の輪（細いリング2本） */
+    radial-gradient(ellipse 46% 44% at 48% 46%, transparent 96.6%, rgba(190, 170, 140, .18) 98%, transparent 99.4%),
+    radial-gradient(ellipse 41% 38% at 54% 54%, transparent 96.2%, rgba(190, 170, 140, .12) 97.8%, transparent 99.4%),
+    /* 水彩のにじみ */
+    radial-gradient(ellipse at 46% 44%, color-mix(in srgb, var(--accent) 9%, transparent) 0%, transparent 62%);
+}
+/* 各風船のそばに小さな「子シャボン玉」を1つずつ（親と同じ水彩色・親のうしろに半分隠れる）。淡い配色だけ */
+.balloon { position: relative; }
+[data-theme="pastel"] .balloon::after {
+  content: ""; position: absolute; z-index: -1;
+  width: 22%; height: 22%; border-radius: 50%;
+  background: radial-gradient(circle at 34% 28%, #ffffff 0%, var(--p2, #d9cfc0) 100%);
+  box-shadow: 0 3px 8px rgba(120, 108, 88, .18);
+  pointer-events: none;
+}
+/* 子玉の置き場所は風船ごとに変える（外側の空きへ。名前の文字にはかからない） */
+.b-center .balloon::after { right: -7%; top: 4%; width: 15%; height: 15%; }
+.b-tl .balloon::after { left: -10%; top: 16%; }
+.b-tr .balloon::after { right: -8%; top: 30%; width: 18%; height: 18%; }
+.b-bl .balloon::after { left: 2%; bottom: -10%; width: 18%; height: 18%; }
+.b-br .balloon::after { right: -4%; bottom: -6%; }
 /* 一新デザインの風船：テーマ色の円＋線画アイコン＋名前（揺れは付けない＝動くものが苦手な方への配慮） */
 .balloon {
   display: flex; flex-direction: column; align-items: center; justify-content: center;
@@ -2925,8 +2996,13 @@ function renderMemoScreen() {
 }
 
 function renderHome() {
+  // 曜日にほんのり色（日＝あたたかい色、土＝みどり）。日本語表示のときだけ
+  let dateHtml = formatJP(todayStr());
+  if (uiLang === "ja") dateHtml = dateHtml
+    .replace("（日）", '（<span class="wd-sun">日</span>）')
+    .replace("（土）", '（<span class="wd-sat">土</span>）');
   document.getElementById("home-today").innerHTML =
-    `${formatJP(todayStr())}<small>${t("{y}年", { y: fromDateStr(todayStr()).getFullYear() })}</small>`;
+    `${dateHtml}<small>${t("{y}年", { y: fromDateStr(todayStr()).getFullYear() })}</small>`;
 
   const count = Object.keys(entries).length;
   document.getElementById("home-count").textContent = t("これまでの記録：{n}日分", { n: count }); // 0日でも同じ形で（表示が日によって変わると迷うため）
