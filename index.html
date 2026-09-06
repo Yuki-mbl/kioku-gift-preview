@@ -1730,21 +1730,8 @@ mark {
     /* 水彩のにじみ */
     radial-gradient(ellipse at 46% 44%, color-mix(in srgb, var(--accent) 9%, transparent) 0%, transparent 62%);
 }
-/* 各風船のそばに小さな「子シャボン玉」を1つずつ（親と同じ水彩色・親のうしろに半分隠れる）。淡い配色だけ */
+/* 子シャボン玉は廃止（2026-09-07 Yukiさん指定） */
 .balloon { position: relative; }
-[data-theme="pastel"] .balloon::after {
-  content: ""; position: absolute; z-index: -1;
-  width: 22%; height: 22%; border-radius: 50%;
-  background: radial-gradient(circle at 34% 28%, #ffffff 0%, var(--p2, #d9cfc0) 100%);
-  box-shadow: 0 3px 8px rgba(120, 108, 88, .18);
-  pointer-events: none;
-}
-/* 子玉の置き場所は風船ごとに変える（外側の空きへ。名前の文字にはかからない） */
-.b-center .balloon::after { right: -10%; top: 48%; width: 15%; height: 15%; } /* 右横（服装とおやすみの間）。上だと服装にかかる */
-.b-tl .balloon::after { left: -10%; top: 16%; }
-.b-tr .balloon::after { right: -8%; top: 30%; width: 18%; height: 18%; }
-.b-bl .balloon::after { left: 2%; bottom: -10%; width: 18%; height: 18%; }
-.b-br .balloon::after { right: -4%; bottom: -6%; }
 /* 一新デザインの風船：テーマ色の円＋線画アイコン＋名前（揺れは付けない＝動くものが苦手な方への配慮） */
 .balloon {
   display: flex; flex-direction: column; align-items: center; justify-content: center;
