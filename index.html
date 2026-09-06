@@ -1673,10 +1673,14 @@ mark {
 #home-doors { position: relative; height: clamp(280px, 42vh, 370px); }
 .balloon-pos { position: absolute; }
 .b-center { left: 50%; top: 50%; transform: translate(-50%, -52%); z-index: 2; }
-.b-tl { left: 0; top: 0; }
-.b-tr { right: 0; top: 4%; }
-.b-bl { left: 1%; bottom: 0; }
-.b-br { right: 1%; bottom: 4%; }
+/* シャボン玉の房：4つの風船を中央（食事）にふんわり1割ほど潜り込ませる（2026-09-06）
+   四隅固定だと画面幅で偶然重なったり離れたりしたため、中央基準＋自分のサイズ比の移動に変更。
+   どの画面幅・文字サイズでも同じ重なり具合になる。食事が最前面（z-index:2）で衛星はその下に潜る */
+.b-tl, .b-tr, .b-bl, .b-br { left: 50%; top: 50%; }
+.b-tl { transform: translate(-127%, -110%); }
+.b-tr { transform: translate(28%, -120%); }
+.b-bl { transform: translate(-130%, 17%); }
+.b-br { transform: translate(40%, 13%); }
 /* 一新デザインの風船：テーマ色の円＋線画アイコン＋名前（揺れは付けない＝動くものが苦手な方への配慮） */
 .balloon {
   display: flex; flex-direction: column; align-items: center; justify-content: center;
@@ -1783,8 +1787,7 @@ html[data-fontsize="large"] .balloon-lg { width: min(156px, 39.4vw, 19.4vh); hei
 html[data-fontsize="xlarge"] #screen-home #home-doors { height: clamp(292px, 44vh, 372px); }
 html[data-fontsize="xlarge"] .balloon { width: min(126px, 31.6vw, 15.6vh); height: min(126px, 31.6vw, 15.6vh); }
 html[data-fontsize="xlarge"] .balloon-lg { width: min(164px, 41vw, 19.6vh); height: min(164px, 41vw, 19.6vh); }
-html[data-fontsize="large"] .b-tr, html[data-fontsize="xlarge"] .b-tr { top: 2%; }
-html[data-fontsize="large"] .b-br, html[data-fontsize="xlarge"] .b-br { bottom: 2%; }
+/* （旧・四隅アンカー時代の b-tr/b-br 調整は中央基準化にともない廃止。2026-09-06） */
 /* 文字サイズ「大」「特大」では、風船の中の絵と文字も一緒に大きく */
 /* ホームの風船の中の絵だけ拡大（他の線画には効かせない） */
 html[data-fontsize="large"] .balloon .balloon-ico { width: 37%; }
