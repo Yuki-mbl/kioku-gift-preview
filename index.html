@@ -1718,28 +1718,7 @@ mark {
   pointer-events: none;
   background: radial-gradient(ellipse at 46% 44%, color-mix(in srgb, var(--accent) 9%, transparent) 0%, transparent 62%);
 }
-/* 飾りは淡い配色だけ（Yukiさん指定 2026-09-06）。ライト・ダークはにじみのみ */
-[data-theme="pastel"] #home-doors::before {
-  background:
-    /* きらきら（白いぼかし玉） */
-    radial-gradient(9px circle at 84% 10%, rgba(255, 255, 255, .9), transparent 70%),
-    radial-gradient(6px circle at 14% 62%, rgba(255, 255, 255, .8), transparent 70%),
-    radial-gradient(7px circle at 68% 95%, rgba(255, 255, 255, .85), transparent 70%),
-    radial-gradient(5px circle at 42% 3%, rgba(255, 255, 255, .8), transparent 70%),
-    /* 真珠玉（白い芯→パステルのふち） */
-    radial-gradient(7px circle at 4% 34%, #fff 18%, #f3c9d3 62%, transparent 74%),
-    radial-gradient(5px circle at 93% 24%, #fff 18%, #f0dfab 62%, transparent 74%),
-    radial-gradient(6px circle at 97% 56%, #fff 18%, #f3c9d3 62%, transparent 74%),
-    radial-gradient(5px circle at 28% 98%, #fff 18%, #f0dfab 62%, transparent 74%),
-    radial-gradient(6px circle at 88% 91%, #fff 18%, #bcd6f0 62%, transparent 74%),
-    radial-gradient(4px circle at 9% 6%, #fff 18%, #cfe6c2 62%, transparent 74%),
-    radial-gradient(5px circle at 55% 101%, #fff 18%, #ddd0ec 62%, transparent 74%),
-    /* 軌道の輪（細いリング2本） */
-    radial-gradient(ellipse 46% 44% at 48% 46%, transparent 96.6%, rgba(190, 170, 140, .18) 98%, transparent 99.4%),
-    radial-gradient(ellipse 41% 38% at 54% 54%, transparent 96.2%, rgba(190, 170, 140, .12) 97.8%, transparent 99.4%),
-    /* 水彩のにじみ */
-    radial-gradient(ellipse at 46% 44%, color-mix(in srgb, var(--accent) 9%, transparent) 0%, transparent 62%);
-}
+/* 軌道の輪・真珠玉・きらきらは廃止（2026-09-07 Yukiさん指定。残すのはリボンの波だけ） */
 /* 子シャボン玉は廃止（2026-09-07 Yukiさん指定） */
 .balloon { position: relative; }
 /* 一新デザインの風船：テーマ色の円＋線画アイコン＋名前（揺れは付けない＝動くものが苦手な方への配慮） */
