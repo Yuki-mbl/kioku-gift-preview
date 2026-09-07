@@ -1939,6 +1939,12 @@ html[data-fontsize="large"] .tabb-ico svg,
 html[data-fontsize="xlarge"] .tabb-ico svg { width: 31px; height: 31px; }
 html[data-fontsize="large"] .tabb-name,
 html[data-fontsize="xlarge"] .tabb-name { font-size: min(.95rem, 4vw); }
+/* キーボード表示中：下のタブと広告は隠す（上がってきて入力欄を隠さない）。保存の帯はキーボードのすぐ上に（2026-09-07） */
+#app.kb-open #tab-bar, #app.kb-open .ad-banner { display: none; }
+#app.kb-open .screen.active { padding-bottom: 20px !important; }
+#app.kb-open .flow-footer { bottom: 0 !important; }
+#app.kb-open .shop-fab { bottom: 16px !important; }
+
 /* タブのある画面は、下がタブ＋広告に隠れないよう余白を足す */
 #app.has-tabs .screen.active { padding-bottom: 128px; }
 #app.has-tabs .flow-footer { bottom: 132px; } /* 日記画面：保存ボタンの帯は広告＋タブの上に */
@@ -5896,12 +5902,20 @@ function wireEvents() {
 function wireKeyboardInset() {
   const vv = window.visualViewport;
   if (!vv) return;
+  // 画面の高さが大きく縮んだら「キーボードが出ている」と判定し、
+  // 下のタブと広告を隠す（上がってきて入力欄を隠さないように。2026-09-07）
+  let kbMaxH = 0, kbLastW = window.innerWidth;
   const update = () => {
+    if (Math.abs(window.innerWidth - kbLastW) > 50) { kbMaxH = 0; kbLastW = window.innerWidth; } // 回転したら測り直し
+    if (vv.height > kbMaxH) kbMaxH = vv.height;
+    document.getElementById("app").classList.toggle("kb-open", kbMaxH - vv.height > 150);
     const hidden = Math.max(0, window.innerHeight - vv.height - vv.offsetTop);
     document.body.style.paddingBottom = hidden > 40 ? hidden + "px" : "";
   };
   vv.addEventListener("resize", update);
   vv.addEventListener("scroll", update);
+  window.addEventListener("resize", update);
+  update();
 }
 
 function init() {
