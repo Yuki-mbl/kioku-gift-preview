@@ -1939,11 +1939,13 @@ html[data-fontsize="large"] .tabb-ico svg,
 html[data-fontsize="xlarge"] .tabb-ico svg { width: 31px; height: 31px; }
 html[data-fontsize="large"] .tabb-name,
 html[data-fontsize="xlarge"] .tabb-name { font-size: min(.95rem, 4vw); }
-/* キーボード表示中：下のタブと広告は隠す（上がってきて入力欄を隠さない）。保存の帯はキーボードのすぐ上に（2026-09-07） */
+/* キーボード表示中：下のタブ・広告に加えて「戻る・保存」の帯と浮きボタンも隠す（2026-09-07 案A）。
+   書いている間は保存が見えない＝朝だけ書いて押してしまう誤操作を防ぐ。
+   キーボードを閉じる（欄の外をタップ）と保存が現れる。声の「保存」は隠れていても効く */
 #app.kb-open #tab-bar, #app.kb-open .ad-banner { display: none; }
 #app.kb-open .screen.active { padding-bottom: 20px !important; }
-#app.kb-open .flow-footer { bottom: 0 !important; }
-#app.kb-open .shop-fab { bottom: 16px !important; }
+#app.kb-open .flow-footer { display: none; }
+#app.kb-open .shop-fab { display: none; }
 
 /* タブのある画面は、下がタブ＋広告に隠れないよう余白を足す */
 #app.has-tabs .screen.active { padding-bottom: 128px; }
