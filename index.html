@@ -2334,6 +2334,14 @@ html[data-fontsize="xlarge"] .tabb-name { font-size: min(.95rem, 4vw); }
           <p class="settings-hint" id="pc-status" style="margin-top:0;"></p>
           <button type="button" class="btn btn-secondary btn-xl" id="pc-open" style="margin-top:14px;" data-t>設定する</button>
         </div>
+        <div class="card" id="quickmemo-card" hidden>
+          <div class="settings-label" data-t>すぐ書けるメモ通知</div>
+          <p class="settings-hint" style="margin-top:0;" data-t>通知欄に「一瞬のひらめき」の入り口をいつも出しておけます。思いついたら、通知から手でも声でも書けます。</p>
+          <div class="seg-group" id="set-quickmemo">
+            <button class="seg" data-t data-value="1">オン</button>
+            <button class="seg" data-t data-value="0">オフ</button>
+          </div>
+        </div>
         <div class="card">
           <div class="settings-label" data-t>広告を消す</div>
           <div class="iap-row">
@@ -2540,6 +2548,32 @@ function saveEntries() { store.set("mn_entries", entries); }
 // 保存の手ごたえ：スマホを強めにひと震わせ（2026-09-07 Yukiさん指定）
 // アプリ版はネイティブの振動（Capacitor Haptics＝iPhoneでも震える）、
 // ブラウザ版は navigator.vibrate（Android Chromeで震える。iPhoneのブラウザだけは非対応で無反応）
+// すぐ書けるメモ通知（Androidアプリ版のみ。2026-09-07 初期値オン）
+// 通知の返信欄から書かれたメモを、アプリを開いたときに「一瞬のひらめき」へ取り込む
+function quickMemoPlugin() {
+  return (window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.QuickMemo) || null;
+}
+async function syncQuickMemoNotify() {
+  const plug = quickMemoPlugin();
+  if (!plug) return;
+  try {
+    const r = await plug.drain();
+    const items = (r && r.items) || [];
+    if (items.length) {
+      const a = loadMemos();
+      // 通知から書いた分は上限10件を超えても失わない（通知側では満杯の案内が出せないため）
+      items.forEach(m => {
+        const v = String((m && m.text) || "").trim();
+        if (v) a.unshift({ text: v, at: (m && m.at) || Date.now() });
+      });
+      saveMemos(a);
+      updateMemoBadge();
+    }
+    if (settings.quickMemoNotify === false) plug.disable(); else plug.enable(); // 初期値（未設定）＝オン
+  } catch (e) {}
+}
+document.addEventListener("visibilitychange", () => { if (!document.hidden) syncQuickMemoNotify(); });
+
 function buzzSave() {
   try {
     const H = window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.Haptics;
@@ -4159,6 +4193,12 @@ function openSettings() {
   const ageStr = ageGroupOf(profile) || "回答しない";
   p.innerHTML = `${t("年代：{v}", { v: esc(t(ageStr)) })}<br>${t("性別：{v}", { v: esc(t(profile.gender || "回答しない")) })}`;
   refreshPasscodeStatus();
+  const qm = document.getElementById("quickmemo-card");
+  if (qm) {
+    qm.hidden = !quickMemoPlugin(); // アプリ版でだけ出す（ブラウザでは通知を出せない）
+    document.querySelectorAll("#set-quickmemo .seg").forEach(b =>
+      b.classList.toggle("selected", (b.dataset.value === "1") === (settings.quickMemoNotify !== false)));
+  }
   renderResetArea();
   showScreen("screen-settings");
 }
@@ -5727,6 +5767,14 @@ function wireEvents() {
   document.getElementById("tab-quiz").addEventListener("click", () => { saveFlowDraftIfAny(); startRecall(); });
   document.getElementById("tab-cal").addEventListener("click", () => { saveFlowDraftIfAny(); openCalendar(); });
 
+  // 設定「すぐ書けるメモ通知」（アプリ版のみ表示）
+  document.querySelectorAll("#set-quickmemo .seg").forEach(b => b.addEventListener("click", () => {
+    settings.quickMemoNotify = b.dataset.value === "1";
+    store.set("mn_settings", settings);
+    document.querySelectorAll("#set-quickmemo .seg").forEach(x => x.classList.toggle("selected", x === b));
+    syncQuickMemoNotify();
+  }));
+
   // 設定「最初に開く画面」
   document.querySelectorAll("#set-start .seg").forEach(b => b.addEventListener("click", () => {
     settings.startScreen = b.dataset.value;
@@ -5927,6 +5975,7 @@ function init() {
   pruneMealPhotos(); // 3日より古い食事写真を自動削除
   wireSwipeNav();    // 指でスライドして移動（右＝戻る／左＝進む）
   wireKeyboardInset();
+  syncQuickMemoNotify(); // すぐ書けるメモ通知（アプリ版のみ。通知から書かれた分も取り込む）
   if (!profile) {
     showScreen("screen-onboarding");
   } else if (settings.passcode) {
