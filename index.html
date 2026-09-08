@@ -1690,6 +1690,17 @@ mark {
    四隅固定だと画面幅で偶然重なったり離れたりしたため、中央基準＋自分のサイズ比の移動に変更。
    どの画面幅・文字サイズでも同じ重なり具合になる。食事が最前面（z-index:2）で衛星はその下に潜る */
 .b-tl, .b-tr, .b-bl, .b-br { left: 50%; top: 50%; }
+/* ホームの「下に引っ張って更新」の帯（2026-09-08） */
+#ptr-bar {
+  position: absolute; top: 10px; left: 50%; transform: translateX(-50%);
+  z-index: 5; white-space: nowrap;
+  background: var(--card); color: var(--muted);
+  border: 1.5px solid var(--border); border-radius: 999px;
+  padding: 8px 18px; font-size: .98rem; font-weight: 700;
+  box-shadow: var(--shadow);
+}
+#ptr-bar[hidden] { display: none; }
+
 /* 淡い配色だけ：題字と風船の間に、リボンがなびくような淡い波（画像なし・SVGの線2本） */
 #screen-home { position: relative; z-index: 0; } /* z-index:0＝波(z:-1)を#appの背景より手前・中身より奥に挟む */
 [data-theme="pastel"] #screen-home::before {
@@ -2568,11 +2579,17 @@ async function syncQuickMemoNotify() {
       });
       saveMemos(a);
       updateMemoBadge();
+      // メモのシートを開いているときは、その場で一覧も最新に
+      const pop = document.getElementById("memo-pop");
+      if (pop && !pop.hidden) renderMemoScreen();
     }
     if (settings.quickMemoNotify === false) plug.disable(); else plug.enable(); // 初期値（未設定）＝オン
   } catch (e) {}
 }
+// アプリに戻ってきた瞬間に取り込む（立ち上げ直し不要。resumeはアプリ版、他はブラウザ用の保険）
 document.addEventListener("visibilitychange", () => { if (!document.hidden) syncQuickMemoNotify(); });
+document.addEventListener("resume", () => syncQuickMemoNotify());
+window.addEventListener("focus", () => syncQuickMemoNotify());
 
 function buzzSave() {
   try {
@@ -2944,6 +2961,7 @@ function openMemo() {
   memoListOpen = false;
   renderMemoScreen();
   document.getElementById("memo-pop").hidden = false;
+  syncQuickMemoNotify(); // 通知から書いた分があれば、開いたその場で一覧に反映される
 }
 // シートをなぞって閉じる共通処理（dir: "down"=下へ払う, "up"=上へ払う）
 function wireSheetClose(sheetId, dir, close) {
@@ -5968,6 +5986,50 @@ function wireKeyboardInset() {
   update();
 }
 
+// ホームで下に引っ張って更新（通知から書いたメモの取り込み。2026-09-08 Yukiさん要望）
+function wirePullRefresh() {
+  const scr = document.getElementById("screen-home");
+  const wrap = scr && scr.querySelector(".home-wrap");
+  if (!wrap) return;
+  const bar = document.createElement("div");
+  bar.id = "ptr-bar";
+  bar.hidden = true;
+  scr.appendChild(bar);
+  let sy = 0, ok = false, dist = 0, busy = false;
+  wrap.addEventListener("touchstart", e => {
+    if (busy || e.touches.length !== 1) { ok = false; return; }
+    ok = wrap.scrollTop <= 0;
+    sy = e.touches[0].clientY;
+    dist = 0;
+  }, { passive: true });
+  wrap.addEventListener("touchmove", e => {
+    if (!ok) return;
+    dist = e.touches[0].clientY - sy;
+    if (dist > 24) {
+      bar.hidden = false;
+      bar.textContent = dist > 70 ? t("指をはなすと更新") : t("↓ 下に引っ張って更新");
+    } else {
+      bar.hidden = true;
+    }
+  }, { passive: true });
+  wrap.addEventListener("touchend", async () => {
+    if (!ok) return;
+    ok = false;
+    if (dist > 70) {
+      busy = true;
+      bar.hidden = false;
+      bar.textContent = t("↻ 更新中…");
+      try { await syncQuickMemoNotify(); } catch (e) {}
+      renderHome();
+      updateMemoBadge();
+      bar.textContent = t("✓ 最新にしました");
+      setTimeout(() => { bar.hidden = true; busy = false; }, 1200);
+    } else {
+      bar.hidden = true;
+    }
+  }, { passive: true });
+}
+
 function init() {
   applySettings();
   setupOnboarding();
@@ -5976,6 +6038,7 @@ function init() {
   wireSwipeNav();    // 指でスライドして移動（右＝戻る／左＝進む）
   wireKeyboardInset();
   syncQuickMemoNotify(); // すぐ書けるメモ通知（アプリ版のみ。通知から書かれた分も取り込む）
+  wirePullRefresh();     // ホームを下に引っ張って更新
   if (!profile) {
     showScreen("screen-onboarding");
   } else if (settings.passcode) {
