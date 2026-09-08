@@ -2564,6 +2564,17 @@ function saveEntries() { store.set("mn_entries", entries); }
 function quickMemoPlugin() {
   return (window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.QuickMemo) || null;
 }
+// アプリ版では、話して書くの前に録音の許可を確かめる（初回だけOSのダイアログが出る。2026-09-08）
+// ブラウザ版はブラウザ自身が許可を聞くので、ここでは何もしない
+async function ensureMicPermission() {
+  const p = window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.MicPerm;
+  if (!p) return true;
+  try {
+    const r = await p.ensure();
+    return !(r && r.granted === false);
+  } catch (e) { return true; }
+}
+
 async function syncQuickMemoNotify() {
   const plug = quickMemoPlugin();
   if (!plug) return;
@@ -5709,11 +5720,12 @@ function wireMics(root) {
   (root || document).querySelectorAll(".mic-btn[data-mic]").forEach(btn => {
     if (btn.dataset.wired) return;
     btn.dataset.wired = "1";
-    btn.addEventListener("click", () => {
+    btn.addEventListener("click", async () => {
       if (micActive && micActive.btn === btn) { stopMic(); return; } // もう一度押すと止まる
       stopMic();
       const target = document.getElementById(btn.dataset.mic);
       if (!target) return;
+      if (!(await ensureMicPermission())) return; // アプリ版：録音の許可がなければ始めない
       const rec = new SpeechRec();
       rec.lang = "ja-JP";
       rec.interimResults = true; // 話している途中の言葉もその場で見せる（待たされ感をなくす）
@@ -5954,9 +5966,10 @@ function wireEvents() {
     searchMic.innerHTML = micIconSvg();
     const searchInput = document.getElementById("search-input");
     const searchPh = searchInput.placeholder;
-    searchMic.addEventListener("click", () => {
+    searchMic.addEventListener("click", async () => {
       if (micActive && micActive.btn === searchMic) { stopMic(); searchInput.placeholder = searchPh; return; }
       stopMic();
+      if (!(await ensureMicPermission())) return; // アプリ版：録音の許可がなければ始めない
       const rec = new SpeechRec();
       rec.lang = "ja-JP";
       rec.interimResults = false;
