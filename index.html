@@ -5472,7 +5472,10 @@ let shopView = "recall";   // recall | hub
 
 // 書いた文をひと品ずつに分ける（改行・読点・空白・「・」で区切る）
 function shopItemsOf(text) {
-  return String(text || "").split(/[\n、，,・;；]+|[ 　]+/).map(t => t.trim()).filter(Boolean);
+  // 区切りとして扱う文字：改行・読点・カンマ・中黒・セミコロン・句点・スペースに加え、
+  // ハイフン／アンダーバー／スラッシュ／縦棒／波線（2026-09-08 拡張。人によって区切り方が違うため）
+  // ※長音「ー」は言葉の一部（ラーメン等）なので区切らない。半角ピリオドも「1.5L」を守るため区切らない
+  return String(text || "").split(/[\n、，,・;；。．_＿~〜～／\/|｜\-－]+|[ 　]+/).map(v => v.trim()).filter(Boolean);
 }
 function removeShopItem(key, idx) {
   const s = loadShopping();
@@ -5539,10 +5542,10 @@ function renderShopPop() {
     const c = SHOP_CATS.find(x => x.key === k);
     const items = shopItemsOf(s[k]);
     if (!items.length) return "";
-    const rows = items.map((t, i) => `
+    const rows = items.map((item, i) => `
       <div class="memo-row">
         <button type="button" class="memo-done" data-shop-done="${k}:${i}" aria-label="${t("買えた（消す）")}">${check}</button>
-        <span class="memo-text">${esc(t)}</span>
+        <span class="memo-text">${esc(item)}</span>
       </div>`).join("");
     return `<div class="shop-pop-sec"><div class="shop-cat">${shopIconHtml(c)}${t(c.short || c.name)}</div>${rows}</div>`;
   }).join("");
