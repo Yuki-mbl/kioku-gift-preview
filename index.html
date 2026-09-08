@@ -3343,6 +3343,42 @@ function renderMealSlot(slotEl) {
   });
 }
 
+// 「この日を書き足す」：まず食事か日記かを選ぶ（旧・食事→日記の2画面連続は廃止。
+// 食事の保存が「保存して次へ（＝日記）」になって迷うため。2026-09-08）
+function openAddPicker(ds, ret) {
+  flow = { date: ds, step: 0, sub: "pick", mode: null, steps: [{ id: "pick" }], returnTo: ret || { screen: "detail", ds } };
+  if (!entries[ds]) entries[ds] = {};
+  renderPickView();
+  showScreen("screen-flow");
+}
+function renderPickView() {
+  renderStepHeader();
+  const content = document.getElementById("flow-content");
+  const footer = document.querySelector(".flow-footer");
+  footer.style.display = "";
+  document.getElementById("flow-skip").style.display = "none"; // 選ぶだけの画面に保存は置かない（戻るだけ）
+  content.innerHTML = `
+    <div class="step-title"><span class="step-emoji step-ico">${balloonIconSvg("pencil")}</span>${t("この日を書き足す")}</div>
+    <div class="step-note">${t("どちらを書き足しますか？")}</div>
+    <div class="opt-list">
+      <button class="opt-card" id="pick-meal">${t("食事")}</button>
+      <button class="opt-card" id="pick-diary">${t("日記")}</button>
+    </div>`;
+  const ret = flow.returnTo;
+  document.getElementById("pick-meal").addEventListener("click", () => { startMeal(flow.date); flow.returnTo = ret; });
+  document.getElementById("pick-diary").addEventListener("click", () => {
+    const ds = flow.date;
+    if (settings.diaryPass && !diaryUnlocked && ((entries[ds] || {}).diary || "").trim()) {
+      pendingUnlock = { type: "detail", ds };
+      showLock("diary");
+      return;
+    }
+    startDiary(ds);
+    flow.returnTo = ret;
+  });
+  playFlowAnim(content);
+}
+
 // flow.sub: "select"（選択画面）/ "input"（入力専用画面）
 let flow = { date: null, step: 0, sub: "select", mode: null };
 let collectStep = null; // 入力専用画面から入力を回収する関数
@@ -3391,6 +3427,7 @@ function playFlowAnim(content) {
 
 function renderStep() {
   renderStepHeader();
+  document.getElementById("flow-skip").style.display = ""; // 書き足しの選択画面で隠した保存を戻す
   collectStep = null;
   const stepId = flow.steps[flow.step].id;
   // 日記ロック中：既に日記が書いてある日は、開く前に解除が必要（書き足しの2ページ目など）
@@ -4187,8 +4224,7 @@ function openDayField(ds, label, from) {
     if (settings.diaryPass && !diaryUnlocked) { pendingUnlock = { type: "detail", ds }; showLock("diary"); return; }
     startDiary(ds); flow.returnTo = ret; return;
   }
-  startFlow(ds); // 旧データ（行った場所など）→ 食事＋日々の出来事の書き足しへ
-  flow.returnTo = ret;
+  openAddPicker(ds, ret); // 旧データ（行った場所など）→ 書き足すもの（食事か日記）を選んでから
 }
 
 // =========================================================
@@ -5951,7 +5987,7 @@ function wireEvents() {
     if (detailFrom === "calendar") { renderCalendar(); showScreen("screen-calendar"); }
     else showScreen("screen-search");
   });
-  document.getElementById("detail-add").addEventListener("click", () => { if (detailDate) startFlow(detailDate); });
+  document.getElementById("detail-add").addEventListener("click", () => { if (detailDate) openAddPicker(detailDate); });
 
   // パスコード設定
   document.getElementById("pc-open").addEventListener("click", openPasscodeSetup);
