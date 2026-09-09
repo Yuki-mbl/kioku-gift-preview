@@ -3649,19 +3649,21 @@ function isRoutinePlace(text) {
     "市役所", "役所", "ジム", "美容院", "理容", "床屋", "塾"].some(k => text.includes(k));
 }
 
-// 記憶確認クイズ（計3問。記憶の体操なので少しだけ多めに）
-//  1問目：昨日の食事（なければ直近の食事の記録）
-//  2問目以降：2日前か3日前の食事。ときどき「1か月以内の外食」や「直近の服装」。なければ別の直近の記録
+// 記憶確認クイズ（計3問。2026-09-09 Yukiさん決定の構成）
+//  1問目：昨日の食事（なければ3日以内の直近の食事）
+//  2問目：別の3日以内の食事
+//  3問目：アルバム（写真を見せる）・外食（直近10回・ヒント付き）・おやすみ（ありがとう、3日以内）・服装（3日以内）からひとつ
+//  食事の問題は3日以内だけ。足りない分は特別問題→3日以内の日記で埋め、無ければ作れる分だけ
 const QUIZ_COUNT = 3;
 function buildQuizQuestions() {
   const today = todayStr();
   const questions = [];
   const used = new Set(); // "date|field" の重複防止
-  const pushQ = (dateStr, field, q, answer, photo) => {
+  const pushQ = (dateStr, field, q, answer, photo, cue) => {
     const key = `${dateStr}|${field}`;
     if (used.has(key) || !answer) return false;
     used.add(key);
-    questions.push({ key, dateStr, q, answer, photos: [].concat(photo || []).filter(Boolean) });
+    questions.push({ key, dateStr, q, answer, photos: [].concat(photo || []).filter(Boolean), cue: cue || null });
     return true;
   };
 
@@ -3708,54 +3710,83 @@ function buildQuizQuestions() {
   const mealDates = [...new Set([...pastDates, ...Object.keys(loadMealPhotos())])]
     .filter(ds => ds < today && ds >= d3 && hasMealRecord(ds)).sort().reverse();
 
-  // ---------- 1問目：昨日の食事（なければ直近の食事） ----------
+  // ---------- 1問目：昨日の食事（なければ3日以内の直近の食事） ----------
   if (hasMealRecord(yStr)) pushMealQ(yStr, true);
   else if (mealDates.length) pushMealQ(mealDates[0], false);
-  else if (entries[yStr]) {
-    // 食事の記録がまだ無い場合は、昨日の他の記入から（日記→場所→服装）
-    const yE = entries[yStr];
-    const cand = [];
-    if (yE.diary) cand.push("diary");
-    if (outfitText(yStr)) cand.push("outfit");
-    for (const f of cand) { if (makeQ[f](yStr, yE)) break; }
+
+  // ---------- 2問目：別の3日以内の食事 ----------
+  for (const ds of [d2, d3]) {
+    if (questions.length >= 2) break;
+    if (hasMealRecord(ds) && !used.has(`${ds}|meal`) && !used.has(`${ds}|eatout`)) pushMealQ(ds, false);
   }
 
-  // ---------- 2問目・3問目 ----------
-  // ときどき出す特別問題：1か月以内の外食／直近3日の服装
-  const monthAgo = daysAgoStr(30);
-  const specials = [];
-  for (const ds of pastDates) {
-    const e = entries[ds];
-    if (ds >= monthAgo && e.eatout && (e.eatout.place || "").trim() && !used.has(`${ds}|eatout`)) specials.push(["eatout", ds]);
+  // ---------- 3問目：アルバム・外食・おやすみ・服装からひとつ ----------
+  // （2026-09-09 Yukiさん決定の構成。種類はまんべんなく回す）
+  const specials = { album: [], eatout: [], grat: [], outfit: [] };
+  // アルバム：写真を先に見せて「何の写真か」（写真がある思い出だけ・期間無制限）
+  loadAlbumMemos().forEach((m, i) => {
+    const cue = albumPhotoForQuiz(m.photo);
+    if (!cue || used.has(`${m.date}|album${i}`)) return;
+    const when = m.photoDate ? t("{d}ごろの写真です", { d: formatYM(m.photoDate) }) : t("アルバムに残した写真です");
+    specials.album.push({ ds: m.date, field: "album" + i,
+      q: t("{w}。何の写真か思い出せますか？", { w: when }),
+      answer: (m.note || "").trim() || t("（メモはありません）"), cue });
+  });
+  // 外食：直近10回分（期間無制限。よく行く人は自然と最近の話だけになり、
+  // めったに行かない人は古くても覚えている。ヒント付きで聞く）
+  const eatoutDates = pastDates.filter(ds => (((entries[ds] || {}).eatout || {}).place || "").trim()).slice(0, 10);
+  for (const ds of eatoutDates) {
+    if (used.has(`${ds}|eatout`)) continue;
+    const eo = entries[ds].eatout;
+    const hints = [];
+    if ((eo.place || "").trim()) hints.push(t("「{v}」で外食しましたね。誰と、何を食べたか思い出せますか？", { v: eo.place }));
+    if ((eo.food || "").trim()) hints.push(t("外で「{v}」を食べましたね。どこで、誰とでしたか？", { v: eo.food }));
+    if ((eo.with || "").trim()) hints.push(t("「{v}」と外食しましたね。どこで、何を食べたか思い出せますか？", { v: eo.with }));
+    specials.eatout.push({ ds, field: "eatout",
+      q: t("{d}、{q}", { d: formatJP(ds), q: hints[Math.floor(Math.random() * hints.length)] }),
+      answer: formatPlaceAnswer(eo), photo: mealPhotoList(ds) });
   }
-  // 服装は「服装の記憶」から（直近3日ぶん）
+  // おやすみ（ありがとうの記録）：3日以内
   for (const ds of [yStr, d2, d3]) {
-    if (ds < today && outfitText(ds) && !used.has(`${ds}|outfit`)) specials.push(["outfit", ds]);
+    const texts = loadGratitude().filter(g => g.date === ds).map(g => (g.text || "").trim()).filter(Boolean);
+    if (texts.length && !used.has(`${ds}|grat`)) {
+      specials.grat.push({ ds, field: "grat",
+        q: t("{d}のおやすみ前に書いたこと、思い出せますか？", { d: formatJP(ds) }),
+        answer: texts.join("\n") });
+    }
   }
-  const base23 = [d2, d3].filter(ds => hasMealRecord(ds) && !used.has(`${ds}|meal`) && !used.has(`${ds}|eatout`));
-  const trySpecial = () => {
-    for (const [f, ds] of shuffle(specials)) { if (makeQ[f](ds, entries[ds])) return true; }
+  // 服装：3日以内（写真は答えのほうに添える）
+  for (const ds of [yStr, d2, d3]) {
+    if (ds < today && outfitText(ds) && !used.has(`${ds}|outfit`)) {
+      specials.outfit.push({ ds, field: "outfit",
+        q: t("{d}、どんな服装でしたか？", { d: formatJP(ds) }),
+        answer: outfitText(ds), photo: outfitOf(ds)?.photo });
+    }
+  }
+  const kinds = shuffle(Object.keys(specials).filter(k => specials[k].length));
+  const pushSpecial = () => {
+    for (let n = 0; n < kinds.length; n++) {
+      const k = kinds.shift(); kinds.push(k); // 種類を順番に回す
+      const arr = specials[k];
+      if (!arr.length) continue;
+      const c = arr.splice(Math.floor(Math.random() * arr.length), 1)[0];
+      if (pushQ(c.ds, c.field, c.q, c.answer, c.photo, c.cue)) return true;
+    }
     return false;
   };
-  const tryBase = () => {
-    for (const ds of shuffle(base23)) { if (pushMealQ(ds, false)) return true; }
-    return false;
-  };
+  pushSpecial();
+
+  // ---------- 足りない分の穴埋め（3日以内の記録だけ。古い食事は出さない＝2026-09-09） ----------
   while (questions.length < QUIZ_COUNT) {
     const before = questions.length;
-    const wantSpecial = Math.random() < 0.35; // 「たまに」の確率
-    if (!(wantSpecial ? (trySpecial() || tryBase()) : (tryBase() || trySpecial()))) {
-      // 1問目と違う直近の食事でもいい
-      for (const ds of mealDates) { if (questions.length >= QUIZ_COUNT) break; pushMealQ(ds, false); }
-      // それでも足りなければ、答えられる記録なら何でも（日記・場所など）
-      if (questions.length < QUIZ_COUNT) {
-        const eligible = [];
-        for (const ds of pastDates) {
-          const e = entries[ds];
-          if (e.diary) eligible.push(["diary", ds]);
-          if (ds >= d3 && outfitText(ds)) eligible.push(["outfit", ds]);
+    if (!pushSpecial()) {
+      // 特別問題も尽きたら、3日以内の日記から
+      for (const ds of [yStr, d2, d3]) {
+        if (questions.length >= QUIZ_COUNT) break;
+        const e = entries[ds] || {};
+        if (e.diary && !(settings.diaryPass && !diaryUnlocked)) {
+          pushQ(ds, "diary", t("{d}に書いたこと、思い出せますか？", { d: formatJP(ds) }), e.diary);
         }
-        for (const [f, ds] of shuffle(eligible)) { if (questions.length >= QUIZ_COUNT) break; makeQ[f](ds, entries[ds]); }
       }
     }
     if (questions.length === before) break; // これ以上は作れない（記録が少ない日）
@@ -3926,6 +3957,7 @@ function renderQuizStep(content) {
       <div class="quiz-count">${t("{i}問目 / 全{n}問", { i: qIndex + 1, n: questions.length })}</div>
       <div class="quiz-q">${q.q}</div>
       <div class="quiz-date-ref">${t("{d}の記録から", { d: formatJP(q.dateStr, true) })}</div>
+      ${q.cue ? `<img class="quiz-photo quiz-cue" src="${q.cue}" alt="${t("手がかりの写真")}">` : ""}
       <label class="field"><span class="field-label quiz-guess-label">${t("頭の中で思い出すだけでOK")}</span>
       <textarea id="quiz-guess" rows="1" placeholder="${t("書きたい方はここをタップ")}"></textarea></label>
       <div class="quiz-reveal-slot" id="quiz-reveal-slot"></div>
