@@ -2564,6 +2564,24 @@ function saveEntries() { store.set("mn_entries", entries); }
 function quickMemoPlugin() {
   return (window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.QuickMemo) || null;
 }
+// アプリ版のネイティブ音声認識（WebViewの音声認識が動かない端末向け。2026-09-09）
+function nativeSpeech() {
+  return (window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.SpeechRecognition) || null;
+}
+// アプリ版の写真えらび：「カメラで撮る／アルバムから選ぶ」を出す（2026-09-09）
+// 返り値：undefined=プラグインなし（ブラウザ）／null=やめた／文字列=写真(dataURL)
+async function pickPhotoNative(maxPx) {
+  const C = window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.Camera;
+  if (!C) return undefined;
+  try {
+    const r = await C.getPhoto({
+      resultType: "dataUrl", source: "PROMPT", quality: 85, width: maxPx, correctOrientation: true,
+      promptLabelHeader: t("写真"), promptLabelPicture: t("カメラで撮る"), promptLabelPhoto: t("アルバムから選ぶ"), promptLabelCancel: t("やめる"),
+    });
+    return (r && r.dataUrl) || null;
+  } catch (e) { return null; } // やめたときもここに来る
+}
+
 // アプリ版では、話して書くの前に録音の許可を確かめる（初回だけOSのダイアログが出る。2026-09-08）
 // ブラウザ版はブラウザ自身が許可を聞くので、ここでは何もしない
 async function ensureMicPermission() {
@@ -3337,7 +3355,11 @@ function renderMealSlot(slotEl) {
   const cam = slotEl.querySelector(".meal-cam");
   if (cam) {
     const file = slotEl.querySelector(".meal-cam-file");
-    cam.addEventListener("click", () => file.click()); // OSが「撮る／選ぶ」を出してくれる
+    cam.addEventListener("click", async () => {
+      const d = await pickPhotoNative(900);
+      if (d === undefined) { file.click(); return; } // ブラウザは従来の選択画面
+      if (d) shrinkDataUrl(d, 900, 0.72).then(u => { setMealPhotoSlot(flow.date, slot, u); renderMealSlot(slotEl); });
+    });
     file.addEventListener("change", () => {
       const f = file.files && file.files[0];
       if (!f) return;
@@ -4623,7 +4645,11 @@ function renderOutfitMain() {
     if (!f) return;
     resizePhotoToDataURL(f, 800, 0.7).then(url => { setOutfit(td, { photo: url }); renderOutfitMain(); });
   });
-  document.getElementById("outfit-shot").addEventListener("click", () => fileInput.click());
+  document.getElementById("outfit-shot").addEventListener("click", async () => {
+    const d = await pickPhotoNative(800);
+    if (d === undefined) { fileInput.click(); return; } // ブラウザは従来の選択画面
+    if (d) shrinkDataUrl(d, 800, 0.7).then(url => { setOutfit(td, { photo: url }); renderOutfitMain(); });
+  });
   const note = document.getElementById("outfit-note");
   const growNote = () => { if (CSS.supports && CSS.supports("field-sizing", "content")) return; note.style.height = "auto"; note.style.height = (note.scrollHeight + note.offsetHeight - note.clientHeight) + "px"; }; // 書くほど下にのびる（枠線ぶんも足す）
   growNote();
@@ -4735,7 +4761,11 @@ function renderOutfitDay(ds) {
   const pickInto = (btnId, inputId) => {
     const input = document.getElementById(inputId);
     if (!input) return;
-    document.getElementById(btnId).addEventListener("click", () => input.click());
+    document.getElementById(btnId).addEventListener("click", async () => {
+      const d = await pickPhotoNative(800);
+      if (d === undefined) { input.click(); return; } // ブラウザは従来の選択画面
+      if (d) shrinkDataUrl(d, 800, 0.7).then(url => { setOutfit(ds, { photo: url }); renderOutfitDay(ds); });
+    });
     input.addEventListener("change", () => {
       const f = input.files && input.files[0];
       if (!f) return;
@@ -5695,12 +5725,12 @@ function micIconSvg() {
   return `<svg class="mic-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="9.2" y="3.4" width="5.6" height="10.2" rx="2.8"/><path d="M5.6 11.6a6.4 6.4 0 0 0 12.8 0"/><path d="M12 18v3.2"/></svg>`;
 }
 function micHtml(targetId) {
-  if (!SpeechRec) return "";
+  if (!SpeechRec && !nativeSpeech()) return "";
   return `<button type="button" class="mic-btn" data-mic="${targetId}">${micIconSvg()}<span class="mic-label">${t("話して書く")}</span></button>`;
 }
 // 欄の右に置く小さな丸マイク（1行の入力欄むけ）
 function micMini(targetId, saveBtnId) {
-  if (!SpeechRec) return "";
+  if (!SpeechRec && !nativeSpeech()) return "";
   const saveAttr = saveBtnId ? ` data-voice-save="${saveBtnId}"` : "";
   return `<button type="button" class="mic-btn mic-mini" data-mic="${targetId}" data-idle="1"${saveAttr} aria-label="${t("話して書く")}">${micIconSvg()}</button>`;
 }
@@ -5725,6 +5755,57 @@ function wireMics(root) {
       stopMic();
       const target = document.getElementById(btn.dataset.mic);
       if (!target) return;
+      // ---- アプリ版：ネイティブ音声認識（こちらを優先。WebViewの認識が動かない端末があるため）----
+      const SRN = nativeSpeech();
+      if (SRN) {
+        try {
+          const perm = await SRN.requestPermissions();
+          if (perm && perm.speechRecognition === "denied") return;
+        } catch (e) {}
+        const base = target.value;
+        let lastSaid = "";
+        let programmatic = false;
+        const onUserEdit = () => { if (!programmatic && micActive && micActive.btn === btn) stopMic(); };
+        target.addEventListener("input", onUserEdit);
+        const applySaid = (said, isFinal) => {
+          let wantSave = false;
+          if (isFinal) {
+            const m = said.match(/(?:保存|ほぞん|ホゾン)[。．\s　]*$/);
+            if (m) { wantSave = true; said = said.slice(0, m.index).replace(/[、。．\s　]+$/, ""); }
+          }
+          programmatic = true;
+          target.value = said ? (base ? base + "　" : "") + said : base;
+          target.dispatchEvent(new Event("input", { bubbles: true }));
+          programmatic = false;
+          if (wantSave) {
+            stopMic();
+            const saveBtnId = btn.dataset.voiceSave;
+            if (saveBtnId) document.getElementById(saveBtnId)?.click();
+          }
+        };
+        const subs = [];
+        subs.push(await SRN.addListener("partialResults", d => {
+          const said = (((d && d.matches) || [])[0] || "").trim();
+          if (said && micActive && micActive.btn === btn) { lastSaid = said; applySaid(said, false); }
+        }));
+        subs.push(await SRN.addListener("listeningState", d => {
+          if (d && d.status === "stopped" && micActive && micActive.btn === btn) {
+            applySaid(lastSaid, true); // 話し終わり＝確定（語尾の「保存」もここで判定）
+            stopMic();
+          }
+        }));
+        micActive = {
+          rec: { stop: () => { try { SRN.stop(); } catch (e) {} } },
+          btn, target,
+          cleanup: () => { subs.forEach(x => { try { x.remove(); } catch (e) {} }); target.removeEventListener("input", onUserEdit); },
+        };
+        btn.classList.add("listening");
+        btn.innerHTML = btn.dataset.idle ? micIconSvg() : `${micIconSvg()}<span class="mic-label">${t("聞いています…（押すと止まる）")}</span>`;
+        try { await SRN.start({ language: "ja-JP", maxResults: 1, partialResults: true, popup: false }); }
+        catch (e) { stopMic(); }
+        return;
+      }
+      // ---- ブラウザ：WebViewと共通のWeb音声認識 ----
       if (!(await ensureMicPermission())) return; // アプリ版：録音の許可がなければ始めない
       const rec = new SpeechRec();
       rec.lang = "ja-JP";
@@ -5960,7 +6041,7 @@ function wireEvents() {
   });
   // 🎤で話して検索（対応ブラウザのみボタンが出る）。ひと言で止まり、そのまま検索
   const searchMic = document.getElementById("search-mic");
-  if (searchMic && SpeechRec) {
+  if (searchMic && (SpeechRec || nativeSpeech())) {
     searchMic.hidden = false;
     searchMic.dataset.idle = "1";
     searchMic.innerHTML = micIconSvg();
@@ -5969,6 +6050,36 @@ function wireEvents() {
     searchMic.addEventListener("click", async () => {
       if (micActive && micActive.btn === searchMic) { stopMic(); searchInput.placeholder = searchPh; return; }
       stopMic();
+      const SRN = nativeSpeech();
+      if (SRN) {
+        try {
+          const perm = await SRN.requestPermissions();
+          if (perm && perm.speechRecognition === "denied") return;
+        } catch (e) {}
+        let lastSaid = "";
+        const subs = [];
+        subs.push(await SRN.addListener("partialResults", d => {
+          const said = (((d && d.matches) || [])[0] || "").trim();
+          if (said && micActive && micActive.btn === searchMic) { lastSaid = said; searchInput.value = said; }
+        }));
+        subs.push(await SRN.addListener("listeningState", d => {
+          if (d && d.status === "stopped" && micActive && micActive.btn === searchMic) {
+            stopMic();
+            searchInput.placeholder = searchPh;
+            if (lastSaid) { lastSearchQ = null; runSearch(lastSaid); }
+          }
+        }));
+        micActive = {
+          rec: { stop: () => { try { SRN.stop(); } catch (e) {} } },
+          btn: searchMic, target: searchInput,
+          cleanup: () => { subs.forEach(x => { try { x.remove(); } catch (e) {} }); },
+        };
+        searchMic.classList.add("listening");
+        searchInput.placeholder = t("聞いています…");
+        try { await SRN.start({ language: "ja-JP", maxResults: 1, partialResults: true, popup: false }); }
+        catch (e) { stopMic(); searchInput.placeholder = searchPh; }
+        return;
+      }
       if (!(await ensureMicPermission())) return; // アプリ版：録音の許可がなければ始めない
       const rec = new SpeechRec();
       rec.lang = "ja-JP";
