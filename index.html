@@ -5720,6 +5720,12 @@ function renderShoppingRecall() {
 // =========================================================
 const SpeechRec = window.SpeechRecognition || window.webkitSpeechRecognition || null;
 let micActive = null; // { rec, btn, target }
+let micStartAt = 0; // 連打・二度押しで二重にマイクが始まらないようにする（2026-09-09）
+// 認識結果が同じ文を二重にして返す端末対策（「昨日の写真 昨日の写真」→「昨日の写真」。2026-09-09）
+function collapseDoubledSaid(said) {
+  const m = said.match(/^(.+)[ 　]+\1$/);
+  return m ? m[1] : said;
+}
 // マイクの線画（ホームの絵と同じタッチ）
 function micIconSvg() {
   return `<svg class="mic-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="9.2" y="3.4" width="5.6" height="10.2" rx="2.8"/><path d="M5.6 11.6a6.4 6.4 0 0 0 12.8 0"/><path d="M12 18v3.2"/></svg>`;
@@ -5753,6 +5759,8 @@ function wireMics(root) {
     btn.addEventListener("click", async () => {
       if (micActive && micActive.btn === btn) { stopMic(); return; } // もう一度押すと止まる
       stopMic();
+      if (Date.now() - micStartAt < 800) return; // 二度押しで二重に始めない
+      micStartAt = Date.now();
       const target = document.getElementById(btn.dataset.mic);
       if (!target) return;
       // ---- アプリ版：ネイティブ音声認識（こちらを優先。WebViewの認識が動かない端末があるため）----
@@ -5764,15 +5772,21 @@ function wireMics(root) {
         } catch (e) {}
         const base = target.value;
         let lastSaid = "";
+        const sessionAt = Date.now();
+        let heard = false; // このセッションで実際に話し始めたか（前回の残り結果を受け取らないための関）
+        const isMine = () => heard || Date.now() - sessionAt > 700; // 「話し始めた」合図が来ない端末の保険
         let programmatic = false;
         const onUserEdit = () => { if (!programmatic && micActive && micActive.btn === btn) stopMic(); };
         target.addEventListener("input", onUserEdit);
         const applySaid = (said, isFinal) => {
+          said = collapseDoubledSaid(said);
           let wantSave = false;
           if (isFinal) {
             const m = said.match(/(?:保存|ほぞん|ホゾン)[。．\s　]*$/);
             if (m) { wantSave = true; said = said.slice(0, m.index).replace(/[、。．\s　]+$/, ""); }
           }
+          // 欄の末尾がすでに同じ文なら継ぎ足さない（前回の残り結果がもう一度届いたとき用）
+          if (said && base && (base === said || base.endsWith("　" + said))) said = "";
           programmatic = true;
           target.value = said ? (base ? base + "　" : "") + said : base;
           target.dispatchEvent(new Event("input", { bubbles: true }));
@@ -5786,10 +5800,12 @@ function wireMics(root) {
         const subs = [];
         subs.push(await SRN.addListener("partialResults", d => {
           const said = (((d && d.matches) || [])[0] || "").trim();
-          if (said && micActive && micActive.btn === btn) { lastSaid = said; applySaid(said, false); }
+          if (said && isMine() && micActive && micActive.btn === btn) { lastSaid = said; applySaid(said, false); }
         }));
         subs.push(await SRN.addListener("listeningState", d => {
-          if (d && d.status === "stopped" && micActive && micActive.btn === btn) {
+          if (!d || !micActive || micActive.btn !== btn) return;
+          if (d.status === "started") { heard = true; return; } // ここから先の結果だけが今回の分
+          if (d.status === "stopped" && isMine()) {
             applySaid(lastSaid, true); // 話し終わり＝確定（語尾の「保存」もここで判定）
             stopMic();
           }
@@ -6050,6 +6066,8 @@ function wireEvents() {
     searchMic.addEventListener("click", async () => {
       if (micActive && micActive.btn === searchMic) { stopMic(); searchInput.placeholder = searchPh; return; }
       stopMic();
+      if (Date.now() - micStartAt < 800) return; // 二度押しで二重に始めない
+      micStartAt = Date.now();
       const SRN = nativeSpeech();
       if (SRN) {
         try {
@@ -6057,13 +6075,18 @@ function wireEvents() {
           if (perm && perm.speechRecognition === "denied") return;
         } catch (e) {}
         let lastSaid = "";
+        const sessionAt = Date.now();
+        let heard = false; // 前回の残り結果を受け取らないための関
+        const isMine = () => heard || Date.now() - sessionAt > 700;
         const subs = [];
         subs.push(await SRN.addListener("partialResults", d => {
-          const said = (((d && d.matches) || [])[0] || "").trim();
-          if (said && micActive && micActive.btn === searchMic) { lastSaid = said; searchInput.value = said; }
+          const said = collapseDoubledSaid((((d && d.matches) || [])[0] || "").trim());
+          if (said && isMine() && micActive && micActive.btn === searchMic) { lastSaid = said; searchInput.value = said; }
         }));
         subs.push(await SRN.addListener("listeningState", d => {
-          if (d && d.status === "stopped" && micActive && micActive.btn === searchMic) {
+          if (!d || !micActive || micActive.btn !== searchMic) return;
+          if (d.status === "started") { heard = true; return; }
+          if (d.status === "stopped" && isMine()) {
             stopMic();
             searchInput.placeholder = searchPh;
             if (lastSaid) { lastSearchQ = null; runSearch(lastSaid); }
