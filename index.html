@@ -3195,7 +3195,7 @@ function eatoutCollect(e) {
 const STEP_DEFS = {
   // ---------- ① 食事（外食もここに含む） ----------
   meal: {
-    emoji: "🍚", icon: "daily", title: "食事", note: "その日食べたものの記録です。",
+    emoji: "🍚", icon: "daily", title: "食事", note: "その日食べたものを記録する",
     options: [
       { value: "full", label: "朝・昼・晩 ＋ 間食", sub: "写真保存は3日間", action: "input" },
       { value: "eatout", label: "外食（お店や友人宅など）", sub: "写真保存は期限なし", action: "input" },
@@ -4900,7 +4900,7 @@ function renderAlbumPhotoView() {
     <div class="album-q q-soft">${t("思い出すだけでも大丈夫")}</div>
     <div class="field meal-line"><textarea id="album-text" class="grow-input" rows="2" placeholder="${t("沖縄旅行")}"></textarea>${micMini("album-text", "album-keep")}</div>
     <button type="button" class="btn btn-primary btn-xl" id="album-keep">${t("保存")}</button>
-    <button type="button" class="btn btn-secondary btn-xl" id="album-skip" style="margin-top:10px;">${t("残さない（ホームへ）")}</button>
+    <button type="button" class="btn btn-secondary btn-xl" id="album-skip" style="margin-top:10px;">${t("思い出しました（ホームへ）")}</button>
     <button type="button" class="btn btn-secondary btn-xl" id="album-list" style="margin-top:10px;">${t("残した思い出を見る（{n}）", { n: memos.length })}</button>`;
   wireMics(document.getElementById("album-wrap")); // 話して書く
   document.getElementById("album-keep").addEventListener("click", () => {
