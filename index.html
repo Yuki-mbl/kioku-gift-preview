@@ -1715,11 +1715,14 @@ mark {
   background-repeat: no-repeat; background-position: right 18px center; background-size: 20px;
   padding-right: 46px;
 }
-/* ふちの間のすき間は4つとも同じ7px（2026-09-06 Yukiさん指定。小数まで詰めて均一に） */
-.b-tl { transform: translate(-151.8%, -117%); }
-.b-tr { transform: translate(57.8%, -106.3%); }
-.b-bl { transform: translate(-130.3%, 37.2%); }
-.b-br { transform: translate(43.6%, 23.3%); }
+/* ふちの間のすき間は4つとも同じ7px（2026-09-06 Yukiさん指定。小数まで詰めて均一に）
+   2026-09-09：中途半端なずれ（均等から2〜18度）が事故に見えたため、点対称の風車型に置き直し。
+   角度は 服装33°・アルバム160°・買い物213°・おやすみ340°（対角どうしが180°ペア）。
+   高さが 服装→アルバム→おやすみ→買い物 の順に階段状に流れる。距離は4つとも同じ138px（=7pxすき間） */
+.b-tl { transform: translate(-163.8%, -94%); }
+.b-tr { transform: translate(51.5%, -118.5%); }
+.b-bl { transform: translate(-151.5%, 13.3%); }
+.b-br { transform: translate(63.8%, -11.2%); }
 
 /* ---------- ふんわり装飾（動きなし・押せない飾り） ---------- */
 /* 房のまわり：淡い水彩のにじみ＋軌道の輪2本＋色とりどりの真珠玉＋きらきらの光
