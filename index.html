@@ -1954,13 +1954,19 @@ html[data-fontsize="large"] .tabb-ico svg,
 html[data-fontsize="xlarge"] .tabb-ico svg { width: 31px; height: 31px; }
 html[data-fontsize="large"] .tabb-name,
 html[data-fontsize="xlarge"] .tabb-name { font-size: min(.95rem, 4vw); }
-/* キーボード表示中：下のタブ・広告に加えて「戻る・保存」の帯と浮きボタンも隠す（2026-09-07 案A）。
+/* キーボード表示中：下のタブ・広告に加えて浮きボタンも隠す（2026-09-07 案A）。
    書いている間は保存が見えない＝朝だけ書いて押してしまう誤操作を防ぐ。
    キーボードを閉じる（欄の外をタップ）と保存が現れる。声の「保存」は隠れていても効く */
 #app.kb-open #tab-bar, #app.kb-open .ad-banner { display: none; }
 #app.kb-open .screen.active { padding-bottom: 20px !important; }
+/* 保存の帯と浮きボタンは、キーボード中でも「いちばん下までスクロールしたら」現れる（2026-09-09）。
+   キーボードを出したまま下へスクロールして保存を探す人が多いため（Yukiさん指摘）。
+   kb-bottom は app.js の updateKbBottom() が付け外しする。
+   書いている最中（途中の位置）では見えないので、誤操作防止（案A）は変わらない */
 #app.kb-open .flow-footer { display: none; }
+#app.kb-open.kb-bottom .flow-footer { display: flex; }
 #app.kb-open .shop-fab { display: none; }
+#app.kb-open.kb-bottom .shop-fab { display: block; bottom: 20px; }
 
 /* タブのある画面は、下がタブ＋広告に隠れないよう余白を足す */
 #app.has-tabs .screen.active { padding-bottom: 128px; }
@@ -6169,11 +6175,30 @@ function wireKeyboardInset() {
     document.getElementById("app").classList.toggle("kb-open", kbMaxH - vv.height > 150);
     const hidden = Math.max(0, window.innerHeight - vv.height - vv.offsetTop);
     document.body.style.paddingBottom = hidden > 40 ? hidden + "px" : "";
+    updateKbBottom();
   };
   vv.addEventListener("resize", update);
   vv.addEventListener("scroll", update);
   window.addEventListener("resize", update);
   update();
+  // キーボードを出したまま下へスクロールして保存を探す人が多い（2026-09-09 Yukiさん指摘）。
+  // 中身のいちばん下まで来たら kb-bottom を付けて、隠していた保存の帯・浮きボタンを出す
+  document.addEventListener("scroll", e => {
+    const el = e.target;
+    if (el && el.nodeType === 1 && el.closest && el.closest(".screen.active")) updateKbBottom(el);
+  }, true);
+}
+// 「下まで来たか」の判定。el省略時はいま開いている画面のスクロール部分を探す
+function updateKbBottom(el) {
+  const app = document.getElementById("app");
+  if (!app.classList.contains("kb-open")) { app.classList.remove("kb-bottom"); return; }
+  if (!el || el.nodeType !== 1) {
+    el = [...document.querySelectorAll(".screen.active, .screen.active *")]
+      .find(x => x.scrollHeight > x.clientHeight + 10 && /(auto|scroll)/.test(getComputedStyle(x).overflowY));
+  }
+  // スクロールする場所がない（中身が短い）ときは出しておく＝隠す理由がない
+  const atBottom = !el || el.scrollTop + el.clientHeight >= el.scrollHeight - 40;
+  app.classList.toggle("kb-bottom", atBottom);
 }
 
 // ホームで下に引っ張って更新（通知から書いたメモの取り込み。2026-09-08 Yukiさん要望）
