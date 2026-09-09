@@ -1089,6 +1089,12 @@ mark {
 .quiz-judge .btn { flex: 1; min-height: 62px; font-size: 1.18rem; border-radius: 999px; }
 /* 横並び2つのとき（ホームへ／食事を記録）：大きめの字で、2行までは折り返しOK */
 .quiz-judge-2 .btn { font-size: min(1.05rem, 4.5vw); line-height: 1.35; padding: 10px 8px; }
+/* 思い出しの締め（2026-09-09 Yukiさん指定）：もっと思い出す→間を空けて→食事を記録（横長1行）→小さめの「戻る」。
+   下のタブに「ホーム」があるので、大きな「ホームへ」はやめた */
+.quiz-meal-row { margin-top: 18px; }
+.quiz-meal-row .btn { white-space: nowrap; font-size: min(1.12rem, 4.6vw); }
+.quiz-back-row { margin-top: 14px; display: flex; justify-content: center; }
+.quiz-back-row .quiz-back-sm { min-height: 52px; font-size: 1.08rem; padding: 10px 44px; border-radius: 999px; }
 .btn-good { background: var(--accent-grad); color: var(--accent-text); box-shadow: var(--btn-glow); }
 .btn-soft { background: var(--card); color: var(--text); border: 1.5px solid var(--border); box-shadow: var(--shadow); }
 
@@ -2335,7 +2341,7 @@ html[data-fontsize="xlarge"] .tabb-name { font-size: min(.95rem, 4vw); }
           <p class="settings-hint" style="margin-top:0;" data-t>ふだんはスマホ本体の設定に合わせています</p>
           <div class="seg-group" id="set-font-size">
             <button class="seg" data-t data-value="1">もっと大きい字にする</button>
-            <button class="seg" data-t data-value="0">このままでよい</button>
+            <button class="seg" data-t data-value="0">スマホの設定のまま</button>
           </div>
         </div>
         <div class="card">
@@ -2383,10 +2389,6 @@ html[data-fontsize="xlarge"] .tabb-name { font-size: min(.95rem, 4vw); }
           <p class="settings-hint" style="margin-top:8px;" data-t>機種変更しても、新しいスマホを同じ設定（iPhoneはApple ID、AndroidはGoogleアカウント）で引き継げば、記録もそのまま戻ります。ふだんは何もしなくて大丈夫です。</p>
           <p class="settings-hint" style="margin-top:16px;" data-t>別のスマホや、別のアカウントに移すとき：</p>
           <button type="button" class="btn btn-secondary btn-xl" id="transfer-make" style="margin-top:8px;" data-t>引き継ぎコードを作る</button>
-        </div>
-        <div class="card">
-          <div class="settings-label" data-t>プロフィール</div>
-          <div class="settings-profile" id="settings-profile"></div>
         </div>
         <div class="card">
           <div class="settings-label" data-t>このアプリについて</div>
@@ -3614,6 +3616,21 @@ function formatMealAnswer(meal) {
   return rows.join("\n");
 }
 
+// 食事の質問は「朝ごはん・昼ごはん・晩ごはん・間食」のどれかを名指しで聞く
+// （2026-09-09 Yukiさん要望。「食事は何でしたか」だと頭の中がごっちゃになるため）。
+// どの欄を聞くかは日付から決める＝開き直しても同じ欄（乱数だと毎回変わって落ち着かない）
+function mealSlotName(meal, ds) {
+  const filled = [];
+  if (meal.morning) filled.push("朝ごはん");
+  if (meal.noon) filled.push("昼ごはん");
+  if (meal.evening) filled.push("晩ごはん");
+  if (meal.snack) filled.push("間食");
+  if (!filled.length) return null;
+  let h = 0;
+  for (const c of ds) h = (h * 31 + c.charCodeAt(0)) % 9973;
+  return filled[h % filled.length];
+}
+
 function formatPlaceAnswer(p) {
   const rows = [];
   if (p.place) rows.push(t("場所：{v}", { v: p.place }));
@@ -3667,10 +3684,15 @@ function buildQuizQuestions() {
     const e = entries[ds] || {};
     if (e.meal) {
       let q;
-      if (isYesterday) {
-        q = e.meal.mode === "best"
+      const slot = e.meal.mode === "best" ? null : mealSlotName(e.meal, ds);
+      if (e.meal.mode === "best") {
+        q = isYesterday
           ? t("昨日、記憶に残っている食べ物は何でしたか？")
-          : (e.meal.evening ? t("昨日の夕飯は何でしたか？") : t("昨日の食事、思い出せますか？"));
+          : t("{d}、記憶に残っている食べ物は何でしたか？", { d: formatJP(ds) });
+      } else if (slot) {
+        q = isYesterday
+          ? t("昨日の{slot}は何でしたか？", { slot: t(slot) })
+          : t("{d}の{slot}は何でしたか？", { d: formatJP(ds), slot: t(slot) });
       } else q = t("{d}の食事は何でしたか？", { d: formatJP(ds) });
       return pushQ(ds, "meal", q, formatMealAnswer(e.meal), mealPhotoList(ds));
     }
@@ -3781,7 +3803,15 @@ function buildDeepQuestions(excludeKeys, max) {
     const e = entries[ds] || {};
     // 食事は3日以内だけ（日付しか手がかりが無く、古いと思い出せないため）
     if (ds >= d3) {
-      if (e.meal) pushQ(others, ds, "meal", t("{d}の食事は何でしたか？", { d: formatJP(ds) }), formatMealAnswer(e.meal), mealPhotoList(ds));
+      if (e.meal) {
+        const slot = e.meal.mode === "best" ? null : mealSlotName(e.meal, ds);
+        const q = e.meal.mode === "best"
+          ? t("{d}、記憶に残っている食べ物は何でしたか？", { d: formatJP(ds) })
+          : slot
+            ? t("{d}の{slot}は何でしたか？", { d: formatJP(ds), slot: t(slot) })
+            : t("{d}の食事は何でしたか？", { d: formatJP(ds) });
+        pushQ(others, ds, "meal", q, formatMealAnswer(e.meal), mealPhotoList(ds));
+      }
       else if (mealPhotoList(ds).length) pushQ(others, ds, "meal", t("{d}の食事は何でしたか？", { d: formatJP(ds) }), t("（この日は写真で記録しました）"), mealPhotoList(ds));
     }
     // 外食は記録の1つをヒントに見せて、残りを思い出してもらう
@@ -3920,9 +3950,11 @@ function renderQuizStep(content) {
             ? `<p class="quiz-more-note">${t("「もっと思い出す」は1日1回です。また明日どうぞ")}</p>` : "");
       content.querySelector(".quiz-actions").outerHTML = isLast
         ? `${moreHtml}
-          <div class="quiz-judge quiz-judge-2">
-            <button class="btn btn-primary" id="quiz-next">${t("ホームへ")}</button>
-            <button class="btn btn-soft" id="quiz-meal"><span class="btn-ico btn-ico-sm">${balloonIconSvg("daily")}</span><span class="nowrap">${t("今日の")}</span><span class="nowrap">${t("食事を記録")}</span></button>
+          <div class="quiz-judge quiz-meal-row">
+            <button class="btn btn-soft" id="quiz-meal"><span class="btn-ico btn-ico-sm">${balloonIconSvg("daily")}</span><span class="nowrap">${t("今日の食事を記録")}</span></button>
+          </div>
+          <div class="quiz-back-row">
+            <button class="btn btn-secondary quiz-back-sm" id="quiz-next">${t("戻る")}</button>
           </div>`
         : `<div class="quiz-judge">
             <button class="btn btn-primary btn-xl" id="quiz-next">${t("次の思い出し")}<span class="btn-ico btn-ico-r">${balloonIconSvg("sprout")}</span></button>
@@ -4286,9 +4318,7 @@ function openSettings() {
   document.querySelectorAll("#set-font-size .seg").forEach(btn => {
     btn.classList.toggle("selected", (btn.dataset.value === "1") === !!settings.fontBoost);
   });
-  const p = document.getElementById("settings-profile");
-  const ageStr = ageGroupOf(profile) || "回答しない";
-  p.innerHTML = `${t("年代：{v}", { v: esc(t(ageStr)) })}<br>${t("性別：{v}", { v: esc(t(profile.gender || "回答しない")) })}`;
+  // プロフィールのカードは出さない（2026-09-09 Yukiさん指示。年代・性別は統計用に保存だけ続ける）
   refreshPasscodeStatus();
   const qm = document.getElementById("quickmemo-card");
   if (qm) {
