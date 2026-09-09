@@ -3703,8 +3703,10 @@ function buildQuizQuestions() {
     }
     return false;
   };
+  // 食事の問題は3日以内だけ（2026-09-09 Yukiさん指定。日付しか手がかりが無く、古いと思い出せない。
+  // 「もっと思い出す」と同じ制限を3問クイズにも適用）
   const mealDates = [...new Set([...pastDates, ...Object.keys(loadMealPhotos())])]
-    .filter(ds => ds < today && hasMealRecord(ds)).sort().reverse();
+    .filter(ds => ds < today && ds >= d3 && hasMealRecord(ds)).sort().reverse();
 
   // ---------- 1問目：昨日の食事（なければ直近の食事） ----------
   if (hasMealRecord(yStr)) pushMealQ(yStr, true);
@@ -3899,7 +3901,7 @@ function renderQuizStep(content) {
         ${t("記録がたまってくると、")}<br>${t("ここで「思い出しクイズ」が出ます。")}<br><br>
         ${t("まずは今日のことを、ひとつだけ書いてみませんか。")}
       </div>
-      <button class="btn btn-primary btn-xl" id="quiz-meal"><span class="btn-ico btn-ico-sm">${balloonIconSvg("daily")}</span><span class="nowrap">${t("今日の")}</span><span class="nowrap">${t("食事を記録")}</span></button>`;
+      <button class="btn btn-primary btn-xl" id="quiz-meal"><span class="btn-ico btn-ico-sm">${balloonIconSvg("daily")}</span><span class="nowrap">${t("今日の食事を記録")}</span></button>`;
     document.getElementById("quiz-meal").addEventListener("click", () => startMeal(todayStr()));
     return;
   }
