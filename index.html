@@ -3266,7 +3266,8 @@ const STEP_DEFS = {
           ${micMini("diary-text", "flow-skip")}
         </div>
       </div>
-      ${settings.diaryPass ? "" : `<p class="photo-hint" style="margin-top:14px;">${t("設定から日記のみをロックできます")}</p>`}`,
+      <p class="photo-hint" style="margin-top:14px;">${t("前日までの日記は「見返す」タブから追記できます")}</p>
+      ${settings.diaryPass ? "" : `<p class="photo-hint" style="margin-top:6px;">${t("設定から日記のみをロックできます")}</p>`}`,
     collect: (mode, e) => {
       const v = document.getElementById("diary-text")?.value.trim();
       if (v) e.diary = v; else delete e.diary;
@@ -3406,13 +3407,12 @@ function renderPickView() {
   document.getElementById("flow-skip").style.display = "none"; // 選ぶだけの画面に保存は置かない（戻るだけ）
   content.innerHTML = `
     <div class="step-title"><span class="step-emoji step-ico">${balloonIconSvg("pencil")}</span>${t("この日を書き足す")}</div>
-    <div class="step-note">${t("どちらを書き足しますか？")}</div>
     <div class="opt-list">
       <button class="opt-card" id="pick-meal">${t("食事")}</button>
       <button class="opt-card" id="pick-diary">${t("日記")}</button>
     </div>`;
   const ret = flow.returnTo;
-  document.getElementById("pick-meal").addEventListener("click", () => { startMeal(flow.date); flow.returnTo = ret; });
+  document.getElementById("pick-meal").addEventListener("click", () => { startMeal(flow.date); flow.returnTo = ret; flow.fromPicker = true; });
   document.getElementById("pick-diary").addEventListener("click", () => {
     const ds = flow.date;
     if (settings.diaryPass && !diaryUnlocked && ((entries[ds] || {}).diary || "").trim()) {
@@ -3422,6 +3422,7 @@ function renderPickView() {
     }
     startDiary(ds);
     flow.returnTo = ret;
+    flow.fromPicker = true; // 戻るは、まずこの選択画面へ（来た道を戻る）
   });
   playFlowAnim(content);
 }
@@ -3596,6 +3597,9 @@ function prevStep() {
     flow.sub = "select";
     flow.mode = null;
     renderStep();
+  } else if (flow.fromPicker) {
+    // 「この日を書き足す」の選択画面から来たなら、まずそこへ戻る（来た道を戻る。2026-09-10修正）
+    openAddPicker(flow.date, flow.returnTo);
   } else if (flow.returnTo) {
     const r = flow.returnTo; flow.returnTo = null;
     goBackTo(r);
