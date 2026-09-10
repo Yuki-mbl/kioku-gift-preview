@@ -1723,13 +1723,15 @@ mark {
 }
 /* ふちの間のすき間は4つとも同じ7px（2026-09-06 Yukiさん指定。小数まで詰めて均一に）
    2026-09-09：中途半端なずれ（均等から2〜18度）が事故に見えたため、点対称の風車型に置き直し。
-   角度は 服装41°・アルバム160°・買い物221°・おやすみ340°（対角どうしが180°ペア）。
+   角度は 服装41°・アルバム157°・買い物221°・おやすみ337°（対角どうしが180°ペア）。
    高さが 服装→アルバム→おやすみ→買い物 の順に階段状に流れる（段差を大きめに＝同日に41°へ）。
-   距離は4つとも同じ138px（=7pxすき間） */
-.b-tl { transform: translate(-163.8%, -94%); }
+   距離は4つとも同じ138px（=7pxすき間）。
+   2026-09-10：狭い端末でアルバム・おやすみが画面の端に接触したため、横に張り出す2つを
+   160°/340°→157°/337°に立てて横幅を約6px縮めた（風船の幅上限も30vw→28.5vwに） */
+.b-tl { transform: translate(-161.4%, -99.9%); }
 .b-tr { transform: translate(41.4%, -132%); }
 .b-bl { transform: translate(-141.4%, 26.8%); }
-.b-br { transform: translate(63.8%, -11.2%); }
+.b-br { transform: translate(61.4%, -5.3%); }
 
 /* ---------- ふんわり装飾（動きなし・押せない飾り） ---------- */
 /* 房のまわり：淡い水彩のにじみ＋軌道の輪2本＋色とりどりの真珠玉＋きらきらの光
@@ -1746,7 +1748,7 @@ mark {
 .balloon {
   display: flex; flex-direction: column; align-items: center; justify-content: center;
   gap: clamp(3px, .7vh, 6px);
-  width: min(114px, 30vw, 15.2vh); height: min(114px, 30vw, 15.2vh);
+  width: min(114px, 28.5vw, 15.2vh); height: min(114px, 28.5vw, 15.2vh);
   border-radius: 50%; padding: 0;
   font-family: inherit;
   cursor: pointer; -webkit-tap-highlight-color: transparent;
@@ -1843,11 +1845,11 @@ mark {
 .balloon-lg .balloon-name { font-size: min(1.08rem, 4.3vw); }
 /* 文字の大きさに合わせて、風船（絵）も連動して大きく（四隅は少し外へ逃がして重なり防止） */
 html[data-fontsize="large"] #screen-home #home-doors { height: clamp(282px, 42vh, 360px); }
-html[data-fontsize="large"] .balloon { width: min(120px, 30.6vw, 15.4vh); height: min(120px, 30.6vw, 15.4vh); }
-html[data-fontsize="large"] .balloon-lg { width: min(156px, 39.4vw, 19.4vh); height: min(156px, 39.4vw, 19.4vh); }
+html[data-fontsize="large"] .balloon { width: min(120px, 29vw, 15.4vh); height: min(120px, 29vw, 15.4vh); }
+html[data-fontsize="large"] .balloon-lg { width: min(156px, 37.7vw, 19.4vh); height: min(156px, 37.7vw, 19.4vh); }
 html[data-fontsize="xlarge"] #screen-home #home-doors { height: clamp(292px, 44vh, 372px); }
-html[data-fontsize="xlarge"] .balloon { width: min(126px, 31.6vw, 15.6vh); height: min(126px, 31.6vw, 15.6vh); }
-html[data-fontsize="xlarge"] .balloon-lg { width: min(164px, 41vw, 19.6vh); height: min(164px, 41vw, 19.6vh); }
+html[data-fontsize="xlarge"] .balloon { width: min(126px, 30vw, 15.6vh); height: min(126px, 30vw, 15.6vh); }
+html[data-fontsize="xlarge"] .balloon-lg { width: min(164px, 39vw, 19.6vh); height: min(164px, 39vw, 19.6vh); }
 /* （旧・四隅アンカー時代の b-tr/b-br 調整は中央基準化にともない廃止。2026-09-06） */
 /* 文字サイズ「大」「特大」では、風船の中の絵と文字も一緒に大きく */
 /* ホームの風船の中の絵だけ拡大（他の線画には効かせない） */
@@ -1886,7 +1888,7 @@ html[data-fontsize="xlarge"] .balloon-lg .balloon-name { font-size: min(1.3rem, 
 }
 [data-theme="pastel"] .balloon-ico { stroke-width: 1.5; }
 [data-theme="pastel"] .balloon-name { color: #635b4e; }
-.balloon-lg { width: min(148px, 38.5vw, 19.2vh); height: min(148px, 38.5vw, 19.2vh); }
+.balloon-lg { width: min(148px, 37vw, 19.2vh); height: min(148px, 37vw, 19.2vh); } /* 28.5vwとの比率114:148を保つ＝すき間7pxが崩れない */
 
 /* =========================================================
    下のタブ：のこす・思い出す・見返す（広告の上に常駐）
