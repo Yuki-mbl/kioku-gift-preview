@@ -859,7 +859,8 @@ input[type="month"]::-webkit-calendar-picker-indicator { width: 28px; height: 28
 .cal-encourage-lead { color: var(--accent-strong); font-weight: 800; font-size: 1.05rem; margin-bottom: 6px; }
 /* カレンダーの上の一行（1行に収まる大きさで中央に） */
 .cal-lead-top { text-align: center; margin: 0; white-space: nowrap; font-size: min(1.05rem, 4.6vw); }
-.cal-encourage p:not(.cal-encourage-lead) { color: var(--text); opacity: .8; font-size: .95rem; }
+/* 2026-09-10 Yukiさん指定：励ましの2行も薄くしない（日記の案内と同じ濃い字＋太字に統一） */
+.cal-encourage p:not(.cal-encourage-lead) { color: var(--text); font-size: .95rem; font-weight: 700; }
 
 /* ===== さがす ===== */
 .search-wrap { padding: 12px 20px 40px; }
