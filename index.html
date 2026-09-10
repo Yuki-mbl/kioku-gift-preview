@@ -1112,6 +1112,11 @@ mark {
 .photo-hint { color: var(--muted); font-size: 1.02rem; margin-top: 8px; text-align: center; line-height: 1.6; }
 /* 大事な案内は薄い字にしない（2026-09-10 Yukiさん指定。日記の「見返すタブから追記」など） */
 .photo-hint.hint-strong { color: var(--text); font-weight: 700; }
+/* 記録がない日の「この日を書き足す」見出し（日別ページに食事・日記ボタンを直置き。2026-09-10） */
+.detail-add-lead {
+  display: flex; align-items: center; justify-content: center; gap: 8px;
+  margin: 26px 0 12px; font-size: 1.15rem; font-weight: 800; color: var(--text);
+}
 .nowrap { white-space: nowrap; display: inline-block; } /* 折り返しは区切りのいい所だけ（ヒント文・ボタン共通） */
 .photo-preview { text-align: center; }
 .photo-preview img { display: block; width: 100%; max-width: 260px; border-radius: 14px; margin: 10px auto 4px; border: 1.5px solid var(--border); }
@@ -4305,12 +4310,24 @@ function openDayDetail(ds) {
   detailDate = ds;
   document.getElementById("detail-date").textContent = formatJP(ds, true);
   const fields = dayFields(ds);
+  // 記録がない日は、浮きボタン→選択画面の2段を省いて、その場で「食事・日記」を選べる（2026-09-10 Yukiさん案）
+  document.getElementById("detail-add").style.display = fields.length ? "" : "none";
   document.getElementById("detail-cards").innerHTML = fields.length
     ? fields.map((f, i) =>
         `<div class="card detail-card tappable" data-idx="${i}" role="button" tabindex="0">
           <div class="detail-label">${t(f.label)}</div>${f.thumb ? `<img class="detail-thumb" src="${f.thumb}" alt="">` : ""}${linkify(f.text)}<span class="detail-chev">›</span>
         </div>`).join("")
-    : `<p class="search-hint">${t("この日の記録はまだありません。")}</p>`;
+    : `<p class="search-hint">${t("この日の記録はまだありません。")}</p>
+      <div class="detail-add-lead"><span class="step-emoji step-ico">${balloonIconSvg("pencil")}</span>${t("この日を書き足す")}</div>
+      <div class="opt-list">
+        <button class="opt-card" id="detail-pick-meal">${t("食事")}</button>
+        <button class="opt-card" id="detail-pick-diary">${t("日記")}</button>
+      </div>`;
+  if (!fields.length) {
+    const ret = { screen: "detail", ds };
+    document.getElementById("detail-pick-meal").addEventListener("click", () => { startMeal(ds); flow.returnTo = ret; });
+    document.getElementById("detail-pick-diary").addEventListener("click", () => { startDiary(ds); flow.returnTo = ret; });
+  }
   // カードをタップすると、その項目の置き場所が開く
   document.querySelectorAll("#detail-cards .detail-card.tappable").forEach(card => {
     const go = e => {
