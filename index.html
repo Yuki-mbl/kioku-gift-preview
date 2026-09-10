@@ -2382,7 +2382,7 @@ html[data-fontsize="xlarge"] .tabb-name { font-size: min(.95rem, 4vw); }
             <button class="seg" data-t data-value="0">オフ</button>
           </div>
         </div>
-        <div class="card">
+        <div class="card" id="iap-card">
           <div class="settings-label" data-t>広告を消す</div>
           <div class="iap-row">
             <div class="iap-left">
@@ -2543,6 +2543,10 @@ const store = {
 let profile = store.get("mn_profile", null);
 let entries = store.get("mn_entries", {});   // { "2026-07-13": {...} }
 let settings = store.get("mn_settings", { theme: "pastel", homeStyle: "guide" }); // 初期テーマは淡い配色。文字の大きさは端末設定に合わせる
+
+// 広告の親スイッチ（2026-09-10 Yukiさん決定「最初はすべて広告なし」でリリース）。
+// 広告を入れるときはここを true に戻すだけ（下の帯・全画面広告・設定の「広告を消す」がまとめて復活する）
+const ADS_ENABLED = false;
 
 // 端末（スマホ本体）の文字サイズ設定を読み取って、ふだんの大きさを決める。
 // 本体で大きめにしている方は、アプリも最初から大きく出る。
@@ -2713,7 +2717,7 @@ function showScreen(id) {
   }
   lastScreenId = id;
   // 広告バナー：一部の画面（設定・初回設定・ロック・引き継ぎ等）以外で表示。買い切り購入済みなら常に非表示
-  document.getElementById("app").classList.toggle("has-ad", !NO_AD_SCREENS.has(id) && !settings.adFree);
+  document.getElementById("app").classList.toggle("has-ad", ADS_ENABLED && !NO_AD_SCREENS.has(id) && !settings.adFree);
   const tabs = document.getElementById("tab-bar");
   const tabsOn = !NO_TAB_SCREENS.has(id);
   if (tabs) tabs.hidden = !tabsOn;
@@ -4013,7 +4017,7 @@ function renderQuizStep(content) {
       document.getElementById("quiz-next").addEventListener("click", () => {
         if (isLast) {
           // 区切りの一瞬にだけ広告（1日1回）。記録のついでのクイズでは出さない
-          if (flow.recallOnly && !settings.adFree && !quizAdShownToday()) {
+          if (ADS_ENABLED && flow.recallOnly && !settings.adFree && !quizAdShownToday()) {
             renderAdGate(() => { noteQuizAdShown(); goHome(); }, t("思い出す"), t("本番アプリでは、広告のあとにホームへ戻ります。"));
             return;
           }
@@ -4027,7 +4031,7 @@ function renderQuizStep(content) {
       if (moreBtn) moreBtn.addEventListener("click", () => {
         noteMoreRecallStart(); // 押したら今日の1回を使う（浸りすぎ防止）
         // 広告を消すを購入済みの方は、広告なしでそのまま始まる
-        if (settings.adFree) { startDeep(morePool); return; }
+        if (!ADS_ENABLED || settings.adFree) { startDeep(morePool); return; }
         renderAdGate(() => startDeep(morePool));
       });
     });
@@ -5503,6 +5507,10 @@ function nightNotifyBody() {
 
 // ---------- 広告を消す（買い切り。プレビューは見本＝押すと購入済みの動きを確かめられる） ----------
 function renderIapCard() {
+  // 広告なしでリリースする間は「広告を消す」のカードごと出さない（買うものが無いため）
+  const card = document.getElementById("iap-card");
+  if (card) card.hidden = !ADS_ENABLED;
+  if (!ADS_ENABLED) return;
   const st = document.getElementById("iap-status");
   const buy = document.getElementById("iap-buy");
   if (!st || !buy) return;
