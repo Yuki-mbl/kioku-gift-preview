@@ -1442,6 +1442,9 @@ mark {
 #screen-nokosu .home-note { margin-top: 0; font-size: clamp(.8rem, 1.6vh, .9rem); }
 #screen-nokosu .search-trigger:has(.search-eg) { font-size: min(1.12rem, 4.3vw) !important; }
 #screen-calendar .cal-encourage { margin-top: clamp(6px, 1vh, 14px); }
+/* カレンダーの上に置いた励まし（2026-09-10 Yukiさん指定で下から移動・文言も変更） */
+.cal-encourage-top { margin: 4px 0 10px; }
+.cal-encourage-top p { white-space: nowrap; font-size: min(.95rem, 4vw); }
 
 /* =========================================================
    ホーム（検索＋カプセル型の扉×★）
@@ -2209,6 +2212,9 @@ html[data-fontsize="xlarge"] .tabb-name { font-size: min(.95rem, 4vw); }
       </header>
       <div class="cal-wrap">
         <p class="cal-encourage-lead cal-lead-top" data-t>日付をタップして書き足せます</p>
+        <div class="cal-encourage cal-encourage-top">
+          <p><span data-t>ひと言だけでだいじょうぶです</span><br><span data-t>そのひと言が、未来の自分への贈りもの</span></p>
+        </div>
         <div class="card cal-card">
           <div class="cal-nav">
             <button class="icon-btn" id="cal-prev">◀</button>
@@ -2226,9 +2232,6 @@ html[data-fontsize="xlarge"] .tabb-name { font-size: min(.95rem, 4vw); }
         </div>
         <button type="button" class="search-trigger js-open-search"><span data-t>記憶の検索</span><small class="search-eg" data-t>（パン、ブラウス、太郎）</small></button>
         <div class="home-note" id="home-streak"></div>
-        <div class="cal-encourage">
-          <p><span data-t>面倒な日は、ひと言だけでだいじょうぶ</span><br><span data-t>そのひと言が、未来の自分への贈りもの</span></p>
-        </div>
       </div>
     </section>
 
