@@ -38,33 +38,33 @@
   --brand: #3e7258;              /* ブランド名（深緑） */
 }
 
-/* ---------- ダーク（ネイビー×スレートグレー×真鍮） ---------- */
+/* ---------- ダーク（深夜のネイビー×真鍮ゴールド。2026-09-10 灰色がかった紺→夜空の深紺に締め直し） ---------- */
 :root[data-theme="dark"] {
   --font: "Zen Maru Gothic", "Hiragino Maru Gothic ProN", "Hiragino Kaku Gothic ProN", "Yu Gothic UI", sans-serif;
-  --bg: #383e4a;
-  --bg-accent: linear-gradient(180deg, #3d434f 0%, #383e4a 55%, #333944 100%);
-  --card: #434a58;
+  --bg: #1f2637;
+  --bg-accent: linear-gradient(180deg, #262e45 0%, #1f2637 55%, #1a2030 100%);
+  --card: #2b3349;
   --text: #f1efe7;
-  --muted: #c9cdd6;
-  --accent: #d6b878;             /* 真鍮ゴールド */
-  --accent-strong: #e6cd93;
-  --accent-grad: linear-gradient(135deg, #33477a 0%, #243356 100%); /* 主ボタンは紺 */
-  --accent-soft: #333c50;
-  --accent2: #cf9276;
+  --muted: #b8c0d4;
+  --accent: #dcbf80;             /* 真鍮ゴールド（少し明るく） */
+  --accent-strong: #ecd6a0;
+  --accent-grad: linear-gradient(135deg, #3d5590 0%, #273a66 100%); /* 主ボタンは夜空の紺 */
+  --accent-soft: #29334e;
+  --accent2: #d29579;
   --accent2-soft: #46362e;
-  --accent-text: #f4eedd;
-  --border: #565d6b;
-  --shadow: 0 2px 10px rgba(10, 14, 26, 0.35);
-  --shadow-lg: 0 10px 28px rgba(10, 14, 26, 0.50);
-  --btn-glow: 0 8px 20px rgba(214, 184, 120, 0.14);
+  --accent-text: #f6f0df;
+  --border: #414c68;
+  --shadow: 0 2px 10px rgba(6, 10, 22, 0.45);
+  --shadow-lg: 0 10px 28px rgba(6, 10, 22, 0.60);
+  --btn-glow: 0 8px 22px rgba(220, 191, 128, 0.20);
   --radius: 26px;
-  --dot: #d6b878;
+  --dot: #dcbf80;
   --danger: #e88b7a;
   --ink: #f1efe7;                /* ダークでは明るいボタン */
-  --ink-text: #2a3040;
-  --amber: #d6b878;
+  --ink-text: #232a3c;
+  --amber: #dcbf80;
   --plum: #a99cc7;
-  --brand: #d6b878;              /* ブランド名（真鍮） */
+  --brand: #dcbf80;              /* ブランド名（真鍮） */
 }
 
 /* ---------- 淡い（アイボリー×ペール・癒し） ---------- */
@@ -1725,6 +1725,20 @@ mark {
   top: clamp(84px, 12vh, 118px); left: 0; right: 0; height: 60px;
   pointer-events: none; opacity: .55;
   background: url("data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%20viewBox%3D%270%200%20375%2060%27%20fill%3D%27none%27%3E%3Cpath%20d%3D%27M-5%2038%20C%2060%208%20130%2056%20190%2032%20S%20320%2012%20380%2040%27%20stroke%3D%27%23f2ccd6%27%20stroke-width%3D%279%27%20stroke-linecap%3D%27round%27%2F%3E%3Cpath%20d%3D%27M-5%2046%20C%2070%2020%20140%2062%20205%2040%20S%20330%2022%20380%2048%27%20stroke%3D%27%23f7e6d4%27%20stroke-width%3D%275%27%20stroke-linecap%3D%27round%27%2F%3E%3C%2Fsvg%3E") center / 100% 100% no-repeat;
+}
+/* ライトだけ：若葉のそよぎ（深緑テーマに合わせたセージの流れ2本＋風に乗る葉3枚。2026-09-10） */
+[data-theme="light"] #screen-home::before {
+  content: ""; position: absolute; z-index: -1;
+  top: clamp(84px, 12vh, 118px); left: 0; right: 0; height: 60px;
+  pointer-events: none; opacity: .55;
+  background: url("data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%20viewBox%3D%270%200%20375%2060%27%20fill%3D%27none%27%3E%3Cpath%20d%3D%27M-5%2040%20C%2060%2012%20130%2056%20195%2034%20S%20320%2014%20380%2042%27%20stroke%3D%27%23cfe0c6%27%20stroke-width%3D%279%27%20stroke-linecap%3D%27round%27%2F%3E%3Cpath%20d%3D%27M-5%2048%20C%2070%2022%20140%2060%20205%2042%20S%20330%2024%20380%2050%27%20stroke%3D%27%23abc7a0%27%20stroke-width%3D%275%27%20stroke-linecap%3D%27round%27%2F%3E%3Cpath%20d%3D%27M92%2026%20q8%20-10%2018%20-2%20q-9%209%20-18%202%20z%27%20fill%3D%27%238fb283%27%2F%3E%3Cpath%20d%3D%27M205%2038%20q8%20-10%2018%20-2%20q-9%209%20-18%202%20z%27%20fill%3D%27%23a5c19a%27%2F%3E%3Cpath%20d%3D%27M300%2020%20q8%20-10%2018%20-2%20q-9%209%20-18%202%20z%27%20fill%3D%27%238fb283%27%2F%3E%3C%2Fsvg%3E") center / 100% 100% no-repeat;
+}
+/* ダークだけ：夜空の流れ星（真鍮ゴールドの尾を引く流れ星＋金と氷青の星。2026-09-10） */
+[data-theme="dark"] #screen-home::before {
+  content: ""; position: absolute; z-index: -1;
+  top: clamp(84px, 12vh, 118px); left: 0; right: 0; height: 60px;
+  pointer-events: none; opacity: .9;
+  background: url("data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%20viewBox%3D%270%200%20375%2060%27%20fill%3D%27none%27%3E%3Cdefs%3E%3ClinearGradient%20id%3D%27tail%27%20x1%3D%270%27%20y1%3D%270%27%20x2%3D%271%27%20y2%3D%270%27%3E%3Cstop%20offset%3D%270%27%20stop-color%3D%27%23e9d29a%27%20stop-opacity%3D%270%27%2F%3E%3Cstop%20offset%3D%271%27%20stop-color%3D%27%23e9d29a%27%20stop-opacity%3D%27.9%27%2F%3E%3C%2FlinearGradient%3E%3C%2Fdefs%3E%3Cpath%20d%3D%27M14%208%20C%2066%2020%20118%2028%20164%2033%27%20stroke%3D%27url%28%23tail%29%27%20stroke-width%3D%272.4%27%20stroke-linecap%3D%27round%27%2F%3E%3Cpath%20d%3D%27M171%2023%20l2.8%207.4%20l7.4%202.8%20l-7.4%202.8%20l-2.8%207.4%20l-2.8%20-7.4%20l-7.4%20-2.8%20l7.4%20-2.8%20z%27%20fill%3D%27%23f2e2b0%27%2F%3E%3Cpath%20d%3D%27M250%209%20l2.2%205.6%20l5.6%202.2%20l-5.6%202.2%20l-2.2%205.6%20l-2.2%20-5.6%20l-5.6%20-2.2%20l5.6%20-2.2%20z%27%20fill%3D%27%23e9d29a%27%2F%3E%3Cpath%20d%3D%27M301%2035%20l1.6%204.2%20l4.2%201.6%20l-4.2%201.6%20l-1.6%204.2%20l-1.6%20-4.2%20l-4.2%20-1.6%20l4.2%20-1.6%20z%27%20fill%3D%27%239db8e8%27%2F%3E%3Cpath%20d%3D%27M338%209%20l1.9%204.9%20l4.9%201.9%20l-4.9%201.9%20l-1.9%204.9%20l-1.9%20-4.9%20l-4.9%20-1.9%20l4.9%20-1.9%20z%27%20fill%3D%27%23e9d29a%27%2F%3E%3Ccircle%20cx%3D%2760%27%20cy%3D%2744%27%20r%3D%271.5%27%20fill%3D%27%239db8e8%27%2F%3E%3Ccircle%20cx%3D%27128%27%20cy%3D%2712%27%20r%3D%271.3%27%20fill%3D%27%23f2e2b0%27%2F%3E%3Ccircle%20cx%3D%27214%27%20cy%3D%2748%27%20r%3D%271.4%27%20fill%3D%27%23f2e2b0%27%2F%3E%3Ccircle%20cx%3D%27284%27%20cy%3D%2711%27%20r%3D%271.2%27%20fill%3D%27%239db8e8%27%2F%3E%3Ccircle%20cx%3D%27356%27%20cy%3D%2744%27%20r%3D%271.6%27%20fill%3D%27%23e9d29a%27%20opacity%3D%27.85%27%2F%3E%3C%2Fsvg%3E") center / 100% 100% no-repeat;
 }
 /* 淡い配色だけ：検索バーの右に虫めがね */
 [data-theme="pastel"] .search-trigger {
