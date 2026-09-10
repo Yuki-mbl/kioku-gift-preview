@@ -5619,7 +5619,47 @@ function requestNotifyPermission() {
   try { if ("Notification" in window && Notification.permission === "default") Notification.requestPermission(); } catch (e) {}
 }
 let gratNotifyTimer = null;
+// ---------- アプリ版：毎晩の通知をOSに予約（アプリを閉じていても・再起動しても届く。2026-09-10） ----------
+// v40まではWebの通知（アプリを開いている間しか動かない）だったため、実機に届かなかった
+function nativeLocalNotify() {
+  return (window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.LocalNotifications) || null;
+}
+// その夜の文言を日付から決める（予約し直しても同じ夜は同じ文）。満月の夜は特別文言
+function nightBodyFor(date) {
+  const epoch = Date.UTC(2000, 0, 6, 18, 14);
+  const age = (((date.getTime() - epoch) / 86400000) % MOON_SYNODIC + MOON_SYNODIC) % MOON_SYNODIC;
+  const full = MOON_SYNODIC / 2;
+  const toFull = age <= full ? full - age : MOON_SYNODIC - age + full;
+  if (toFull < 0.75) return t(FULLMOON_NOTIFY_MSG);
+  return t(NIGHT_NOTIFY_MSGS[Math.floor(date.getTime() / 86400000) % NIGHT_NOTIFY_MSGS.length]);
+}
+const NIGHT_NOTIFY_ID_BASE = 8001; // 8001〜8030の30枠を使い回す（アプリを開くたび30日ぶん予約し直す）
+async function scheduleNightNative(SLN) {
+  try {
+    await SLN.cancel({ notifications: Array.from({ length: 30 }, (_, i) => ({ id: NIGHT_NOTIFY_ID_BASE + i })) });
+    if (!notify.on) return;
+    const perm = await SLN.requestPermissions();
+    if (perm && perm.display && perm.display !== "granted") return;
+    const [hh, mm] = (notify.time || "21:30").split(":").map(Number);
+    const now = new Date();
+    const list = [];
+    for (let d = 0; d < 30; d++) {
+      const at = new Date(now.getFullYear(), now.getMonth(), now.getDate() + d, hh || 21, mm || 30, 0, 0);
+      if (at <= now) continue;
+      list.push({
+        id: NIGHT_NOTIFY_ID_BASE + d,
+        title: t("おやすみの記憶"),
+        body: nightBodyFor(at),
+        schedule: { at, allowWhileIdle: true },
+        smallIcon: "ic_stat_memo",
+      });
+    }
+    if (list.length) await SLN.schedule({ notifications: list });
+  } catch (e) {}
+}
 function scheduleGratNotify() {
+  const SLN = nativeLocalNotify();
+  if (SLN) { scheduleNightNative(SLN); return; } // アプリ版はOS予約（下のWeb通知はブラウザ用）
   if (gratNotifyTimer) { clearTimeout(gratNotifyTimer); gratNotifyTimer = null; }
   if (!notify.on || !("Notification" in window)) return;
   const [hh, mm] = (notify.time || "21:30").split(":").map(Number);
@@ -6030,7 +6070,10 @@ function wireEvents() {
     }
     goHome();
   });
-  scheduleGratNotify(); // 起動時に通知を予約（設定オンなら）
+  scheduleGratNotify(); // 起動時に通知を予約（設定オンなら。アプリ版は30日ぶんOSに予約し直す）
+  // アプリ版：おやすみ通知をタップしたら、おやすみの記憶画面を開く
+  const SLN0 = nativeLocalNotify();
+  if (SLN0) { try { SLN0.addListener("localNotificationActionPerformed", () => { try { openSleep(); } catch (e) {} }); } catch (e) {} }
   document.getElementById("btn-settings").addEventListener("click", openSettings);
   wireIap(); // 設定「広告を消す」（買い切り）
 
