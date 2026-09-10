@@ -1109,6 +1109,8 @@ mark {
 .photo-block { margin-top: 14px; display: flex; flex-direction: column; gap: 8px; }
 .photo-block > .btn { width: 100%; }
 .photo-hint { color: var(--muted); font-size: 1.02rem; margin-top: 8px; text-align: center; line-height: 1.6; }
+/* 大事な案内は薄い字にしない（2026-09-10 Yukiさん指定。日記の「見返すタブから追記」など） */
+.photo-hint.hint-strong { color: var(--text); font-weight: 700; }
 .nowrap { white-space: nowrap; display: inline-block; } /* 折り返しは区切りのいい所だけ（ヒント文・ボタン共通） */
 .photo-preview { text-align: center; }
 .photo-preview img { display: block; width: 100%; max-width: 260px; border-radius: 14px; margin: 10px auto 4px; border: 1.5px solid var(--border); }
@@ -3269,7 +3271,7 @@ const STEP_DEFS = {
           ${micMini("diary-text", "flow-skip")}
         </div>
       </div>
-      <p class="photo-hint" style="margin-top:14px;">${t("前日までの日記は「見返す」タブから追記できます")}</p>
+      <p class="photo-hint hint-strong" style="margin-top:14px;">${t("前日までの日記は「見返す」タブから追記できます")}</p>
       ${settings.diaryPass ? "" : `<p class="photo-hint" style="margin-top:6px;">${t("設定から日記のみをロックできます")}</p>`}`,
     collect: (mode, e) => {
       const v = document.getElementById("diary-text")?.value.trim();
