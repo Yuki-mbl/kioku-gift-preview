@@ -3356,7 +3356,7 @@ function attachMealPhotoUI(content) {
   hint.className = "photo-hint";
   // 1行に入らないスマホでは「ずっと」の前で折り返す（半端な位置で切らない）
   hint.innerHTML = flow.mode === "eatout"
-    ? t("写真はなくてもOK。ずっと残ります")
+    ? t("写真はなくてもOK。残した写真は消えません")
     : `<span class="nowrap">${t("写真はなくてもOK・3日だけ保存。")}</span> <span class="nowrap">${t("ずっと残すなら「外食」のカメラへ")}</span>`;
   area.appendChild(hint);
 }
