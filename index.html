@@ -676,6 +676,10 @@ input[type="month"]::-webkit-calendar-picker-indicator { width: 28px; height: 28
 #screen-daydetail .shop-fab { font-size: min(1.18rem, 4.4vw); }
 /* 空の日の食事・服装・日記カードは中央寄せ（左下の戻ると重なっても字が隠れないように。2026-09-13） */
 #screen-daydetail .opt-card { text-align: center; }
+/* ホーム・見返すの検索バーの右にマイク（押すと検索画面が開いてそのまま聞き始める。2026-09-13） */
+.home-search-line { display: flex; align-items: center; gap: 10px; }
+.home-search-line .search-trigger { flex: 1; min-width: 0; }
+.home-search-line .search-mic { flex: 0 0 auto; }
 #screen-daydetail .detail-wrap { padding-top: 26px; }
 /* 白ふち系の浮きボタンは、ダークでも見えるようアクセント色の枠と文字にする */
 .btn-secondary.shop-fab { border: 2px solid var(--accent); color: var(--accent-strong); font-weight: 800; }
@@ -2219,7 +2223,10 @@ html[data-fontsize="xlarge"] .tabb-name { font-size: min(.95rem, 4vw); }
       </header>
       <div class="home-wrap">
         <div class="home-doors" id="home-doors"></div>
-        <button type="button" class="search-trigger js-open-search"><span data-t>記憶の検索</span><small class="search-eg" data-t>（パン、ブラウス、太郎）</small></button>
+        <div class="search-line home-search-line">
+          <button type="button" class="search-trigger js-open-search"><span data-t>記憶の検索</span><small class="search-eg" data-t>（パン、ブラウス、太郎）</small></button>
+          <button type="button" class="mic-btn search-mic js-open-search-mic" data-t-aria aria-label="話して検索" hidden>🎤</button>
+        </div>
         <div class="home-note" id="home-count"></div>
       </div>
     </section>
@@ -2251,7 +2258,10 @@ html[data-fontsize="xlarge"] .tabb-name { font-size: min(.95rem, 4vw); }
           </div>
           <div class="cal-grid" id="cal-grid"></div>
         </div>
-        <button type="button" class="search-trigger js-open-search"><span data-t>記憶の検索</span><small class="search-eg" data-t>（パン、ブラウス、太郎）</small></button>
+        <div class="search-line home-search-line">
+          <button type="button" class="search-trigger js-open-search"><span data-t>記憶の検索</span><small class="search-eg" data-t>（パン、ブラウス、太郎）</small></button>
+          <button type="button" class="mic-btn search-mic js-open-search-mic" data-t-aria aria-label="話して検索" hidden>🎤</button>
+        </div>
         <div class="home-note" id="home-streak"></div>
       </div>
     </section>
@@ -4191,12 +4201,17 @@ function dayFields(ds) {
           ...diaryFields, ...albumFieldsFor(ds), ...pick("行った場所")];
 }
 
-function openSearch() {
+function openSearch(viaMic) {
   document.getElementById("search-input").value = "";
   lastSearchQ = null;
   runSearch("");
   showScreen("screen-search");
-  setTimeout(() => document.getElementById("search-input").focus(), 60);
+  if (viaMic === true) {
+    // 検索バーのマイクから来たとき：キーボードは出さず、そのまま聞き始める（2026-09-13）
+    setTimeout(() => document.getElementById("search-mic")?.click(), 120);
+  } else {
+    setTimeout(() => document.getElementById("search-input").focus(), 60);
+  }
 }
 
 // 検索用にことばをそろえる（カタカナ・ひらがな・半角カナ・全角英数のどれでも同じ扱い）
@@ -6249,6 +6264,14 @@ function wireEvents() {
   // さがす（ホーム・カレンダーの検索バーから）
   document.querySelectorAll(".js-open-search").forEach(el =>
     el.addEventListener("click", openSearch));
+  // 検索バーの右のマイク：押すと検索画面が開いて、そのまま聞き始める（2026-09-13 Yukiさん要望）
+  document.querySelectorAll(".js-open-search-mic").forEach(b => {
+    if (!(SpeechRec || nativeSpeech())) return;
+    b.hidden = false;
+    b.dataset.idle = "1";
+    b.innerHTML = micIconSvg();
+    b.addEventListener("click", () => openSearch(true));
+  });
   document.getElementById("search-back").addEventListener("click", goHome);
   // メモのポップアップ：✕・背景タップで閉じる
   document.getElementById("memo-close").addEventListener("click", closeMemo);
