@@ -786,6 +786,8 @@ input[type="month"]::-webkit-calendar-picker-indicator { width: 28px; height: 28
 }
 /* 1行を保証（他画面の指定より優先させる） */
 #screen-calendar .search-trigger:has(.search-eg) { font-size: min(1.12rem, 4.3vw) !important; }
+/* マイク付きの検索バーは幅が狭いぶん、字も画面幅に合わせて縮める（例文が切れないように。2026-09-13） */
+.home-search-line .search-trigger:has(.search-eg) { font-size: min(1.12rem, 4vw) !important; }
 /* とても細い端末では左右の余白を詰めて、例まで全部見せる */
 @media (max-width: 340px) {
   .search-trigger:has(.search-eg) { padding-left: 12px; padding-right: 8px; }
@@ -1885,20 +1887,30 @@ html[data-fontsize="xlarge"] .balloon-name { font-size: min(1.16rem, 4.8vw); }
 html[data-fontsize="xlarge"] .balloon-lg .balloon-name { font-size: min(1.3rem, 5.3vw); }
 /* 風船の個別サイズ：買い物は少し大きく（食事よりは小さい）、おやすみは少し小さく（2026-08-30 Yukiさん指定） */
 /* 個別サイズは廃止：食事だけ大きく、他の4つは同じ大きさ（2026-09-06 Yukiさん指定） */
+/* ===== 球体の立体感（全テーマ共通の作り：左上のつや＋下側の丸い陰り。2026-09-13 Yukiさん要望）=====
+   ::before＝光のつや（ハイライト）、::after＝球の下側とふちの陰り。中の絵と文字は1段上に置いて暗くしない */
+.balloon::before, .balloon::after { content: ""; position: absolute; border-radius: 50%; pointer-events: none; z-index: 0; }
+.balloon::before { left: 15%; top: 7%; width: 46%; height: 34%; }
+.balloon::after { inset: 0; }
+.balloon > * { position: relative; z-index: 1; }
 /* ライト：深緑の球×金の細リング */
 [data-theme="light"] .balloon {
   color: #eef5e8;
-  background: radial-gradient(circle at 34% 28%, #4f8a6b 0%, #376550 52%, #27503c 100%);
+  background: radial-gradient(circle at 34% 28%, #549272 0%, #376550 55%, #224634 100%);
   border: 1px solid rgba(220, 205, 150, .55);
   box-shadow: 0 12px 24px rgba(40, 90, 60, .22), inset 0 2px 6px rgba(255, 255, 255, .16);
 }
+[data-theme="light"] .balloon::before { background: radial-gradient(ellipse at 50% 42%, rgba(255, 255, 255, .5) 0%, rgba(255, 255, 255, 0) 70%); }
+[data-theme="light"] .balloon::after { background: radial-gradient(circle at 34% 26%, rgba(255, 255, 255, 0) 48%, rgba(8, 40, 24, .26) 88%, rgba(4, 26, 15, .42) 100%); }
 /* ダーク：ネイビーの球×金の細リング */
 [data-theme="dark"] .balloon {
   color: #f4eedd;
-  background: radial-gradient(circle at 34% 28%, #41598a 0%, #2c3e68 52%, #1d2b4a 100%);
+  background: radial-gradient(circle at 34% 28%, #47619a 0%, #2c3e68 55%, #182543 100%);
   border: 1px solid rgba(214, 184, 120, .42);
   box-shadow: 0 14px 26px rgba(10, 14, 26, .38), inset 0 2px 6px rgba(255, 255, 255, .14);
 }
+[data-theme="dark"] .balloon::before { background: radial-gradient(ellipse at 50% 42%, rgba(255, 255, 255, .42) 0%, rgba(255, 255, 255, 0) 70%); }
+[data-theme="dark"] .balloon::after { background: radial-gradient(circle at 34% 26%, rgba(255, 255, 255, 0) 48%, rgba(4, 9, 26, .34) 88%, rgba(2, 5, 16, .5) 100%); }
 /* 淡い：白からふわっと色づく水彩風の球×細い線画（背景と見分けがつく濃さに） */
 [data-theme="pastel"] .balloon {
   color: #6b6152;
@@ -1909,6 +1921,14 @@ html[data-fontsize="xlarge"] .balloon-lg .balloon-name { font-size: min(1.3rem, 
   box-shadow: 0 6px 14px rgba(160, 148, 126, .18),
               0 26px 24px -14px rgba(140, 124, 98, .38),
               inset 0 2px 6px rgba(255, 255, 255, .85);
+}
+/* 淡いの球体感：白いつやを小さめに、下側は風船それぞれの色を深めて丸く陰らせる（水彩の柔らかさは保つ） */
+[data-theme="pastel"] .balloon::before { background: radial-gradient(ellipse at 50% 42%, rgba(255, 255, 255, .95) 0%, rgba(255, 255, 255, 0) 72%); }
+[data-theme="pastel"] .balloon::after {
+  background: radial-gradient(circle at 35% 26%,
+    rgba(255, 255, 255, 0) 50%,
+    color-mix(in srgb, var(--p2) 45%, transparent) 86%,
+    color-mix(in srgb, #6e5c42 26%, var(--p2) 40%) 100%);
 }
 [data-theme="pastel"] .balloon-ico { stroke-width: 1.5; }
 [data-theme="pastel"] .balloon-name { color: #635b4e; }
@@ -2220,7 +2240,7 @@ html[data-fontsize="xlarge"] .tabb-name { font-size: min(.95rem, 4vw); }
       <div class="home-wrap">
         <div class="home-doors" id="home-doors"></div>
         <div class="search-line home-search-line">
-          <button type="button" class="search-trigger js-open-search"><span data-t>記憶の検索</span><small class="search-eg" data-t>（パン、ブラウス、太郎）</small></button>
+          <button type="button" class="search-trigger js-open-search"><span data-t>記憶の検索</span><small class="search-eg" data-t>（パン、服、太郎）</small></button>
           <button type="button" class="mic-btn search-mic js-open-search-mic" data-t-aria aria-label="話して検索" hidden>🎤</button>
         </div>
         <div class="home-note" id="home-count"></div>
@@ -2255,7 +2275,7 @@ html[data-fontsize="xlarge"] .tabb-name { font-size: min(.95rem, 4vw); }
           <div class="cal-grid" id="cal-grid"></div>
         </div>
         <div class="search-line home-search-line">
-          <button type="button" class="search-trigger js-open-search"><span data-t>記憶の検索</span><small class="search-eg" data-t>（パン、ブラウス、太郎）</small></button>
+          <button type="button" class="search-trigger js-open-search"><span data-t>記憶の検索</span><small class="search-eg" data-t>（パン、服、太郎）</small></button>
           <button type="button" class="mic-btn search-mic js-open-search-mic" data-t-aria aria-label="話して検索" hidden>🎤</button>
         </div>
         <div class="home-note" id="home-streak"></div>
