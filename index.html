@@ -1891,7 +1891,7 @@ html[data-fontsize="xlarge"] .balloon-lg .balloon-name { font-size: min(1.3rem, 
 [data-theme="light"] .balloon {
   color: #eef5e8;
   background: radial-gradient(circle at 34% 28%, #549272 0%, #376550 55%, #224634 100%);
-  border: 1px solid rgba(220, 205, 150, .55);
+  border: none; /* 金の枠は廃止（2026-09-13 Yukiさん指示。球体の陰りで輪郭は十分出る） */
   box-shadow: 0 12px 24px rgba(40, 90, 60, .22), inset 0 2px 6px rgba(255, 255, 255, .16);
 }
 [data-theme="light"] .balloon::before { background: radial-gradient(ellipse at 50% 42%, rgba(255, 255, 255, .5) 0%, rgba(255, 255, 255, 0) 70%); }
@@ -1900,7 +1900,7 @@ html[data-fontsize="xlarge"] .balloon-lg .balloon-name { font-size: min(1.3rem, 
 [data-theme="dark"] .balloon {
   color: #f4eedd;
   background: radial-gradient(circle at 34% 28%, #47619a 0%, #2c3e68 55%, #182543 100%);
-  border: 1px solid rgba(214, 184, 120, .42);
+  border: none; /* 金の枠は廃止（2026-09-13 Yukiさん指示） */
   box-shadow: 0 14px 26px rgba(10, 14, 26, .38), inset 0 2px 6px rgba(255, 255, 255, .14);
 }
 [data-theme="dark"] .balloon::before { background: radial-gradient(ellipse at 50% 42%, rgba(255, 255, 255, .42) 0%, rgba(255, 255, 255, 0) 70%); }
@@ -6032,35 +6032,56 @@ function wireMics(root) {
           }
           return false;
         };
-        // 聞き始め（自動の聞き直しにも使う）。まれに立ち上げに失敗する端末があるため1回だけやり直す
-        const startListen = async () => {
+        // 聞き始め（自動の聞き直しにも使う）。まれに立ち上げに失敗する端末があるため1回だけやり直す。
+        // 聞き直しは少し間を置く（前の認識器がマイクを手放すのを待つ。すぐ始めると失敗する端末がある）
+        const startListen = async (delayMs) => {
+          if (delayMs) {
+            await new Promise(r => setTimeout(r, delayMs));
+            if (!micActive || micActive.btn !== btn) return;
+          }
           sessionAt = Date.now(); heard = false; lastSaid = "";
           try { await SRN.start({ language: "ja-JP", maxResults: 1, partialResults: true, popup: false }); }
           catch (e) {
-            await new Promise(r => setTimeout(r, 350));
+            await new Promise(r => setTimeout(r, 400));
             if (!micActive || micActive.btn !== btn) return;
             try { await SRN.start({ language: "ja-JP", maxResults: 1, partialResults: true, popup: false }); }
             catch (e2) { stopMic(); }
           }
         };
         const subs = [];
+        let deadRestarts = 0; // 見張りが立て直した回数（続けて失敗する端末では止まったことを見せる）
         subs.push(await SRN.addListener("partialResults", d => {
           const said = (((d && d.matches) || [])[0] || "").trim();
-          if (said && isMine() && micActive && micActive.btn === btn) { lastSaid = said; applySaid(said, false); }
+          if (said && isMine() && micActive && micActive.btn === btn) { lastSaid = said; deadRestarts = 0; applySaid(said, false); }
         }));
         subs.push(await SRN.addListener("listeningState", d => {
           if (!d || !micActive || micActive.btn !== btn) return;
           if (d.status === "started") { heard = true; return; } // ここから先の結果だけが今回の分
           if (d.status === "stopped" && isMine()) {
             if (applySaid(lastSaid, true)) return; // 語尾が「保存」なら確定して終わり
-            base = target.value; // ここまでを確定して、
-            startListen();       // 続きを聞く（間があっても切れない）
+            base = target.value;  // ここまでを確定して、
+            sessionAt = Date.now(); // 待っている間に見張りが二重に立て直さないように
+            startListen(400);     // 少し置いてから続きを聞く（間があっても切れない）
           }
         }));
+        // 見張り：認識器がエラーで黙って死んでも、こちらには何も知らされない（プラグインの作り）。
+        // 定期的に「聞いているか」を確かめて、死んでいたら立て直す（2026-09-13。マイクが全く拾わない報告への対策）
+        const watchdog = setInterval(async () => {
+          if (!micActive || micActive.btn !== btn) { clearInterval(watchdog); return; }
+          if (Date.now() - sessionAt < 1500) return; // 立ち上げ直後はまだ準備中かもしれない
+          try {
+            const st = await SRN.isListening();
+            if (st && st.listening === false && micActive && micActive.btn === btn) {
+              deadRestarts++;
+              if (deadRestarts > 5) { stopMic(); return; } // 何度立て直しても死ぬ端末では、止まったことを見せる
+              startListen();
+            }
+          } catch (e) {}
+        }, 900);
         micActive = {
           rec: { stop: () => { try { SRN.stop(); } catch (e) {} } },
           btn, target,
-          cleanup: () => { subs.forEach(x => { try { x.remove(); } catch (e) {} }); target.removeEventListener("input", onUserEdit); },
+          cleanup: () => { clearInterval(watchdog); subs.forEach(x => { try { x.remove(); } catch (e) {} }); target.removeEventListener("input", onUserEdit); },
         };
         btn.classList.add("listening");
         btn.innerHTML = btn.dataset.idle ? micIconSvg() : `${micIconSvg()}<span class="mic-label">${t("聞いています…（押すと止まる）")}</span>`;
