@@ -3337,10 +3337,11 @@ const STEP_DEFS = {
     fields: (mode, e) => `
       <div class="field"><span class="field-label">${t("自由に書いてください")}</span>
         <div class="meal-line">
-          <textarea id="diary-text" rows="6" placeholder="${t("今日あったこと、思ったこと…")}">${esc(e.diary)}</textarea>
+          <textarea id="diary-text" rows="6" maxlength="1000" placeholder="${t("今日あったこと、思ったこと…")}">${esc(e.diary)}</textarea>
           ${micMini("diary-text", "flow-skip")}
         </div>
       </div>
+      <p class="photo-hint hint-strong" id="diary-limit" hidden style="margin-top:10px;"></p>
       <p class="photo-hint hint-strong" style="margin-top:14px;"><span class="nowrap">${t("前日までの日記は")}</span> <span class="nowrap">${t("「見返す」タブから追記できます")}</span></p>
       ${settings.diaryPass ? "" : `<p class="photo-hint" style="margin-top:6px;">${t("設定から日記のみをロックできます")}</p>`}`,
     collect: (mode, e) => {
@@ -3632,6 +3633,8 @@ function renderInputView(stepId, content) {
     <div class="step-title">${stepIconHtml(def)}${inputTitle}</div>
     <div class="input-area">${def.fields(flow.mode, e)}</div>`;
   if (stepId === "meal") attachMealPhotoUI(content); // 食事だけ写真も残せる（任意）
+  // 既に長い日記を開いたときも、文字数の案内をすぐ出す
+  if (stepId === "diary") document.getElementById("diary-text")?.dispatchEvent(new Event("input", { bubbles: true }));
   collectStep = () => def.collect(flow.mode, entries[flow.date]);
   wireMics(content); // 話して書く
   wireGrowInputs(content); // 長く書くと欄が下にのびる
@@ -6319,6 +6322,22 @@ function wireEvents() {
   // さがす（ホーム・カレンダーの検索バーから）
   document.querySelectorAll(".js-open-search").forEach(el =>
     el.addEventListener("click", openSearch));
+  // 日記は1000文字まで。500文字を超えたら案内を出す（2026-09-13 Yukiさん指定）。
+  // maxlengthは手入力用の守り、こちらはマイク入力（JSからの書き込み）でも超えないための守り
+  document.addEventListener("input", e => {
+    const ta = e.target;
+    if (!ta || ta.id !== "diary-text") return;
+    if (ta.value.length > 1000) ta.value = ta.value.slice(0, 1000);
+    const note = document.getElementById("diary-limit");
+    if (!note) return;
+    const len = ta.value.length;
+    note.hidden = len <= 500;
+    if (len > 500) {
+      note.textContent = len >= 1000
+        ? t("日記は1000文字まで。いっぱいになりました")
+        : t("日記は1000文字までです（あと{n}文字）", { n: 1000 - len });
+    }
+  });
   // 検索バーの右のマイク：押すと検索画面が開いて、そのまま聞き始める（2026-09-13 Yukiさん要望）
   document.querySelectorAll(".js-open-search-mic").forEach(b => {
     if (!(SpeechRec || nativeSpeech())) return;
