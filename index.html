@@ -670,6 +670,11 @@ input[type="month"]::-webkit-calendar-picker-indicator { width: 28px; height: 28
   box-shadow: 0 8px 22px rgba(0, 0, 0, .25);
 }
 #app.has-ad .shop-fab { bottom: 76px; }
+/* 左下に置く浮きボタン（日別ページの「戻る」。右下の浮きボタンと対で使う。2026-09-13） */
+.shop-fab.fab-left { left: 16px; right: auto; padding: 16px 24px; }
+/* 左右の浮きボタンが狭い端末でぶつからないよう、日別ページだけ少し字を縮める */
+#screen-daydetail .shop-fab { font-size: min(1.18rem, 4.4vw); }
+#screen-daydetail .detail-wrap { padding-top: 26px; }
 /* 白ふち系の浮きボタンは、ダークでも見えるようアクセント色の枠と文字にする */
 .btn-secondary.shop-fab { border: 2px solid var(--accent); color: var(--accent-strong); font-weight: 800; }
 .shop-fab-spacer { height: 110px; flex-shrink: 0; } /* 最後の欄がボタンに隠れないための余白 */
@@ -2267,16 +2272,13 @@ html[data-fontsize="xlarge"] .tabb-name { font-size: min(.95rem, 4vw); }
 
     <!-- ===== 日の詳細 ===== -->
     <section id="screen-daydetail" class="screen">
-      <header class="top-bar">
-        <button class="back-btn" id="detail-back" data-t data-t-aria aria-label="戻る">← 戻る</button>
-        <div class="top-title" data-t>この日の記録</div>
-        <span class="icon-btn ghost"></span>
-      </header>
+      <!-- 戻るは左下の浮きボタン（2026-09-13 Yukiさん要望「上の戻るは忙しい」。右下の書き足すと対） -->
       <div class="detail-wrap">
         <div class="detail-date" id="detail-date"></div>
         <div id="detail-cards"></div>
         <div class="shop-fab-spacer"></div>
         <button type="button" class="btn btn-primary shop-fab" id="detail-add"><span class="btn-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20h4L19.5 8.5a2.12 2.12 0 0 0-3-3L5 17l-1 3Z"/><path d="M13.7 6.8l3.5 3.5"/></svg></span><span data-t>この日を書き足す</span></button>
+        <button type="button" class="btn btn-secondary shop-fab fab-left" id="detail-back" data-t data-t-aria aria-label="戻る">← 戻る</button>
       </div>
     </section>
 
