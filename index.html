@@ -674,6 +674,8 @@ input[type="month"]::-webkit-calendar-picker-indicator { width: 28px; height: 28
 .shop-fab.fab-left { left: 16px; right: auto; padding: 16px 24px; }
 /* 左右の浮きボタンが狭い端末でぶつからないよう、日別ページだけ少し字を縮める */
 #screen-daydetail .shop-fab { font-size: min(1.18rem, 4.4vw); }
+/* 空の日の食事・服装・日記カードは中央寄せ（左下の戻ると重なっても字が隠れないように。2026-09-13） */
+#screen-daydetail .opt-card { text-align: center; }
 #screen-daydetail .detail-wrap { padding-top: 26px; }
 /* 白ふち系の浮きボタンは、ダークでも見えるようアクセント色の枠と文字にする */
 .btn-secondary.shop-fab { border: 2px solid var(--accent); color: var(--accent-strong); font-weight: 800; }
