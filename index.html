@@ -5933,10 +5933,13 @@ function wireMics(root) {
           const perm = await SRN.requestPermissions();
           if (perm && perm.speechRecognition === "denied") return;
         } catch (e) {}
-        const base = target.value;
+        // Androidの認識器は「間」があるたびに終わってしまうため、終わったら自動で聞き直す
+        // （もう一度押さなくても、間を空けながら続けて話せる。止めるのはマイクをもう一度押すか語尾の「保存」。
+        //  2026-09-13 Yukiさん要望。ついでに、聞き直しの失敗＝2回目から効かなくなる問題も1回やり直しで対策）
+        let base = target.value; // 確定した区切りごとに更新し、全角スペースを挟んで継ぎ足していく
         let lastSaid = "";
-        const sessionAt = Date.now();
-        let heard = false; // このセッションで実際に話し始めたか（前回の残り結果を受け取らないための関）
+        let sessionAt = Date.now();
+        let heard = false; // この区切りで実際に話し始めたか（前回の残り結果を受け取らないための関）
         const isMine = () => heard || Date.now() - sessionAt > 700; // 「話し始めた」合図が来ない端末の保険
         let programmatic = false;
         const onUserEdit = () => { if (!programmatic && micActive && micActive.btn === btn) stopMic(); };
@@ -5958,6 +5961,19 @@ function wireMics(root) {
             stopMic();
             const saveBtnId = btn.dataset.voiceSave;
             if (saveBtnId) document.getElementById(saveBtnId)?.click();
+            return true; // 止めた
+          }
+          return false;
+        };
+        // 聞き始め（自動の聞き直しにも使う）。まれに立ち上げに失敗する端末があるため1回だけやり直す
+        const startListen = async () => {
+          sessionAt = Date.now(); heard = false; lastSaid = "";
+          try { await SRN.start({ language: "ja-JP", maxResults: 1, partialResults: true, popup: false }); }
+          catch (e) {
+            await new Promise(r => setTimeout(r, 350));
+            if (!micActive || micActive.btn !== btn) return;
+            try { await SRN.start({ language: "ja-JP", maxResults: 1, partialResults: true, popup: false }); }
+            catch (e2) { stopMic(); }
           }
         };
         const subs = [];
@@ -5969,8 +5985,9 @@ function wireMics(root) {
           if (!d || !micActive || micActive.btn !== btn) return;
           if (d.status === "started") { heard = true; return; } // ここから先の結果だけが今回の分
           if (d.status === "stopped" && isMine()) {
-            applySaid(lastSaid, true); // 話し終わり＝確定（語尾の「保存」もここで判定）
-            stopMic();
+            if (applySaid(lastSaid, true)) return; // 語尾が「保存」なら確定して終わり
+            base = target.value; // ここまでを確定して、
+            startListen();       // 続きを聞く（間があっても切れない）
           }
         }));
         micActive = {
@@ -5980,8 +5997,7 @@ function wireMics(root) {
         };
         btn.classList.add("listening");
         btn.innerHTML = btn.dataset.idle ? micIconSvg() : `${micIconSvg()}<span class="mic-label">${t("聞いています…（押すと止まる）")}</span>`;
-        try { await SRN.start({ language: "ja-JP", maxResults: 1, partialResults: true, popup: false }); }
-        catch (e) { stopMic(); }
+        startListen();
         return;
       }
       // ---- ブラウザ：WebViewと共通のWeb音声認識 ----
