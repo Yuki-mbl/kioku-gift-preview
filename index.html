@@ -3336,7 +3336,7 @@ const STEP_DEFS = {
           ${micMini("diary-text", "flow-skip")}
         </div>
       </div>
-      <p class="photo-hint hint-strong" style="margin-top:14px;">${t("前日までの日記は「見返す」タブから追記できます")}</p>
+      <p class="photo-hint hint-strong" style="margin-top:14px;"><span class="nowrap">${t("前日までの日記は")}</span> <span class="nowrap">${t("「見返す」タブから追記できます")}</span></p>
       ${settings.diaryPass ? "" : `<p class="photo-hint" style="margin-top:6px;">${t("設定から日記のみをロックできます")}</p>`}`,
     collect: (mode, e) => {
       const v = document.getElementById("diary-text")?.value.trim();
