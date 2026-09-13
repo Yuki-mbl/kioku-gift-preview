@@ -3436,10 +3436,17 @@ function renderPickView() {
     <div class="step-title"><span class="step-emoji step-ico">${balloonIconSvg("pencil")}</span>${t("この日を書き足す")}</div>
     <div class="opt-list">
       <button class="opt-card" id="pick-meal">${t("食事")}</button>
+      <button class="opt-card" id="pick-outfit">${t("服装")}</button>
       <button class="opt-card" id="pick-diary">${t("日記")}</button>
     </div>`;
   const ret = flow.returnTo;
   document.getElementById("pick-meal").addEventListener("click", () => { startMeal(flow.date); flow.returnTo = ret; flow.fromPicker = true; });
+  // 服装もここから書き足せる（2026-09-13 Yukiさん要望「服装に戻るのが面倒」）。もどるでこの選択画面へ
+  document.getElementById("pick-outfit").addEventListener("click", () => {
+    outfitReturnTo = { picker: true, ds: flow.date, ret };
+    renderOutfitDay(flow.date);
+    showScreen("screen-outfit");
+  });
   document.getElementById("pick-diary").addEventListener("click", () => {
     const ds = flow.date;
     if (settings.diaryPass && !diaryUnlocked && ((entries[ds] || {}).diary || "").trim()) {
@@ -4337,11 +4344,17 @@ function openDayDetail(ds) {
       <div class="detail-add-lead"><span class="step-emoji step-ico">${balloonIconSvg("pencil")}</span>${t("この日を書き足す")}</div>
       <div class="opt-list">
         <button class="opt-card" id="detail-pick-meal">${t("食事")}</button>
+        <button class="opt-card" id="detail-pick-outfit">${t("服装")}</button>
         <button class="opt-card" id="detail-pick-diary">${t("日記")}</button>
       </div>`;
   if (!fields.length) {
     const ret = { screen: "detail", ds };
     document.getElementById("detail-pick-meal").addEventListener("click", () => { startMeal(ds); flow.returnTo = ret; });
+    document.getElementById("detail-pick-outfit").addEventListener("click", () => {
+      outfitReturnTo = ds; // もどるでこの日別ページへ
+      renderOutfitDay(ds);
+      showScreen("screen-outfit");
+    });
     document.getElementById("detail-pick-diary").addEventListener("click", () => { startDiary(ds); flow.returnTo = ret; });
   }
   // カードをタップすると、その項目の置き場所が開く
@@ -4899,7 +4912,11 @@ function renderOutfitDay(ds) {
   regrowOutfitNotes();
   dnote.addEventListener("input", () => { growDay(); setOutfit(ds, { note: dnote.value.trim() }); }); // 書くたび自動保存
   document.getElementById("outfit-day-back")?.addEventListener("click", () => {
-    if (outfitReturnTo) { const d = outfitReturnTo; outfitReturnTo = null; openDayDetail(d); return; }
+    if (outfitReturnTo) {
+      const d = outfitReturnTo; outfitReturnTo = null;
+      if (d && d.picker) openAddPicker(d.ds, d.ret); else openDayDetail(d);
+      return;
+    }
     renderOutfitMain();
   });
   const delBtn = document.getElementById("outfit-day-del");
@@ -6068,8 +6085,12 @@ function wireEvents() {
   document.getElementById("cal-back").addEventListener("click", goHome);
   document.getElementById("outfit-back").addEventListener("click", () => {
     if (outfitView === "day") {
-      // 「この日の記録」から来ていたら、そこへ帰す
-      if (outfitReturnTo) { const d = outfitReturnTo; outfitReturnTo = null; openDayDetail(d); return; }
+      // 「この日の記録」や「この日を書き足す」から来ていたら、そこへ帰す（来た道を戻る）
+      if (outfitReturnTo) {
+        const d = outfitReturnTo; outfitReturnTo = null;
+        if (d && d.picker) openAddPicker(d.ds, d.ret); else openDayDetail(d);
+        return;
+      }
       renderOutfitMain();
     } else goHome();
   });
