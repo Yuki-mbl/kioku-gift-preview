@@ -5087,7 +5087,7 @@ function renderAlbumPhotoView() {
   document.getElementById("album-wrap").innerHTML = `
     <div class="album-lead"><span class="lead-ico">${balloonIconSvg("album")}</span>${t("スマホのアルバムから記憶をたどる")}</div>
     <div class="album-photo${isReal ? " has-img" : ""}"><span class="ph-emoji">${albumPhotoHtml(emoji)}</span></div>
-    ${isReal ? "" : `<p class="album-cap">${t("（本番アプリでは、あなたのアルバムから1枚出ます）")}</p>`}
+    ${isReal ? "" : `<p class="album-cap"><span class="nowrap">${t("（本番アプリでは、")}</span><span class="nowrap">${t("あなたのアルバムから1枚出ます）")}</span></p>`}
     <div class="album-q q-soft">${t("思い出すだけでも大丈夫")}</div>
     <div class="field meal-line"><textarea id="album-text" class="grow-input" rows="2" placeholder="${t("沖縄旅行")}"></textarea>${micMini("album-text", "album-keep")}</div>
     <button type="button" class="btn btn-primary btn-xl" id="album-keep">${t("保存")}</button>
