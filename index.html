@@ -676,6 +676,11 @@ input[type="month"]::-webkit-calendar-picker-indicator { width: 28px; height: 28
 #screen-daydetail .shop-fab { font-size: min(1.18rem, 4.4vw); }
 /* 空の日の食事・服装・日記カードは中央寄せ（左下の戻ると重なっても字が隠れないように。2026-09-13） */
 #screen-daydetail .opt-card { text-align: center; }
+/* アルバムの「思い出しました（ホームへ）」「残した思い出を見る」は1行を守る
+   （小さい端末・大きい文字では折り返していたため、幅に合わせて字が縮む。2026-09-13） */
+#album-skip, #album-list { white-space: nowrap; font-size: min(1.18rem, 5.2vw); padding-left: 10px; padding-right: 10px; }
+html[data-fontsize="large"] #album-skip, html[data-fontsize="large"] #album-list { font-size: min(1.3rem, 5.2vw); }
+html[data-fontsize="xlarge"] #album-skip, html[data-fontsize="xlarge"] #album-list { font-size: min(1.4rem, 5.2vw); }
 /* ホーム・見返すの検索バーの右にマイク（押すと検索画面が開いてそのまま聞き始める。2026-09-13） */
 .home-search-line { display: flex; align-items: center; gap: 10px; }
 .home-search-line .search-trigger { flex: 1; min-width: 0; }
