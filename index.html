@@ -676,6 +676,11 @@ input[type="month"]::-webkit-calendar-picker-indicator { width: 28px; height: 28
 #screen-daydetail .shop-fab { font-size: min(1.18rem, 4.4vw); }
 /* 空の日の食事・服装・日記カードは中央寄せ（左下の戻ると重なっても字が隠れないように。2026-09-13） */
 #screen-daydetail .opt-card { text-align: center; }
+/* 日記の入力欄は画面の高さに合わせる：低い画面では少し低くして、
+   下の案内（見返すタブから追記・ロック）が保存の帯に隠れないように（2026-09-13 Yukiさん指摘）。
+   書き始めれば従来どおり自動で下にのびる */
+#diary-text { height: clamp(150px, 27vh, 280px); }
+html[data-fontsize="xlarge"] #diary-text { height: clamp(140px, 22vh, 260px); } /* 特大の字は案内の行数も増えるぶん、欄を少し低く */
 /* アルバムの「思い出しました（ホームへ）」「残した思い出を見る」は1行を守る
    （小さい端末・大きい文字では折り返していたため、幅に合わせて字が縮む。2026-09-13） */
 #album-skip, #album-list { white-space: nowrap; font-size: min(1.18rem, 5.2vw); padding-left: 10px; padding-right: 10px; }
