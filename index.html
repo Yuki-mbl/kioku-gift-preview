@@ -806,6 +806,8 @@ html[data-fontsize="xlarge"] #album-skip, html[data-fontsize="xlarge"] #album-li
   .search-trigger:has(.search-eg) { padding-left: 12px; padding-right: 8px; }
   #screen-calendar .cal-wrap { padding-left: 10px !important; padding-right: 10px !important; }
   #screen-calendar .search-trigger:has(.search-eg) { font-size: min(1.12rem, 4.05vw) !important; }
+  /* ホームはマイクのぶん幅が狭いので、もう少し小さく（2026-09-14。320pxで「）」が切れていた） */
+  #screen-home .search-trigger:has(.search-eg) { font-size: min(1.12rem, 3.6vw) !important; }
 }
 /* 画面が低いときは例を隠して1行に収める */
 /* とても低い画面では、カレンダーもスクロールできるように（切れないように） */
@@ -1493,7 +1495,7 @@ mark {
 #screen-home .home-wrap { overflow-y: auto; scrollbar-width: none; }
 #screen-home .home-wrap::-webkit-scrollbar { width: 0; height: 0; }
 #screen-home .search-trigger { margin-top: 0; margin-bottom: 0; padding: clamp(10px, 1.6vh, 15px) 20px; }
-#screen-home .search-trigger:has(.search-eg) { font-size: min(1.12rem, 4.3vw) !important; }
+#screen-home .search-trigger:has(.search-eg) { font-size: min(1.12rem, 4vw) !important; } /* ホームはマイクのぶん幅が狭い（2026-09-14） */
 .welcome-title { text-align: center; font-size: min(clamp(1.25rem, 2.9vh, 1.42rem), 5.6vw); font-weight: 900; margin-bottom: 2px; white-space: nowrap; }
 .welcome-choice {
   display: flex; flex-direction: column; gap: 4px;
@@ -2266,6 +2268,85 @@ html[data-theme="dark"][data-fontsize] #screen-home #home-doors .balloon-name {
 html[data-theme="dark"][data-fontsize] #screen-home #home-doors .balloon-lg .balloon-name { font-size: min(1.72rem, 7.6vw); }
 /* 背の低い端末でも5行＋検索が収まるように、はみ出すときだけ中身をスクロール */
 html[data-theme="dark"] #screen-home .home-wrap { overflow-y: auto; }
+
+/* =========================================================
+   ライトだけ：緑の帯とタイル（2026-09-14 Yukiさん選定の案L3）
+   食事を深緑の大きな帯にして一番手に、残り4つを2×2のタイルに。丸はやめる。
+   ※淡い配色は従来の風船のまま／ダークは目次。DOMは共通で、ここのCSSだけで姿を変える
+   ========================================================= */
+.balloon-sub { display: none; } /* 帯の小さな説明はライトのときだけ出す */
+/* 題字：小さく字間を広く、左寄せの深緑 */
+html[data-theme="light"] #screen-home .home-brand { justify-content: flex-start; padding: 22px 62px 0 24px; min-height: 0; }
+html[data-theme="light"] #screen-home .brand-line {
+  font-size: min(.78rem, 3.3vw); letter-spacing: .3em; font-weight: 700;
+  background: none; -webkit-text-fill-color: currentColor; color: var(--accent); filter: none;
+}
+html[data-theme="light"] #screen-home .home-brand .icon-btn {
+  width: 36px; height: 36px; right: 20px; background: none;
+  border: 1.5px solid var(--border); border-radius: 50%; box-shadow: none;
+}
+html[data-theme="light"] #screen-home .home-brand .icon-btn svg { width: 19px; height: 19px; color: var(--accent); }
+/* 日付：深緑で大きく、年は下に小さく */
+html[data-theme="light"] #screen-home .top-bar { padding: 12px 24px 0; }
+html[data-theme="light"] .home-date-jp { color: var(--accent-strong); font-weight: 900; }
+html[data-theme="light"] #screen-home .home-date .home-date-jp small {
+  display: block; margin: 3px 0 0; padding: 0; font-size: min(.76rem, 3.3vw);
+  color: var(--muted); letter-spacing: .22em; font-weight: 700;
+}
+html[data-theme="light"] #screen-home::before { display: none; } /* 若葉の帯はこの形では出さない */
+/* 5つの入口：食事＝横いっぱいの緑の帯／残り4つ＝2×2のタイル */
+html[data-theme="light"][data-fontsize] #screen-home #home-doors {
+  height: auto; display: grid; grid-template-columns: 1fr 1fr;
+  gap: clamp(9px, 1.4vh, 12px); margin: 16px 0 0;
+}
+html[data-theme="light"] #home-doors::before { display: none; }
+html[data-theme="light"] .balloon-pos { position: static; transform: none; }
+html[data-theme="light"] .b-center { grid-column: 1 / -1; }
+/* 共通：丸をやめる */
+html[data-theme="light"][data-fontsize] #screen-home #home-doors .balloon,
+html[data-theme="light"][data-fontsize] #screen-home #home-doors .balloon-lg {
+  width: 100%; height: auto; border-radius: 16px; box-shadow: none;
+}
+html[data-theme="light"] .balloon::before, html[data-theme="light"] .balloon::after { display: none; }
+/* 帯（食事） */
+html[data-theme="light"][data-fontsize] #screen-home #home-doors .balloon-lg {
+  min-height: clamp(80px, 11vh, 100px); border-radius: 20px; padding: clamp(16px, 2.4vh, 22px);
+  background: linear-gradient(135deg, #3F7257 0%, #2C543F 100%); border: none;
+  box-shadow: 0 10px 22px rgba(44, 84, 63, .22);
+  display: grid; grid-template-columns: auto 1fr; column-gap: 16px; align-items: center;
+}
+html[data-theme="light"] .balloon-lg .balloon-ico { grid-row: 1 / 3; grid-column: 1; width: min(36px, 9vw); height: min(36px, 9vw); color: #EAF3E8; }
+html[data-theme="light"] .balloon-lg .balloon-name {
+  grid-column: 2; align-self: end; justify-self: start; text-align: left;
+  font-size: min(1.6rem, 7vw); font-weight: 900; color: #F5F9F1; letter-spacing: .04em;
+}
+html[data-theme="light"] .balloon-lg .balloon-sub {
+  display: block; grid-column: 2; align-self: start; justify-self: start; text-align: left; margin-top: 3px;
+  font-size: min(.76rem, 3.3vw); font-weight: 700; color: rgba(234, 243, 232, .78); letter-spacing: .1em;
+}
+/* タイル（アルバム・服装・買い物・おやすみ） */
+html[data-theme="light"][data-fontsize] #screen-home #home-doors .balloon:not(.balloon-lg) {
+  min-height: clamp(84px, 12vh, 104px); padding: clamp(13px, 2vh, 17px) 14px;
+  background: var(--card); border: 1.5px solid var(--border);
+  flex-direction: column; align-items: flex-start; justify-content: center; gap: clamp(6px, 1vh, 10px);
+}
+html[data-theme="light"] .balloon:not(.balloon-lg) .balloon-ico { width: min(25px, 6.4vw); height: min(25px, 6.4vw); color: var(--accent); }
+html[data-theme="light"] .balloon:not(.balloon-lg) .balloon-name {
+  font-size: min(1.2rem, 5.2vw); font-weight: 700; color: var(--text); text-align: left;
+}
+html[data-theme="light"] .balloon:active { transform: scale(.99); }
+/* 検索：やわらかい緑の地に */
+html[data-theme="light"] .home-search-line { margin-top: clamp(12px, 2vh, 18px); }
+html[data-theme="light"] .home-wrap .search-trigger {
+  background: var(--accent-soft); border: none; box-shadow: none; color: #4B6150; opacity: 1;
+}
+html[data-theme="light"] .home-search-line .search-mic { background: var(--accent-soft); border: none; box-shadow: none; }
+html[data-theme="light"] #home-count { text-align: center; color: var(--muted); }
+
+/* とても狭い端末では、ホームの検索の字をもう少し小さく（例の「）」まで見せる。2026-09-14） */
+@media (max-width: 340px) {
+  #screen-home .search-trigger:has(.search-eg) { font-size: min(1.12rem, 3.5vw) !important; }
+}
 </style>
 <div id="app">
 
@@ -3307,7 +3388,7 @@ function renderHome() {
     return `<div class="balloon-pos ${posCls}">
       <button type="button" class="balloon${lg ? " balloon-lg" : ""} balloon-k-${k}" data-fav-open="${k}"
         style="--cc:${d.cc};--p1:${d.pale[0]};--p2:${d.pale[1]};" aria-label="${t(d.name)}">
-        ${balloonIconSvg(k)}<span class="balloon-name">${t(d.short)}</span>
+        ${balloonIconSvg(k)}<span class="balloon-name">${t(d.short)}</span>${k === "daily" ? `<span class="balloon-sub">${t("きょう食べたもの")}</span>` : ""}
       </button></div>`;
   };
   box.innerHTML = mk("daily", centerCls, true) + sats.map((k, i) => mk(k, slots[i], false)).join("");
