@@ -2270,11 +2270,11 @@ html[data-theme="dark"][data-fontsize] #screen-home #home-doors .balloon-lg .bal
 html[data-theme="dark"] #screen-home .home-wrap { overflow-y: auto; }
 
 /* =========================================================
-   ライトだけ：緑の帯とタイル（2026-09-14 Yukiさん選定の案L3）
-   食事を深緑の大きな帯にして一番手に、残り4つを2×2のタイルに。丸はやめる。
+   ライトだけ：一本の緑の線（2026-09-14 Yukiさん選定の案L2）
+   左に細い緑の茎を通し、各項目に葉のしるし。丸はやめる。
    ※淡い配色は従来の風船のまま／ダークは目次。DOMは共通で、ここのCSSだけで姿を変える
    ========================================================= */
-.balloon-sub { display: none; } /* 帯の小さな説明はライトのときだけ出す */
+.balloon-sub { display: none; } /* 帯の小さな説明はこの形では使わない */
 /* 題字：小さく字間を広く、左寄せの深緑 */
 html[data-theme="light"] #screen-home .home-brand { justify-content: flex-start; padding: 22px 62px 0 24px; min-height: 0; }
 html[data-theme="light"] #screen-home .brand-line {
@@ -2286,62 +2286,60 @@ html[data-theme="light"] #screen-home .home-brand .icon-btn {
   border: 1.5px solid var(--border); border-radius: 50%; box-shadow: none;
 }
 html[data-theme="light"] #screen-home .home-brand .icon-btn svg { width: 19px; height: 19px; color: var(--accent); }
-/* 日付：深緑で大きく、年は下に小さく */
-html[data-theme="light"] #screen-home .top-bar { padding: 12px 24px 0; }
+/* 日付：深緑で大きく、年は横に小さく添える */
+html[data-theme="light"] #screen-home .top-bar { padding: 14px 24px 2px; }
 html[data-theme="light"] .home-date-jp { color: var(--accent-strong); font-weight: 900; }
 html[data-theme="light"] #screen-home .home-date .home-date-jp small {
-  display: block; margin: 3px 0 0; padding: 0; font-size: min(.76rem, 3.3vw);
+  margin-left: 10px; font-size: min(.76rem, 3.3vw);
   color: var(--muted); letter-spacing: .22em; font-weight: 700;
 }
 html[data-theme="light"] #screen-home::before { display: none; } /* 若葉の帯はこの形では出さない */
-/* 5つの入口：食事＝横いっぱいの緑の帯／残り4つ＝2×2のタイル */
+/* 5つの入口：一本の茎に、葉のしるしで並ぶ */
 html[data-theme="light"][data-fontsize] #screen-home #home-doors {
-  height: auto; display: grid; grid-template-columns: 1fr 1fr;
-  gap: clamp(9px, 1.4vh, 12px); margin: 16px 0 0;
+  height: auto; display: flex; flex-direction: column;
+  position: relative; margin: 8px 24px 0 46px; padding: 0;
 }
-html[data-theme="light"] #home-doors::before { display: none; }
-html[data-theme="light"] .balloon-pos { position: static; transform: none; }
-html[data-theme="light"] .b-center { grid-column: 1 / -1; }
-/* 共通：丸をやめる */
+html[data-theme="light"] #home-doors::before {  /* 緑の茎 */
+  content: ""; position: absolute; inset: 6px auto 6px 0; width: 2px; height: auto;
+  background: linear-gradient(180deg, var(--accent) 0%, rgba(62, 114, 88, .25) 100%);
+}
+html[data-theme="light"] .balloon-pos { position: relative; left: 0; top: 0; transform: none; padding-left: 26px; }
+html[data-theme="light"] .balloon-pos + .balloon-pos { border-top: 1px solid var(--border); }
+html[data-theme="light"] .balloon-pos::before {  /* 葉のしるし */
+  content: ""; position: absolute; left: -5px; top: 50%; margin-top: -6px;
+  width: 12px; height: 12px; background: var(--accent);
+  border-radius: 50% 0 50% 50%; transform: rotate(45deg);
+}
+html[data-theme="light"] .b-center::before { width: 16px; height: 16px; margin-top: -8px; left: -7px; }
 html[data-theme="light"][data-fontsize] #screen-home #home-doors .balloon,
 html[data-theme="light"][data-fontsize] #screen-home #home-doors .balloon-lg {
-  width: 100%; height: auto; border-radius: 16px; box-shadow: none;
+  width: 100%; height: auto; min-height: clamp(62px, 9.2vh, 88px);
+  flex-direction: row; align-items: center; justify-content: flex-start; gap: 12px;
+  border-radius: 0; background: none; border: none; box-shadow: none; padding: 0;
 }
 html[data-theme="light"] .balloon::before, html[data-theme="light"] .balloon::after { display: none; }
-/* 帯（食事） */
-html[data-theme="light"][data-fontsize] #screen-home #home-doors .balloon-lg {
-  min-height: clamp(80px, 11vh, 100px); border-radius: 20px; padding: clamp(16px, 2.4vh, 22px);
-  background: linear-gradient(135deg, #3F7257 0%, #2C543F 100%); border: none;
-  box-shadow: 0 10px 22px rgba(44, 84, 63, .22);
-  display: grid; grid-template-columns: auto 1fr; column-gap: 16px; align-items: center;
+html[data-theme="light"][data-fontsize] #screen-home #home-doors .balloon-name {
+  order: 1; flex: 1; text-align: left; color: var(--text);
+  font-size: min(1.38rem, 6.1vw); font-weight: 700; letter-spacing: .03em;
 }
-html[data-theme="light"] .balloon-lg .balloon-ico { grid-row: 1 / 3; grid-column: 1; width: min(36px, 9vw); height: min(36px, 9vw); color: #EAF3E8; }
-html[data-theme="light"] .balloon-lg .balloon-name {
-  grid-column: 2; align-self: end; justify-self: start; text-align: left;
-  font-size: min(1.6rem, 7vw); font-weight: 900; color: #F5F9F1; letter-spacing: .04em;
+html[data-theme="light"][data-fontsize] #screen-home #home-doors .balloon-lg .balloon-name {
+  font-size: min(1.68rem, 7.4vw); color: var(--accent-strong); font-weight: 900;
 }
-html[data-theme="light"] .balloon-lg .balloon-sub {
-  display: block; grid-column: 2; align-self: start; justify-self: start; text-align: left; margin-top: 3px;
-  font-size: min(.76rem, 3.3vw); font-weight: 700; color: rgba(234, 243, 232, .78); letter-spacing: .1em;
+html[data-theme="light"][data-fontsize] #screen-home #home-doors .balloon .balloon-ico {
+  order: 2; flex: 0 0 auto; width: min(25px, 6.2vw); height: min(25px, 6.2vw); color: var(--accent); opacity: .75;
 }
-/* タイル（アルバム・服装・買い物・おやすみ） */
-html[data-theme="light"][data-fontsize] #screen-home #home-doors .balloon:not(.balloon-lg) {
-  min-height: clamp(84px, 12vh, 104px); padding: clamp(13px, 2vh, 17px) 14px;
-  background: var(--card); border: 1.5px solid var(--border);
-  flex-direction: column; align-items: flex-start; justify-content: center; gap: clamp(6px, 1vh, 10px);
+html[data-theme="light"][data-fontsize] #screen-home #home-doors .balloon-lg .balloon-ico {
+  width: min(28px, 7vw); height: min(28px, 7vw); opacity: 1;
 }
-html[data-theme="light"] .balloon:not(.balloon-lg) .balloon-ico { width: min(25px, 6.4vw); height: min(25px, 6.4vw); color: var(--accent); }
-html[data-theme="light"] .balloon:not(.balloon-lg) .balloon-name {
-  font-size: min(1.2rem, 5.2vw); font-weight: 700; color: var(--text); text-align: left;
-}
-html[data-theme="light"] .balloon:active { transform: scale(.99); }
-/* 検索：やわらかい緑の地に */
-html[data-theme="light"] .home-search-line { margin-top: clamp(12px, 2vh, 18px); }
+html[data-theme="light"] .balloon:active { transform: none; opacity: .55; }
+/* 検索：罫線1本。茎の位置に合わせて左を揃える */
+html[data-theme="light"] .home-search-line { margin: clamp(10px, 1.8vh, 16px) 0 0 22px; }
 html[data-theme="light"] .home-wrap .search-trigger {
-  background: var(--accent-soft); border: none; box-shadow: none; color: #4B6150; opacity: 1;
+  background: none; border: none; border-bottom: 1.5px solid var(--border);
+  border-radius: 0; box-shadow: none; padding: 12px 2px; opacity: 1;
 }
-html[data-theme="light"] .home-search-line .search-mic { background: var(--accent-soft); border: none; box-shadow: none; }
-html[data-theme="light"] #home-count { text-align: center; color: var(--muted); }
+html[data-theme="light"] .home-search-line .search-mic { background: none; border: 1.5px solid var(--border); box-shadow: none; }
+html[data-theme="light"] #home-count { text-align: left; padding-left: 24px; color: var(--muted); }
 
 /* とても狭い端末では、ホームの検索の字をもう少し小さく（例の「）」まで見せる。2026-09-14） */
 @media (max-width: 340px) {
