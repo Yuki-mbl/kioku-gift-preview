@@ -2042,11 +2042,17 @@ html[data-fontsize="xlarge"] .tabb-name { font-size: min(.95rem, 4vw); }
 
 /* タブのある画面は、下がタブ＋広告に隠れないよう余白を足す */
 #app.has-tabs .screen.active { padding-bottom: 128px; }
-#app.has-tabs .flow-footer { bottom: 132px; } /* 日記画面：保存ボタンの帯は広告＋タブの上に */
+/* 保存の帯・浮きボタンはタブのすぐ上に。広告があるときだけ広告ぶんも空ける
+   （広告オフ時に60pxの無駄な空きができていた。2026-09-14 Yukiさん指摘） */
+#app.has-tabs .flow-footer { bottom: 72px; }
+#app.has-tabs.has-ad .flow-footer { bottom: 132px; } /* 広告＋タブの上に */
+#app.kb-open .flow-footer { bottom: 0; } /* キーボード中はタブが消えるので、キーボードのすぐ上に */
 /* 広告のない画面（設定）はタブぶんだけの余白でいい */
-#app.has-tabs:not(.has-ad) .screen.active { padding-bottom: 88px; }
-#app.has-tabs .shop-fab { bottom: 140px; } /* この日を書き足す等の浮きボタンはタブの上へ */
-#app.has-tabs .shop-fab-spacer { height: 175px; } /* 最後の欄が浮きボタンに隠れないように */
+#app.has-tabs:not(.has-ad) .screen.active { padding-bottom: 72px; } /* タブの高さぴったり（2026-09-14。88pxだと保存の帯とタブの間に空きができていた） */
+#app.has-tabs .shop-fab { bottom: 84px; } /* この日を書き足す等の浮きボタンはタブの上へ */
+#app.has-tabs.has-ad .shop-fab { bottom: 140px; }
+#app.has-tabs .shop-fab-spacer { height: 120px; } /* 最後の欄が浮きボタンに隠れないように */
+#app.has-tabs.has-ad .shop-fab-spacer { height: 175px; }
 /* アルバム：タブの分だけ写真を低くして、「写真とメモを残したい」までを1画面に */
 #app.has-tabs .album-photo { aspect-ratio: auto; height: clamp(130px, 23vh, 250px); }
 #app.has-tabs .album-photo.has-img { height: auto; } /* 実写真は形そのまま（フリーサイズ） */
@@ -5969,6 +5975,9 @@ function renderShoppingRecall() {
 const SpeechRec = window.SpeechRecognition || window.webkitSpeechRecognition || null;
 let micActive = null; // { rec, btn, target }
 let micStartAt = 0; // 連打・二度押しで二重にマイクが始まらないようにする（2026-09-09）
+// 話した区切りのつなぎ文字。日本語は全角スペース、他の言語は半角スペース
+// （英語などで「apple　banana」と全角が混ざると不自然なため。2026-09-14 Yukiさん提案）
+function micJoiner() { return uiLang === "ja" ? "　" : " "; }
 // 認識結果が同じ文を二重にして返す端末対策（「昨日の写真 昨日の写真」→「昨日の写真」。2026-09-09）
 function collapseDoubledSaid(said) {
   const m = said.match(/^(.+)[ 　]+\1$/);
@@ -6037,9 +6046,10 @@ function wireMics(root) {
             if (m) { wantSave = true; said = said.slice(0, m.index).replace(/[、。．\s　]+$/, ""); }
           }
           // 欄の末尾がすでに同じ文なら継ぎ足さない（前回の残り結果がもう一度届いたとき用）
-          if (said && base && (base === said || base.endsWith("　" + said))) said = "";
+          const sep = micJoiner();
+          if (said && base && (base === said || base.endsWith(sep + said))) said = "";
           programmatic = true;
-          target.value = said ? (base ? base + "　" : "") + said : base;
+          target.value = said ? (base ? base + sep : "") + said : base;
           target.dispatchEvent(new Event("input", { bubbles: true }));
           programmatic = false;
           if (wantSave) {
@@ -6132,15 +6142,15 @@ function wireMics(root) {
           if (!tx) continue;
           if (ev.results[i].isFinal) parts.push(tx); else interim += tx;
         }
-        let finals = parts.join("　");
-        if (interim) interim = (finals ? "　" : "") + interim;
+        let finals = parts.join(micJoiner());
+        if (interim) interim = (finals ? micJoiner() : "") + interim;
         // 最後に「保存」と言ったら、その言葉は書かずにマイクを止めて保存する（全マイク欄で共通の合図）
         let wantSave = false;
         const m = finals.match(/(?:保存|ほぞん|ホゾン)[。．\s　]*$/);
         if (m && !interim) { wantSave = true; finals = finals.slice(0, m.index).replace(/[、。．\s　]+$/, ""); }
         const said = (finals + interim).trim();
         programmatic = true;
-        target.value = said ? (base ? base + "　" : "") + said : base;
+        target.value = said ? (base ? base + micJoiner() : "") + said : base;
         target.dispatchEvent(new Event("input", { bubbles: true })); // 自動保存・自動のびを効かせる
         programmatic = false;
         if (wantSave) {
