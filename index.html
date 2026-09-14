@@ -4934,7 +4934,9 @@ function renderOutfitDay(ds) {
   setOneScreen("screen-outfit", false); // 1日の詳細は内容に合わせて伸びる
   const o = outfitOf(ds) || {};
   // その日の他の記録も見返すと同じ形で並べる（服装は上の編集欄が担当。順は外食→食事→おやすみ…）2026-09-04
-  const recs = dayFields(ds).filter(f => f.label !== "服装など");
+  // ただし**服装カレンダーの日付から開いたときだけ**（2026-09-14 Yukiさん指摘）。
+  // 日別ページや「この日を書き足す」から来たときは、直前の画面に同じ一覧が出ているので繰り返さない
+  const recs = outfitReturnTo ? [] : dayFields(ds).filter(f => f.label !== "服装など");
   const recHtml = recs.length ? `
     <div class="outfit-day-recs">${recs.map((f, i) => `
       <div class="card detail-card tappable" data-oidx="${i}" role="button" tabindex="0">
