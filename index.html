@@ -65,6 +65,9 @@
   --amber: #dcbf80;
   --plum: #a99cc7;
   --brand: #dcbf80;              /* ブランド名（真鍮） */
+  --brass-ed: #D9B876;           /* エディトリアル用の真鍮（罫線・番号・題字） */
+  --brass-strong-ed: #F0DCA8;
+  --line-ed: rgba(217, 184, 118, .28);
 }
 
 /* ---------- 淡い（アイボリー×ペール・癒し） ---------- */
@@ -2165,6 +2168,104 @@ html[data-fontsize="xlarge"] .tabb-name { font-size: min(.95rem, 4vw); }
 @keyframes swipe-in-back { from { transform: translateX(-26px); opacity: .65; } }
 @keyframes swipe-in-fwd { from { transform: translateX(26px); opacity: .65; } }
 @media (prefers-reduced-motion: reduce) { .swipe-in-back, .swipe-in-fwd { animation: none; } }
+
+/* =========================================================
+   ダークだけ：エディトリアル・インデックス（2026-09-14 Yukiさん選定の案A）
+   夜の雑誌の目次に見立てたホーム。丸い風船をやめ、番号つきの行に。
+   ※ライト・淡い配色は従来どおり（風船の房）。DOMは共通で、ここのCSSだけで姿を変える
+   ========================================================= */
+/* 題字：小さく・字間を広く・真鍮色に */
+[data-theme="dark"] .brand-line {
+  font-size: min(.78rem, 3.4vw); font-weight: 700; letter-spacing: .34em;
+  background: none; -webkit-text-fill-color: currentColor; color: var(--brass-ed);
+  filter: none;
+}
+html[data-theme="dark"] #screen-home .home-brand { justify-content: flex-start; padding: 20px 62px 0 26px; min-height: 0; }
+html[data-theme="dark"] #screen-home .brand-line { font-size: min(.72rem, 3vw); letter-spacing: .2em; }
+html[data-theme="dark"] #screen-home .home-brand .icon-btn {
+  border: 1px solid var(--line-ed); border-radius: 50%;
+  width: 36px; height: 36px; background: none; box-shadow: none; right: 20px;
+}
+html[data-theme="dark"] #screen-home .home-brand .icon-btn svg { width: 19px; height: 19px; }
+/* 目次は行の高さぶんだけ伸ばす（文字サイズ別の高さ指定を打ち消す） */
+html[data-theme="dark"][data-fontsize] #screen-home #home-doors { height: auto; }
+/* 日付：大きな数字＋横に月と曜日 */
+.home-date-ed { display: none; } /* エディトリアル版の日付はダークのときだけ出す */
+[data-theme="dark"] .home-date-jp { display: none; }
+[data-theme="dark"] .home-date-ed { display: flex; align-items: flex-end; gap: 14px; }
+[data-theme="dark"] #screen-home .top-bar { padding: 10px 26px 0; }
+[data-theme="dark"] .hd-day {
+  font-size: min(6.2rem, 27vw); font-weight: 900; line-height: .84; letter-spacing: -.03em;
+  color: transparent; background: linear-gradient(160deg, #FFF4DA 0%, #D9B876 55%, #9A7B3F 100%);
+  -webkit-background-clip: text; background-clip: text;
+}
+[data-theme="dark"] .hd-side { display: flex; flex-direction: column; padding-bottom: 10px; }
+[data-theme="dark"] .hd-mon { font-style: normal; font-size: min(1.2rem, 5.2vw); font-weight: 700; color: var(--text); letter-spacing: .06em; }
+[data-theme="dark"] .hd-wd { font-style: normal; font-size: min(.76rem, 3.3vw); font-weight: 700; color: var(--muted); letter-spacing: .3em; margin-top: 4px; }
+[data-theme="dark"] .hd-wd.wd-sun { color: #E8A88C; }
+[data-theme="dark"] .hd-wd.wd-sat { color: #9DB8DE; }
+/* 入口5つ：番号つきの目次に（丸・房の配置はすべて解除） */
+[data-theme="dark"] #home-doors {
+  height: auto; display: flex; flex-direction: column;
+  counter-reset: idx; margin: 18px 0 0; padding: 0 2px;
+  border-top: 1px solid var(--line-ed);
+}
+[data-theme="dark"] #home-doors::before { display: none; } /* 房のにじみは出さない */
+[data-theme="dark"] #screen-home::before { display: none; } /* 題字下の帯も出さない */
+[data-theme="dark"] .balloon-pos {
+  position: static; transform: none; counter-increment: idx;
+  border-bottom: 1px solid rgba(255, 255, 255, .07);
+}
+[data-theme="dark"] .balloon,
+[data-theme="dark"] .balloon-lg {
+  width: 100%; height: auto; min-height: clamp(66px, 9.2vh, 82px);
+  flex-direction: row; align-items: center; justify-content: flex-start; gap: 16px;
+  border-radius: 0; background: none; box-shadow: none; border: none; padding: 0 4px;
+}
+[data-theme="dark"] .balloon::after { display: none; } /* 球体の陰りは使わない */
+[data-theme="dark"] .balloon::before {  /* 01〜05の番号 */
+  display: block; position: static; width: 26px; height: auto; background: none;
+  content: counter(idx, decimal-leading-zero);
+  color: var(--brass-ed); font-size: min(.76rem, 3.3vw); font-weight: 700; letter-spacing: .18em;
+  order: 0; flex: 0 0 auto;
+}
+[data-theme="dark"] .balloon .balloon-name {
+  order: 1; flex: 1; text-align: left; color: var(--text);
+  font-size: min(1.5rem, 6.6vw); font-weight: 700; letter-spacing: .04em;
+}
+[data-theme="dark"] .balloon-lg .balloon-name { font-size: min(1.85rem, 8vw); }
+[data-theme="dark"] .balloon .balloon-ico {
+  order: 2; flex: 0 0 auto; width: min(26px, 6.4vw); height: min(26px, 6.4vw);
+  color: var(--muted); stroke-width: 1.7;
+}
+[data-theme="dark"] .balloon-lg .balloon-ico { width: min(30px, 7.4vw); height: min(30px, 7.4vw); color: var(--brass-strong-ed); }
+[data-theme="dark"] .balloon:active { transform: none; opacity: .6; }
+/* 検索：枠のない1本の罫線に */
+[data-theme="dark"] .home-search-line { margin-top: 18px; }
+[data-theme="dark"] .home-wrap .search-trigger {
+  background: none; border: none; border-bottom: 1px solid var(--line-ed);
+  border-radius: 0; box-shadow: none; padding: 12px 2px; opacity: 1;
+}
+[data-theme="dark"] .home-search-line .search-mic { background: none; border: 1px solid var(--line-ed); box-shadow: none; }
+[data-theme="dark"] #home-count { color: var(--muted); font-size: min(.86rem, 3.7vw); letter-spacing: .1em; text-align: left; padding-left: 2px; }
+/* 文字サイズ「大」「特大」用の風船ルール（絵が幅37%など）を、ダークの目次では打ち消す。
+   打ち消さないと絵が巨大になって行が高くなり、小さい端末で最後の行がタブに隠れる（2026-09-14） */
+html[data-theme="dark"][data-fontsize] #screen-home #home-doors .balloon,
+html[data-theme="dark"][data-fontsize] #screen-home #home-doors .balloon-lg {
+  width: 100%; height: auto; min-height: clamp(56px, 8vh, 80px);
+}
+html[data-theme="dark"][data-fontsize] #screen-home #home-doors .balloon .balloon-ico {
+  width: min(26px, 6.4vw); height: min(26px, 6.4vw); color: var(--muted);
+}
+html[data-theme="dark"][data-fontsize] #screen-home #home-doors .balloon-lg .balloon-ico {
+  width: min(30px, 7.4vw); height: min(30px, 7.4vw); color: var(--brass-strong-ed);
+}
+html[data-theme="dark"][data-fontsize] #screen-home #home-doors .balloon-name {
+  flex: 1; text-align: left; font-size: min(1.42rem, 6.4vw);
+}
+html[data-theme="dark"][data-fontsize] #screen-home #home-doors .balloon-lg .balloon-name { font-size: min(1.72rem, 7.6vw); }
+/* 背の低い端末でも5行＋検索が収まるように、はみ出すときだけ中身をスクロール */
+html[data-theme="dark"] #screen-home .home-wrap { overflow-y: auto; }
 </style>
 <div id="app">
 
@@ -3180,8 +3281,17 @@ function renderHome() {
   if (uiLang === "ja") dateHtml = dateHtml
     .replace("（日）", '（<span class="wd-sun">日</span>）')
     .replace("（土）", '（<span class="wd-sat">土</span>）');
+  // 日付は2通り用意し、テーマごとにCSSで出し分ける（2026-09-14 ダークのエディトリアル化）
+  //  ・ふつう（ライト/淡い）＝これまでどおり「9月14日（月） 2026年」
+  //  ・ダーク＝日にちを大きな数字にして、月・曜日をその横に小さく添える
+  const d0 = fromDateStr(todayStr());
+  const WD_JA = "日月火水木金土", WD_EN = ["SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT"];
+  const wdCls = d0.getDay() === 0 ? " wd-sun" : (d0.getDay() === 6 ? " wd-sat" : "");
   document.getElementById("home-today").innerHTML =
-    `${dateHtml}<small>${t("{y}年", { y: fromDateStr(todayStr()).getFullYear() })}</small>`;
+    `<span class="home-date-jp">${dateHtml}<small>${t("{y}年", { y: d0.getFullYear() })}</small></span>`
+    + `<span class="home-date-ed" aria-hidden="true"><b class="hd-day">${d0.getDate()}</b>`
+    + `<span class="hd-side"><i class="hd-mon">${t("{m}月", { m: d0.getMonth() + 1 })}</i>`
+    + `<em class="hd-wd${wdCls}">${WD_EN[d0.getDay()]}・${uiLang === "ja" ? WD_JA[d0.getDay()] : ""}</em></span></span>`;
 
   const count = Object.keys(entries).length;
   document.getElementById("home-count").textContent = t("これまでの記録：{n}日分", { n: count }); // 0日でも同じ形で（表示が日によって変わると迷うため）
