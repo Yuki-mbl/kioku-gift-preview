@@ -2614,18 +2614,6 @@ html[data-theme="light"] #home-count { text-align: left; padding-left: 24px; col
           </div>
         </div>
         <div class="card">
-          <div class="settings-label" data-t>最初に開く画面</div>
-          <p class="settings-hint" style="margin-top:0;" data-t>アプリを開いたとき、最初に出る画面をえらべます。</p>
-          <div class="age-group" id="set-start">
-            <button class="seg" data-t data-value="home">ホーム</button>
-            <button class="seg" data-t data-value="daily">食事</button>
-            <button class="seg" data-t data-value="shopping">買い物</button>
-            <button class="seg" data-t data-value="outfit">服装</button>
-            <button class="seg" data-t data-value="album">アルバム</button>
-            <button class="seg" data-t data-value="sleep">おやすみ</button>
-          </div>
-        </div>
-        <div class="card">
           <div class="settings-label" data-t>パスコード（ロック）</div>
           <p class="settings-hint" id="pc-status" style="margin-top:0;"></p>
           <button type="button" class="btn btn-secondary btn-xl" id="pc-open" style="margin-top:14px;" data-t>設定する</button>
@@ -3163,7 +3151,8 @@ function goHome() {
   showScreen("screen-home");
 }
 
-// 起動時にどこを開くか（設定「最初に開く画面」。初期値はホーム＝2択）
+// 起動時にどこを開くか。いつでもホーム（2026-09-14 設定「最初に開く画面」は廃止）。
+// 帰る場所がいつも同じほうが迷わないため。旧設定 settings.startScreen は見ない
 function applyStart() {
   // 15分以内に閉じていたら、直前の画面へ戻す（買い物の途中で消灯しても続きから）
   const rez = store.get("mn_resume", null);
@@ -3174,13 +3163,7 @@ function applyStart() {
     }[rez.id];
     if (back) { back(); return; }
   }
-  const s = settings.startScreen || "home";
-  if (s === "daily") { startMeal(todayStr()); return; } // 食事＝今日の食事の記入から
-  if (s === "shopping") { openShopping(); return; }
-  if (s === "outfit") { openOutfit(); return; }
-  if (s === "album") { openAlbum(); return; }
-  if (s === "sleep") { openSleep(); return; }
-  goHome(); // home（旧設定の "ask" もここに合流）
+  goHome();
 }
 
 // ---------- ホームの風船（5つ固定・食事はいつも真ん中） ----------
@@ -4694,11 +4677,6 @@ function openDayField(ds, label, from) {
 // =========================================================
 function openSettings() {
   renderIapCard();
-  // 旧設定の「はじめの2択(ask)」「のこす(nokosu)」はホームに合流
-  const curStart = ["ask", "nokosu"].includes(settings.startScreen) ? "home" : (settings.startScreen || "home");
-  document.querySelectorAll("#set-start .seg").forEach(btn => {
-    btn.classList.toggle("selected", btn.dataset.value === curStart);
-  });
   document.querySelectorAll(".theme-opt").forEach(btn => {
     btn.classList.toggle("selected", btn.dataset.themeOpt === (settings.theme || "pastel"));
   });
@@ -6481,13 +6459,6 @@ function wireEvents() {
     store.set("mn_settings", settings);
     document.querySelectorAll("#set-quickmemo .seg").forEach(x => x.classList.toggle("selected", x === b));
     syncQuickMemoNotify();
-  }));
-
-  // 設定「最初に開く画面」
-  document.querySelectorAll("#set-start .seg").forEach(b => b.addEventListener("click", () => {
-    settings.startScreen = b.dataset.value;
-    store.set("mn_settings", settings);
-    document.querySelectorAll("#set-start .seg").forEach(x => x.classList.toggle("selected", x === b));
   }));
 
   // 買い物ちゅうに画面へ触れたら、点灯の15分と「続きから戻る」の時計を延長する
