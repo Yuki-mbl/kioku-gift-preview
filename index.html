@@ -609,7 +609,7 @@ input[type="month"]::-webkit-calendar-picker-indicator { width: 28px; height: 28
   background: var(--card); border: 1px solid var(--border);
   border-radius: var(--radius); padding: 16px 18px; box-shadow: var(--shadow);
 }
-.shop-cat { font-size: 1.2rem; font-weight: 800; display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+.shop-cat { font-size: min(1.2rem, 5.4vw); font-weight: 800; display: flex; align-items: center; gap: 10px; margin-bottom: 10px; white-space: nowrap; } /* 狭い画面で「まとめて書く人はコ／コ」と割れないよう幅に合わせて縮む（2026-09-14） */
 .shop-clear {
   flex-shrink: 0; font-family: inherit; font-size: .92rem; font-weight: 700;
   color: var(--danger); background: var(--card);
@@ -5794,7 +5794,7 @@ function scheduleGratNotify() {
 // =========================================================
 // 先頭は「まとめて」＝分けたくない人はここに全部書けばいい（キーotherは旧「その他」のまま）
 const SHOP_CATS = [
-  { key: "other", icon: "basket", name: "まとめて書く人はココ", short: "まとめて" }, // 長い名前は書く画面だけ。答え合わせ側は「まとめて」
+  { key: "other", icon: "basket", name: "まとめて書く人はココ", short: "まとめて", ph: "人参　シャンプー" }, // 長い名前は書く画面だけ。答え合わせ側は「まとめて」
   { key: "veg", icon: "carrot", name: "野菜や果物" },
   { key: "meat", icon: "fish", name: "肉や魚" },
   { key: "misc", icon: "bread", name: "その他" },
@@ -5917,12 +5917,15 @@ function renderShoppingHub() {
     <div class="shop-edit-card shop-edit-${c.key}">
       <div class="shop-cat">${shopIconHtml(c)}${t(c.name)}</div>
       <div class="meal-line">
-        <textarea class="shop-edit-input grow-input" id="shop-${c.key}" data-key="${c.key}" rows="2">${esc(s[c.key] || "")}</textarea>
+        <textarea class="shop-edit-input grow-input" id="shop-${c.key}" data-key="${c.key}" rows="2" placeholder="${c.ph ? t(c.ph) : ""}">${esc(s[c.key] || "")}</textarea>
         ${micMini("shop-" + c.key, "shop-hide")}
       </div>
     </div>`);
   // 先頭（まとめて）と分類の間の一言
-  const cardHtml = cards[0] + `<p class="shop-divider">${t("ここから下は、分けて思い出したい人用")}</p>` + cards.slice(1).join("");
+  // 狭い画面で折り返すときは「分けて書くと、／思い出しやすくなります」で割る
+  const cardHtml = cards[0]
+    + `<p class="shop-divider"><span class="nowrap">${t("分けて書くと、")}</span><span class="nowrap">${t("思い出しやすくなります")}</span></p>`
+    + cards.slice(1).join("");
   document.getElementById("shopping-wrap").innerHTML = `
     ${shopDoneBarHtml()}
     <div class="shop-hub-list">${cardHtml}</div>
