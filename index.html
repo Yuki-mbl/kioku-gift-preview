@@ -1545,6 +1545,17 @@ mark {
   font-size: max(16px, min(1.12rem, 4.6vw));
   padding-top: clamp(9px, 1.4vh, 13px); padding-bottom: clamp(9px, 1.4vh, 13px);
 }
+/* 押せる帯だと分かる見た目に（2026-09-14。背景に同化して「ボタンに見えない」ため）：
+   カードの地色＋はっきりした枠＋影、文字も本文の濃さ。右端に「›」 */
+.shop-done-bar {
+  background: var(--card); color: var(--text);
+  border-color: var(--accent-soft); box-shadow: var(--shadow);
+  justify-content: flex-start; gap: 10px;
+}
+.shop-done-label { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; }
+.shop-done-chev { flex: 0 0 auto; color: var(--accent); font-size: 1.3em; line-height: 1; }
+.shop-done-bar .shop-ico { flex: 0 0 auto; }
+.shop-done-bar .shop-ico .balloon-ico { width: min(22px, 5.6vw); height: min(22px, 5.6vw); color: var(--accent); }
 .memo-open:active, .memo-bar:active { transform: scale(.99); }
 .memo-bar-count {
   flex: 0 0 auto; min-width: 24px; height: 24px; border-radius: 999px;
@@ -5841,7 +5852,11 @@ function undoShopDone(idx) {
 // 「今日買ったもの」の静かな帯（常時表示。場所が毎日同じだと迷わない）
 function shopDoneBarHtml() {
   const n = loadShopDone().length;
-  return `<button type="button" class="memo-open" id="shop-done-open">${t("今日買ったもの（{n}）", { n: n ? n : t("まだなし") })}</button>`;
+  // 押せる帯だと分かるように、カゴの線画と右端の「›」を添える（2026-09-14 Yukiさん指摘「ボタンに見えない」）
+  return `<button type="button" class="memo-open shop-done-bar" id="shop-done-open">`
+    + `<span class="shop-emoji shop-ico">${balloonIconSvg("shopping")}</span>`
+    + `<span class="shop-done-label">${t("今日買ったもの（{n}）", { n: n ? n : t("まだなし") })}</span>`
+    + `<span class="shop-done-chev">›</span></button>`;
 }
 function openShopDonePop() {
   renderShopDonePop();
