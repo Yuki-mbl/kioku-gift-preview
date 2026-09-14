@@ -4052,11 +4052,12 @@ function renderQuizStep(content) {
       <div class="quiz-date-ref">${t("{d}の記録から", { d: formatJP(q.dateStr, true) })}</div>
       ${q.cue ? `<img class="quiz-photo quiz-cue" src="${q.cue}" alt="${t("手がかりの写真")}">` : ""}
       <label class="field"><span class="field-label quiz-guess-label">${t("頭の中で思い出すだけでOK")}</span>
-      <textarea id="quiz-guess" rows="1" placeholder="${t("書きたい方はここをタップ")}"></textarea></label>
+      <div class="meal-line"><textarea id="quiz-guess" rows="1" placeholder="${t("書きたい方はここをタップ")}"></textarea>${micMini("quiz-guess")}</div></label>
       <div class="quiz-reveal-slot" id="quiz-reveal-slot"></div>
       <div class="quiz-actions">
         <button class="btn btn-primary btn-xl" id="quiz-reveal">${t("答えを見る")}</button>
       </div>`;
+    wireMics(content); // 話して書く（答えは書かなくてもいいが、書きたい人は声でも）
     // 自動でキーボードを出さない（書くのは任意。頭の中で思い出すだけでいい）
     document.getElementById("quiz-reveal").addEventListener("click", () => {
       document.getElementById("quiz-reveal-slot").innerHTML = `
@@ -4138,11 +4139,12 @@ function renderQuizStep(content) {
         <div class="quiz-q">${q.q}</div>
         <div class="quiz-date-ref">${t("{d}の記録から", { d: formatJP(q.dateStr, true) })}</div>
         <label class="field"><span class="field-label quiz-guess-label">${t("頭の中で思い出すだけでOK")}</span>
-        <textarea id="quiz-guess" rows="1" placeholder="${t("書きたい方はここをタップ")}"></textarea></label>
+        <div class="meal-line"><textarea id="quiz-guess" rows="1" placeholder="${t("書きたい方はここをタップ")}"></textarea>${micMini("quiz-guess")}</div></label>
         <div class="quiz-reveal-slot" id="quiz-reveal-slot"></div>
         <div class="quiz-actions">
           <button class="btn btn-primary btn-xl" id="quiz-reveal">${t("答えを見る")}</button>
         </div>`;
+      wireMics(content); // 話して書く
       document.getElementById("quiz-reveal").addEventListener("click", () => {
         document.getElementById("quiz-reveal-slot").innerHTML = `
           <div class="quiz-answer-label">${q.photos.length ? t("あなたが残したもの") : t("あなたが入力したこと")}</div>
@@ -5221,11 +5223,12 @@ function renderAlbumEdit(idx) {
     <div class="album-photo${String(m.photo).startsWith("data:") ? " has-img" : ""}"><span class="ph-emoji">${albumPhotoHtml(m.photo)}</span></div>
     <div class="album-q">${t("思い出を追記")}</div>
     <label class="field"><span class="album-field-label">${t("メモ")}</span>
-      <textarea id="edit-note" rows="3">${esc(m.note || "")}</textarea></label>
+      <div class="meal-line"><textarea id="edit-note" rows="3">${esc(m.note || "")}</textarea>${micMini("edit-note", "edit-save")}</div></label>
     <label class="field"><span class="album-field-label">${t("撮影した年月")}</span>
       <input type="month" id="edit-date" value="${m.photoDate || ""}"></label>
     <button type="button" class="btn btn-primary btn-xl" id="edit-save">${t("保存")}</button>
     <button type="button" class="btn btn-secondary btn-xl" id="edit-cancel" style="margin-top:10px;">${t("やめる")}</button>`;
+  wireMics(document.getElementById("album-wrap")); // 話して書く（語尾の「保存」で保存まで）
   document.getElementById("edit-save").addEventListener("click", () => {
     const list = loadAlbumMemos();
     if (!list[idx]) { renderAlbumList(); return; }
