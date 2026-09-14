@@ -5430,9 +5430,11 @@ function moonTonight() {
     <div class="moon-caption">${t("今夜は {n}", { n: t(name) })}</div>
     ${lore ? `<div class="moon-lore">${t(lore)}</div>` : ""}
     <div class="moon-stars-note">⭐ ${t("今宵で{n}夜目", { n: v.count })} ・ ${constDone && fullReached && isFull ? t("{c}がむすばれました", { c: t(C.name) }) : t(C.name)}${v.count === 1 && v.prev > 0 ? t("（先月は{n}夜、月を見上げました）", { n: v.prev }) : ""}</div>`;
+  // 仕組みの説明はその月の最初の3晩だけ（星が増えるのを何度か見れば体で分かるため。
+  // 毎晩出すと文字が多くなりすぎる。月が変わるとまたそっと復習される。2026-09-14 Yukiさん了承）
   const below = `
     ${isFull ? "" : `<div>${t("満月まで あと{n}日", { n: Math.round(toFull) })}</div>`}
-    <div>${t("開いた夜の分だけ星が灯っていきます")}</div>`;
+    ${v.count <= 3 ? `<div>${t("開いた夜の分だけ星が灯っていきます")}</div>` : ""}`;
   const svg = `
     <svg viewBox="-160 -70 320 140" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="${t("今夜の月と星座")}">
       <defs>
