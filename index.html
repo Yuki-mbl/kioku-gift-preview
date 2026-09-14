@@ -1282,6 +1282,8 @@ mark {
 /* ===== パスコード設定 ===== */
 .pc-note { color: var(--muted); font-size: 1rem; line-height: 1.7; }
 .pc-status-set { color: var(--accent); font-weight: 700; }
+/* ロックの状態は2行固定。狭い画面・大きい字でもはみ出さないよう幅に合わせて縮む（2026-09-14） */
+#pc-status .nowrap { font-size: min(1em, 4.6vw); }
 .pc-danger {
   background: var(--card); color: var(--danger, #c85a4b);
   border: 1.5px solid var(--danger, #c85a4b);
@@ -4645,7 +4647,9 @@ function refreshPasscodeStatus() {
     s.classList.remove("pc-status-set");
     btn.textContent = t("設定する");
   } else {
-    s.textContent = t("アプリのロック：{a} ／ 日記のロック：{b}", { a: settings.passcode ? t("設定中 🔒") : t("なし"), b: settings.diaryPass ? t("設定中 🔒") : t("なし") });
+    // 1行に入らず半端に折り返していたので、はじめから2行に分ける（2026-09-14 Yukiさん指示）
+    s.innerHTML = `<span class="nowrap">${t("アプリのロック：{a}", { a: settings.passcode ? t("設定中 🔒") : t("なし") })}</span><br>`
+      + `<span class="nowrap">${t("日記のロック：{b}", { b: settings.diaryPass ? t("設定中 🔒") : t("なし") })}</span>`;
     s.classList.add("pc-status-set");
     btn.textContent = t("変更・解除する");
   }
