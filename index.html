@@ -3692,6 +3692,7 @@ function renderPickView() {
   const footer = document.querySelector(".flow-footer");
   footer.style.display = "";
   document.getElementById("flow-skip").style.display = "none"; // 選ぶだけの画面に保存は置かない（戻るだけ）
+  document.getElementById("flow-back").style.display = "";      // ここは戻るが命綱なので必ず出す
   content.innerHTML = `
     <div class="step-title"><span class="step-emoji step-ico">${balloonIconSvg("pencil")}</span>${t("この日を書き足す")}</div>
     <div class="opt-list">
@@ -3829,6 +3830,7 @@ function renderSelectView(stepId, content) {
       renderStep();
     });
   });
+  updateFlowBack();
   playFlowAnim(content);
 }
 
@@ -3849,6 +3851,7 @@ function renderInputView(stepId, content) {
   collectStep = () => def.collect(flow.mode, entries[flow.date]);
   wireMics(content); // 話して書く
   wireGrowInputs(content); // 長く書くと欄が下にのびる
+  updateFlowBack();
   playFlowAnim(content);
   // 自動でキーボードは出さない（いきなりキーボードが出ると、何の画面か分からなくなるため）
 }
@@ -3871,6 +3874,22 @@ function flowSkip() {
   if (collectStep) { collectStep(); buzzSave(); }
   saveEntries();
   nextStep();
+}
+
+// 戻るボタンを出すかどうか：帰る場所があるときだけ出す（2026-09-14 Yukiさん指摘）
+// ホームから開いた日記のように「戻る＝ホームへ」でしかない画面では、下のタブで帰れるので出さない。
+// （この戻るは押すと中身を保存してから帰るので、隠しても書きかけが消えることはない）
+function flowHasBack() {
+  if (flow.sub === "input") {
+    const def = STEP_DEFS[flow.steps[flow.step].id];
+    if (def && def.options.length > 1) return true; // 入力 → 同じ項目の選択画面へ戻れる
+  }
+  if (flow.recallOnly) return false;                // 思い出すだけ：戻る＝ホーム
+  if (flow.step > 0) return true;                   // 2つめ以降の項目 → 前の項目へ
+  return !!(flow.fromPicker || flow.returnTo);      // 「この日を書き足す」や日別ページから来た
+}
+function updateFlowBack() {
+  document.getElementById("flow-back").style.display = flowHasBack() ? "" : "none";
 }
 
 // 戻るボタン
