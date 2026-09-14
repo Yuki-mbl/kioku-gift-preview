@@ -4094,7 +4094,7 @@ function renderQuizStep(content) {
           </div>
           ${morePool.capped ? `<p class="quiz-more-note">${t("1日10問までです")}</p>` : ""}`
         : (isLast && flow.recallOnly && (moreRecallDoneToday() || moreLeft <= 0)
-            ? `<p class="quiz-more-note">${t("「もっと思い出す」は1日1回です。また明日どうぞ")}</p>` : "");
+            ? `<p class="quiz-more-note">${t("「もっと思い出す」は1日1回です。また明日。")}</p>` : "");
       content.querySelector(".quiz-actions").outerHTML = isLast
         ? `${moreHtml}
           <div class="quiz-judge quiz-meal-row">
