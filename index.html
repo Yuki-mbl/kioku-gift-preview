@@ -6052,25 +6052,34 @@ function wireMics(root) {
         };
         // 聞き始め（自動の聞き直しにも使う）。まれに立ち上げに失敗する端末があるため1回だけやり直す。
         // 聞き直しは少し間を置く（前の認識器がマイクを手放すのを待つ。すぐ始めると失敗する端末がある）
+        // Androidは前の認識器がマイクを手放す前に始め直すと「黙って失敗」する（エラーはJSに届かない作り）。
+        // そこで①少し待ってから始め②本当に聞けているか確かめ③だめなら間を空けてやり直す（2026-09-14）
+        let starting = false; // 立ち上げ中（見張りと二重に始めないための鍵）
+        let failStreak = 0;   // 続けて立ち上がらなかった回数
         const startListen = async (delayMs) => {
-          if (delayMs) {
-            await new Promise(r => setTimeout(r, delayMs));
-            if (!micActive || micActive.btn !== btn) return;
-          }
-          sessionAt = Date.now(); heard = false; lastSaid = "";
-          try { await SRN.start({ language: "ja-JP", maxResults: 1, partialResults: true, popup: false }); }
-          catch (e) {
-            await new Promise(r => setTimeout(r, 400));
-            if (!micActive || micActive.btn !== btn) return;
-            try { await SRN.start({ language: "ja-JP", maxResults: 1, partialResults: true, popup: false }); }
-            catch (e2) { stopMic(); }
-          }
+          if (starting) return;
+          starting = true;
+          try {
+            for (let i = 0; i < 3; i++) {
+              const wait = (delayMs || 0) + i * 500; // やり直すたびに長めに待つ
+              if (wait) await new Promise(r => setTimeout(r, wait));
+              if (!micActive || micActive.btn !== btn) return;
+              sessionAt = Date.now(); heard = false; lastSaid = "";
+              try { await SRN.start({ language: "ja-JP", maxResults: 1, partialResults: true, popup: false }); } catch (e) {}
+              await new Promise(r => setTimeout(r, 500)); // 立ち上がりを待ってから確かめる
+              if (!micActive || micActive.btn !== btn) return;
+              let alive = true;
+              try { const st = await SRN.isListening(); alive = !(st && st.listening === false); } catch (e) {}
+              if (alive) { failStreak = 0; return; } // 聞けている
+              failStreak++;
+            }
+            if (failStreak >= 6) stopMic(); // 何度やり直しても立ち上がらない端末では、止まったことを見せる
+          } finally { starting = false; }
         };
         const subs = [];
-        let deadRestarts = 0; // 見張りが立て直した回数（続けて失敗する端末では止まったことを見せる）
         subs.push(await SRN.addListener("partialResults", d => {
           const said = (((d && d.matches) || [])[0] || "").trim();
-          if (said && isMine() && micActive && micActive.btn === btn) { lastSaid = said; deadRestarts = 0; applySaid(said, false); }
+          if (said && isMine() && micActive && micActive.btn === btn) { lastSaid = said; failStreak = 0; applySaid(said, false); }
         }));
         subs.push(await SRN.addListener("listeningState", d => {
           if (!d || !micActive || micActive.btn !== btn) return;
@@ -6079,23 +6088,19 @@ function wireMics(root) {
             if (applySaid(lastSaid, true)) return; // 語尾が「保存」なら確定して終わり
             base = target.value;  // ここまでを確定して、
             sessionAt = Date.now(); // 待っている間に見張りが二重に立て直さないように
-            startListen(400);     // 少し置いてから続きを聞く（間があっても切れない）
+            startListen(700);     // マイクが空くのを待ってから続きを聞く（間があっても切れない）
           }
         }));
         // 見張り：認識器がエラーで黙って死んでも、こちらには何も知らされない（プラグインの作り）。
         // 定期的に「聞いているか」を確かめて、死んでいたら立て直す（2026-09-13。マイクが全く拾わない報告への対策）
         const watchdog = setInterval(async () => {
           if (!micActive || micActive.btn !== btn) { clearInterval(watchdog); return; }
-          if (Date.now() - sessionAt < 1500) return; // 立ち上げ直後はまだ準備中かもしれない
+          if (starting || Date.now() - sessionAt < 1500) return; // 立ち上げ中・直後はそっとしておく
           try {
             const st = await SRN.isListening();
-            if (st && st.listening === false && micActive && micActive.btn === btn) {
-              deadRestarts++;
-              if (deadRestarts > 5) { stopMic(); return; } // 何度立て直しても死ぬ端末では、止まったことを見せる
-              startListen();
-            }
+            if (st && st.listening === false && micActive && micActive.btn === btn) startListen(300);
           } catch (e) {}
-        }, 900);
+        }, 1000);
         micActive = {
           rec: { stop: () => { try { SRN.stop(); } catch (e) {} } },
           btn, target,
