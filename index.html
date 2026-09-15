@@ -879,16 +879,16 @@ html[data-fontsize="xlarge"] #album-skip { font-size: min(1.4rem, 5.2vw); }
   white-space: nowrap; overflow: hidden;
 }
 /* 1行を保証（他画面の指定より優先させる） */
-#screen-calendar .search-trigger:has(.search-eg) { font-size: min(1.12rem, 4.3vw) !important; }
+#screen-calendar .search-trigger:has(.search-eg) { font-size: min(1.34rem, 4.5vw) !important; }
 /* マイク付きの検索バーは幅が狭いぶん、字も画面幅に合わせて縮める（例文が切れないように。2026-09-13） */
-.home-search-line .search-trigger:has(.search-eg) { font-size: min(1.12rem, 4vw) !important; }
+.home-search-line .search-trigger:has(.search-eg) { font-size: min(1.34rem, 4.4vw) !important; }
 /* とても細い端末では左右の余白を詰めて、例まで全部見せる */
 @media (max-width: 340px) {
   .search-trigger:has(.search-eg) { padding-left: 12px; padding-right: 8px; }
   #screen-calendar .cal-wrap { padding-left: 10px !important; padding-right: 10px !important; }
-  #screen-calendar .search-trigger:has(.search-eg) { font-size: min(1.12rem, 4.05vw) !important; }
+  #screen-calendar .search-trigger:has(.search-eg) { font-size: min(1.34rem, 4.4vw) !important; }
   /* ホームはマイクのぶん幅が狭いので、もう少し小さく（2026-09-14。320pxで「）」が切れていた） */
-  #screen-home .search-trigger:has(.search-eg) { font-size: min(1.12rem, 3.6vw) !important; }
+  #screen-home .search-trigger:has(.search-eg) { font-size: min(1.34rem, 4.2vw) !important; }
 }
 /* 画面が低いときは例を隠して1行に収める */
 /* とても低い画面では、カレンダーもスクロールできるように（切れないように） */
@@ -1585,7 +1585,7 @@ mark {
 #screen-nokosu #home-write { min-height: clamp(48px, 7vh, 64px); padding: clamp(8px, 1.4vh, 16px) 24px; }
 #screen-nokosu .search-trigger { margin-bottom: 0; padding: clamp(9px, 1.5vh, 14px) 20px; font-size: clamp(.95rem, 2vh, 1.12rem); }
 #screen-nokosu .home-note { margin-top: 0; font-size: clamp(.8rem, 1.6vh, .9rem); }
-#screen-nokosu .search-trigger:has(.search-eg) { font-size: min(1.12rem, 4.3vw) !important; }
+#screen-nokosu .search-trigger:has(.search-eg) { font-size: min(1.34rem, 4.5vw) !important; }
 #screen-calendar .cal-encourage { margin-top: clamp(6px, 1vh, 14px); }
 /* カレンダーの上に置いた励まし（2026-09-10 Yukiさん指定で下から移動・文言も変更） */
 .cal-encourage-top { margin: 4px 0 10px; }
@@ -1602,7 +1602,7 @@ mark {
 #screen-home .home-wrap { overflow-y: auto; scrollbar-width: none; }
 #screen-home .home-wrap::-webkit-scrollbar { width: 0; height: 0; }
 #screen-home .search-trigger { margin-top: 0; margin-bottom: 0; padding: clamp(10px, 1.6vh, 15px) 20px; }
-#screen-home .search-trigger:has(.search-eg) { font-size: min(1.12rem, 4vw) !important; } /* ホームはマイクのぶん幅が狭い（2026-09-14） */
+#screen-home .search-trigger:has(.search-eg) { font-size: min(1.34rem, 4.4vw) !important; } /* ホームはマイクのぶん幅が狭い。例を「パン、太郎」に縮めたぶん字を大きく（2026-09-15） */
 .welcome-title { text-align: center; font-size: min(clamp(1.25rem, 2.9vh, 1.42rem), 5.6vw); font-weight: 900; margin-bottom: 2px; white-space: nowrap; }
 .welcome-choice {
   display: flex; flex-direction: column; gap: 4px;
@@ -2469,7 +2469,7 @@ html[data-theme="light"] #home-count { text-align: left; padding-left: 24px; col
 
 /* とても狭い端末では、ホームの検索の字をもう少し小さく（例の「）」まで見せる。2026-09-14） */
 @media (max-width: 340px) {
-  #screen-home .search-trigger:has(.search-eg) { font-size: min(1.12rem, 3.5vw) !important; }
+  #screen-home .search-trigger:has(.search-eg) { font-size: min(1.34rem, 4.2vw) !important; }
 }
 
 /* ===== ダークの字（明朝体）まわりの調整。2026-09-15 =====
@@ -2610,7 +2610,7 @@ html[data-theme="dark"] .brand-line { font-weight: 700; }
       <div class="home-wrap">
         <div class="home-doors" id="home-doors"></div>
         <div class="search-line home-search-line">
-          <button type="button" class="search-trigger js-open-search"><span data-t>記憶をさがす</span><small class="search-eg" data-t>（パン、服、太郎）</small></button>
+          <button type="button" class="search-trigger js-open-search"><span data-t>記憶をさがす</span><small class="search-eg" data-t>（パン、太郎）</small></button>
           <button type="button" class="mic-btn search-mic js-open-search-mic" data-t-aria aria-label="話して検索" hidden>🎤</button>
         </div>
         <div class="home-note" id="home-count"></div>
@@ -2645,7 +2645,7 @@ html[data-theme="dark"] .brand-line { font-weight: 700; }
           <div class="cal-grid" id="cal-grid"></div>
         </div>
         <div class="search-line home-search-line">
-          <button type="button" class="search-trigger js-open-search"><span data-t>記憶をさがす</span><small class="search-eg" data-t>（パン、服、太郎）</small></button>
+          <button type="button" class="search-trigger js-open-search"><span data-t>記憶をさがす</span><small class="search-eg" data-t>（パン、太郎）</small></button>
           <button type="button" class="mic-btn search-mic js-open-search-mic" data-t-aria aria-label="話して検索" hidden>🎤</button>
         </div>
         <div class="home-note" id="home-streak"></div>
@@ -2661,7 +2661,7 @@ html[data-theme="dark"] .brand-line { font-weight: 700; }
       </header>
       <div class="search-wrap">
         <div class="search-line">
-          <input type="text" id="search-input" data-t-ph placeholder="記憶をさがす（パン、服、太郎）">
+          <input type="text" id="search-input" data-t-ph placeholder="記憶をさがす（パン、太郎）">
           <button type="button" class="mic-btn search-mic" id="search-mic" data-t-aria aria-label="話して検索" hidden>🎤</button>
         </div>
         <div id="search-results"></div>
