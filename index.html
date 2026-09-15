@@ -4740,14 +4740,18 @@ function clearLockFails() {
   store.set("mn_settings", settings);
 }
 
-// 日記の入口（ロックがあれば先にパスコード）
+// 日記の入口。ロックは「読める中身があるとき」だけ（2026-09-15 Yukiさん指摘）。
+// まっさらな今日の欄を開くだけなら過去の日記は見えないので、書くたびに4桁を求めない。
+// すでに今日の分を書いてある／前の日を開くときは、renderStep の中でパスコードを求める
 function openDiary(dateStr) {
-  if (settings.diaryPass && !diaryUnlocked) {
-    pendingUnlock = { type: "diary", ds: dateStr || todayStr() };
+  const ds = dateStr || todayStr();
+  // ※ここで見る。startDiary に任せると、中で画面を出し直してロックが消えてしまう
+  if (settings.diaryPass && !diaryUnlocked && ((entries[ds] || {}).diary || "").trim()) {
+    pendingUnlock = { type: "diary", ds };
     showLock("diary");
     return;
   }
-  startDiary(dateStr || todayStr());
+  startDiary(ds);
 }
 
 function renderLockDots() {
