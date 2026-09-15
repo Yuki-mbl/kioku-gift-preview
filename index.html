@@ -6182,6 +6182,7 @@ async function scheduleNightNative(SLN) {
         body: nightBodyFor(at),
         schedule: { at, allowWhileIdle: true },
         smallIcon: "ic_stat_memo",
+        channelId: "kioku_night", // アプリ側で作るバッジなしのチャンネル（MainActivity）。既定の"default"はバッジが付く
       });
     }
     if (list.length) await SLN.schedule({ notifications: list });
