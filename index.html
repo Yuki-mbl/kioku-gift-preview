@@ -1081,7 +1081,8 @@ mark {
   margin: 28px 0;
 }
 .quiz-count { font-size: 1rem; font-weight: 700; color: var(--muted); margin: 8px 0 10px; }
-.quiz-guess-label { font-size: 1.15rem; color: var(--text); }
+/* 思い出す：入力欄はやめて、声に出してもらう一言だけ（2026-09-15） */
+.quiz-say { font-size: 1.15rem; color: var(--text); font-weight: 700; margin-bottom: 22px; }
 .quiz-q {
   font-size: 1.3rem; font-weight: 800;
   line-height: 1.5;
@@ -1154,8 +1155,6 @@ mark {
 .quiz-photo { display: block; width: 100%; max-width: 300px; border-radius: 14px; margin: 10px auto 0; border: 1.5px solid var(--border); }
 /* 問題と一緒に見せる手がかりの写真（アルバム・服装） */
 .quiz-photo.quiz-cue { margin: 0 auto 12px; }
-/* 回答欄は1行（書けば下にのびる） */
-#quiz-guess { min-height: 0; height: auto; resize: none; overflow: hidden; line-height: 1.6; field-sizing: content; }
 
 
 /* ===== 完了 ===== */
@@ -4276,14 +4275,12 @@ function renderQuizStep(content) {
       <div class="quiz-q">${q.q}</div>
       <div class="quiz-date-ref">${t("{d}の記録から", { d: formatJP(q.dateStr, true) })}</div>
       ${q.cue ? `<img class="quiz-photo quiz-cue" src="${q.cue}" alt="${t("手がかりの写真")}">` : ""}
-      <label class="field"><span class="field-label quiz-guess-label">${t("頭の中で思い出すだけでOK")}</span>
-      <div class="meal-line"><textarea id="quiz-guess" rows="1" placeholder="${t("書きたい方はここをタップ")}"></textarea>${micMini("quiz-guess")}</div></label>
+      <p class="quiz-say">${t("声に出して言ってみて")}</p>
       <div class="quiz-reveal-slot" id="quiz-reveal-slot"></div>
       <div class="quiz-actions">
         <button class="btn btn-primary btn-xl" id="quiz-reveal">${t("答えを見る")}</button>
       </div>`;
-    wireMics(content); // 話して書く（答えは書かなくてもいいが、書きたい人は声でも）
-    // 自動でキーボードを出さない（書くのは任意。頭の中で思い出すだけでいい）
+    // 思い出す画面に入力欄は置かない（2026-09-15 Yukiさん判断。書いた言葉はどこにも使っていなかった）
     document.getElementById("quiz-reveal").addEventListener("click", () => {
       document.getElementById("quiz-reveal-slot").innerHTML = `
         <div class="quiz-answer-label">${q.photos.length ? t("あなたが残したもの") : t("あなたが入力したこと")}</div>
@@ -4363,13 +4360,11 @@ function renderQuizStep(content) {
         ${q.cue ? `<img class="quiz-photo quiz-cue" src="${q.cue}" alt="${t("手がかりの写真")}">` : ""}
         <div class="quiz-q">${q.q}</div>
         <div class="quiz-date-ref">${t("{d}の記録から", { d: formatJP(q.dateStr, true) })}</div>
-        <label class="field"><span class="field-label quiz-guess-label">${t("頭の中で思い出すだけでOK")}</span>
-        <div class="meal-line"><textarea id="quiz-guess" rows="1" placeholder="${t("書きたい方はここをタップ")}"></textarea>${micMini("quiz-guess")}</div></label>
+        <p class="quiz-say">${t("声に出して言ってみて")}</p>
         <div class="quiz-reveal-slot" id="quiz-reveal-slot"></div>
         <div class="quiz-actions">
           <button class="btn btn-primary btn-xl" id="quiz-reveal">${t("答えを見る")}</button>
         </div>`;
-      wireMics(content); // 話して書く
       document.getElementById("quiz-reveal").addEventListener("click", () => {
         document.getElementById("quiz-reveal-slot").innerHTML = `
           <div class="quiz-answer-label">${q.photos.length ? t("あなたが残したもの") : t("あなたが入力したこと")}</div>
