@@ -2034,9 +2034,18 @@ html[data-fontsize="xlarge"] .balloon-lg .balloon-name { font-size: min(1.3rem, 
 [data-theme="light"] .tab-quick-circle { background: radial-gradient(circle at 34% 28%, #4f8a6b 0%, #376550 52%, #27503c 100%); }
 [data-theme="light"] .tab-quick-circle::before { display: none; }
 [data-theme="light"] .tab-quick-circle::after { background: radial-gradient(circle at 34% 26%, rgba(255, 255, 255, 0) 55%, rgba(8, 40, 24, .12) 88%, rgba(4, 26, 15, .22) 100%); }
-[data-theme="dark"] .tab-quick-circle { background: radial-gradient(circle at 34% 28%, #41598a 0%, #2c3e68 52%, #1d2b4a 100%); }
+/* ダークの＋は真鍮色を差し色に（2026-09-15 Yukiさん選定の案③）。
+   紺に沈んでいた丸を、テーマの金でぱっと見つかるように。＋の線は地の紺色にして読みやすく */
+[data-theme="dark"] .tab-quick-circle {
+  background: radial-gradient(circle at 34% 28%, #EBD49A 0%, #D9B876 52%, #A8884B 100%);
+  color: #1b2340;
+  border-color: #1b2340; /* タブの地と同じ色で縁取り、金の丸をくっきり浮かせる */
+  box-shadow: 0 6px 18px rgba(217, 184, 118, .28), 0 6px 16px rgba(0, 0, 0, .3);
+}
 [data-theme="dark"] .tab-quick-circle::before { display: none; }
-[data-theme="dark"] .tab-quick-circle::after { background: radial-gradient(circle at 34% 26%, rgba(255, 255, 255, 0) 55%, rgba(4, 9, 26, .16) 88%, rgba(2, 5, 16, .26) 100%); }
+[data-theme="dark"] .tab-quick-circle::after { background: radial-gradient(circle at 34% 26%, rgba(255, 255, 255, 0) 55%, rgba(80, 55, 10, .12) 88%, rgba(60, 40, 6, .22) 100%); }
+/* 通知メモの数は、金の丸の上でも読めるよう濃い紺の玉に */
+[data-theme="dark"] .tab-quick-badge { background: #1b2340; color: var(--brass-strong-ed); border-color: var(--brass-ed); }
 [data-theme="pastel"] .tab-quick-circle::before { background: radial-gradient(ellipse at 50% 42%, rgba(255, 255, 255, .95) 0%, rgba(255, 255, 255, 0) 72%); }
 [data-theme="pastel"] .tab-quick-circle::after { background: radial-gradient(circle at 35% 26%, rgba(255, 255, 255, 0) 50%, rgba(238, 173, 185, .45) 86%, color-mix(in srgb, #6e5c42 26%, #eeadb9 40%) 100%); }
 /* ラベル無しになったぶん、丸をタブの縦中央寄りに */
