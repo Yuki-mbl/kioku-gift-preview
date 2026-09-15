@@ -3467,7 +3467,7 @@ function renderMemoScreen() {
   const writePart = full
     ? `<p class="memo-note">${t("メモは{n}個まで。", { n: MEMO_MAX })}<br>${t("できたものをチェックで消すと、また書けます")}</p>`
     : `<div class="memo-line">
-        <textarea id="memo-input" class="grow-input" rows="1" placeholder="${t("お風呂掃除　庭に水やり")}"></textarea>
+        <textarea id="memo-input" class="grow-input" rows="1" placeholder="${t("例：お風呂掃除　庭に水やり")}"></textarea>
         ${micMini("memo-input", "memo-save")}
       </div>
       <button type="button" class="btn btn-primary btn-xl memo-add" id="memo-save">${t("保存")}</button>`;
@@ -3684,7 +3684,7 @@ const STEP_DEFS = {
     fields: (mode, e) => `
       <div class="field"><span class="field-label">${t("自由に書いてください")}</span>
         <div class="meal-line">
-          <textarea id="diary-text" class="grow-input" rows="6" maxlength="1000" placeholder="${t("今日あったこと、思ったこと…")}">${esc(e.diary)}</textarea>
+          <textarea id="diary-text" class="grow-input" rows="6" maxlength="1000" placeholder="${t("例：孫が来た。うれしかった")}">${esc(e.diary)}</textarea>
           ${micMini("diary-text", "flow-skip")}
         </div>
       </div>
@@ -5177,7 +5177,7 @@ function renderOutfitMain() {
       <div id="outfit-today-body"></div>
       <input type="file" id="outfit-file" accept="image/*" style="display:none;">
       <div class="meal-line" style="margin-top:10px;">
-        <textarea id="outfit-note" class="outfit-note-input" rows="1" placeholder="${t("紺スーツ　田中さん")}">${esc(today?.note || "")}</textarea>
+        <textarea id="outfit-note" class="outfit-note-input" rows="1" placeholder="${t("例：紺スーツ　田中さん")}">${esc(today?.note || "")}</textarea>
         ${micMini("outfit-note", "outfit-save")}
       </div>
       <div class="outfit-btn-row">
@@ -5304,7 +5304,7 @@ function renderOutfitDay(ds) {
       <button type="button" class="btn ${o.photo ? "btn-secondary" : "btn-primary"} btn-xl btn-shrink" id="oday-pick"><span class="btn-ico btn-ico-big">${balloonIconSvg("camera")}</span>${o.photo ? t("写真を入れ替える") : t("この日の服の写真")}</button>
       <input type="file" id="oday-file-pick" accept="image/*" style="display:none;">
       <div class="meal-line" style="margin-top:12px;">
-        <textarea id="oday-note" class="outfit-note-input" rows="1" placeholder="${t("ここに書いてもOK")}">${esc(o.note || "")}</textarea>
+        <textarea id="oday-note" class="outfit-note-input" rows="1" placeholder="${t("例：紺のセーター")}">${esc(o.note || "")}</textarea>
         ${micMini("oday-note")}
       </div>
     </div>
@@ -6159,7 +6159,7 @@ function scheduleGratNotify() {
 // =========================================================
 // 先頭は「まとめて」＝分けたくない人はここに全部書けばいい（キーotherは旧「その他」のまま）
 const SHOP_CATS = [
-  { key: "other", icon: "basket", name: "まとめて書く人はココ", short: "まとめて", ph: "人参　シャンプー" }, // 長い名前は書く画面だけ。答え合わせ側は「まとめて」
+  { key: "other", icon: "basket", name: "まとめて書く人はココ", short: "まとめて", ph: "例：人参　シャンプー" }, // 長い名前は書く画面だけ。答え合わせ側は「まとめて」
   { key: "veg", icon: "carrot", name: "野菜や果物" },
   { key: "meat", icon: "fish", name: "肉や魚" },
   { key: "misc", icon: "bread", name: "その他" },
