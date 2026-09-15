@@ -756,7 +756,11 @@ html[data-fontsize="xlarge"] #diary-text { min-height: clamp(140px, 22vh, 260px)
 /* 「思い出せました」は大きいまま、行き先は下に小さく（2026-09-15。1行に押し込むと字が小さくなるため） */
 
 /* 「メモリーアルバム」の名前が入る行は、狭い端末・大きい文字でも1行を守る（2026-09-15） */
-#screen-album .album-q { font-size: min(1.15rem, 4.9vw); white-space: nowrap; }
+#screen-album .album-q {
+  font-size: min(1.15rem, 4.9vw); white-space: nowrap;
+  /* ここから下は「残す人」の場所。細い線で、上のボタンと分ける（2026-09-15） */
+  border-top: 1px solid var(--border); margin-top: 18px; padding-top: 16px;
+}
 #album-list { font-size: min(1.12rem, 4.5vw); }
 html[data-fontsize="large"] #album-list { font-size: min(1.2rem, 4.5vw); }
 html[data-fontsize="xlarge"] #album-list { font-size: min(1.26rem, 4.5vw); }
@@ -2724,11 +2728,11 @@ html[data-theme="dark"] .brand-line { font-weight: 700; }
       <div class="outfit-wrap" id="outfit-wrap"></div>
     </section>
 
-    <!-- ===== アルバムの記憶 ===== -->
+    <!-- ===== メモリーアルバム ===== -->
     <section id="screen-album" class="screen">
       <header class="top-bar">
         <button class="back-btn" id="album-back" data-t data-t-aria aria-label="ホームへ">← ホームへ</button>
-        <div class="top-title" data-t>アルバムの記憶</div>
+        <div class="top-title" data-t>メモリーアルバム</div>
         <span class="icon-btn ghost"></span>
       </header>
       <div class="album-wrap" id="album-wrap"></div>
@@ -3325,7 +3329,7 @@ const FAV_DEFS = {
   daily: { emoji: "🍚", name: "食事の記憶", short: "食事", cc: "#18b5a2", pale: ["#f9e2c8", "#ecb98c"], open: () => startMeal(todayStr()) }, // 食事の記入だけ
   shopping: { emoji: "🛒", name: "買い物の記憶", short: "買い物", cc: "#a774e8", pale: ["#e8dcf2", "#c3a9dd"], open: () => openShopping() }, // 左下＝薄紫（2026-09-06 位置交換。色は場所に残す）
   outfit: { emoji: "👕", name: "服装の記憶", short: "服装", cc: "#f0a72c", pale: ["#f8e7bd", "#e3c077"], open: () => openOutfit() },
-  album: { emoji: "📷", name: "アルバムの記憶", short: "アルバム", cc: "#6fc244", pale: ["#ddecd2", "#b3d19f"], open: () => openAlbum() }, // 左上＝薄緑
+  album: { emoji: "📷", name: "メモリーアルバム", short: "アルバム", cc: "#6fc244", pale: ["#ddecd2", "#b3d19f"], open: () => openAlbum() }, // 左上＝薄緑
   sleep: { emoji: "🌙", name: "おやすみの記憶", short: "おやすみ", cc: "#4b83e8", pale: ["#d8e6f4", "#a3c4e4"], open: () => openSleep() },
 };
 // 風船の中の線画アイコン（一新デザイン。絵文字は使わない）
@@ -4185,7 +4189,7 @@ function buildQuizQuestions() {
   loadAlbumMemos().forEach((m, i) => {
     const cue = albumPhotoForQuiz(m.photo);
     if (!cue || used.has(`${m.date}|album${i}`)) return;
-    const when = m.photoDate ? t("{d}ごろの写真です", { d: formatYM(m.photoDate) }) : t("アルバムに残した写真です");
+    const when = m.photoDate ? t("{d}ごろの写真です", { d: formatYM(m.photoDate) }) : t("メモリーアルバムの写真です");
     specials.album.push({ ds: m.date, field: "album" + i,
       q: t("{w}。何の写真か思い出せますか？", { w: when }),
       answer: (m.note || "").trim() || t("（メモはありません）"), cue });
@@ -4326,7 +4330,7 @@ function buildDeepQuestions(excludeKeys, max) {
   }
   // アルバムに残した思い出（写真を先に見せて、何の写真か思い出す）
   loadAlbumMemos().forEach((m, i) => {
-    const when = m.photoDate ? t("{d}ごろの写真です", { d: formatYM(m.photoDate) }) : t("アルバムに残した写真です");
+    const when = m.photoDate ? t("{d}ごろの写真です", { d: formatYM(m.photoDate) }) : t("メモリーアルバムの写真です");
     pushQ(albums, m.date, "album" + i,
       t("{w}。何の写真か思い出せますか？", { w: when }),
       (m.note || "").trim() || t("（メモはありません）"),
@@ -4572,11 +4576,11 @@ function entryFields(e) {
   return fields;
 }
 
-// その日に残した「アルバムの記憶」メモ（本文ありのみ）
+// その日に残した「メモリーアルバム」のメモ（本文ありのみ）
 function albumFieldsFor(ds) {
   return loadAlbumMemos()
     .filter(m => m.date === ds && m.note)
-    .map(m => ({ label: "アルバムの記憶", text: m.note }));
+    .map(m => ({ label: "メモリーアルバム", text: m.note }));
 }
 
 // その日に残した「ありがとう」
@@ -4812,7 +4816,7 @@ function openDayField(ds, label, from) {
     showScreen("screen-outfit");
     return;
   }
-  if (label.startsWith("アルバム")) { albumReturnTo = ret; renderAlbumList(); showScreen("screen-album"); return; }
+  if (label.startsWith("メモリーアルバム")) { albumReturnTo = ret; renderAlbumList(); showScreen("screen-album"); return; }
   if (label.startsWith("ありがとう")) { gratReturnTo = ret; renderGratitudeList(); showScreen("screen-sleep"); return; }
   if (label.startsWith("食事") || label.startsWith("外食")) { startMeal(ds, ret); return; }
   if (label.startsWith("日記")) {
@@ -5471,7 +5475,7 @@ function renderAlbumPhotoView() {
     <button type="button" class="btn btn-primary btn-xl" id="album-keep">${t("保存")}</button>
     <button type="button" class="btn btn-secondary btn-xl" id="album-list" style="margin-top:10px;">${t("「メモリーアルバム」を見る（{n}）", { n: memos.length })}</button>`;
   wireMics(document.getElementById("album-wrap")); // 話して書く
-  // ひと言アルバム：写真だけでは残さない。言葉があってはじめて「思い出せる」記録になる（2026-09-15）
+  // メモリーアルバム：写真だけでは残さない。言葉があってはじめて「思い出せる」記録になる（2026-09-15）
   const albumText = document.getElementById("album-text");
   const keepBtn = document.getElementById("album-keep");
   const syncKeep = () => keepBtn.classList.toggle("is-waiting", !albumText.value.trim());
@@ -5516,7 +5520,7 @@ function renderAlbumDone(justSaved, reveal) {
   document.getElementById("album-list").addEventListener("click", renderAlbumList);
 }
 
-// 残した思い出の一覧（30件ずつ表示）
+// メモリーアルバムの一覧（30件ずつ表示）
 let albumListShown = 30;
 function renderAlbumList(keep) {
   if (keep !== true) albumListShown = 30;
@@ -5589,7 +5593,7 @@ function renderAlbumView(idx) {
   document.getElementById("view-edit").addEventListener("click", () => renderAlbumEdit(idx));
 }
 
-// 残した思い出に追記する（メモ・撮影日）
+// メモリーアルバムに追記する（メモ・撮影日）
 function renderAlbumEdit(idx) {
   albumView = "edit";
   setBackLabel("album-back", true);
@@ -6031,7 +6035,7 @@ const LEGAL_TEXTS = {
       <h3>3. 引き継ぎコードについて</h3>
       <p>別のスマホに移すために「引き継ぎコード」を作ったときは、記録は暗号化された状態で一時的に預かられます。運営を含め、コードを知らない人は中身を読めません。預かったデータは、引き継ぎ完了後または一定期間で自動的に消去されます。</p>
       <h3>4. 写真について</h3>
-      <p>食事・服装・アルバムで使う写真は、お客さまの端末の中だけで扱われ、外部に送信されることはありません。「アルバムの記憶」でスマホの写真を表示する機能は、お客さまが許可した場合にだけ、端末の中で写真を読み取ります。許可は端末の設定からいつでも取り消せます。</p>
+      <p>食事・服装・アルバムで使う写真は、お客さまの端末の中だけで扱われ、外部に送信されることはありません。「メモリーアルバム」でスマホの写真を表示する機能は、お客さまが許可した場合にだけ、端末の中で写真を読み取ります。許可は端末の設定からいつでも取り消せます。</p>
       <h3>5. 音声入力について</h3>
       <p>「話して書く」は、お使いの端末の音声認識の仕組みを利用します。認識された文字は記録として端末に保存されますが、運営が音声や文字を受け取ることはありません。</p>
       <h3>6. 集めない情報</h3>
