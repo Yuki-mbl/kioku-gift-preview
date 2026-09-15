@@ -40,7 +40,8 @@
 
 /* ---------- ダーク（深夜のネイビー×真鍮ゴールド。2026-09-10 灰色がかった紺→夜空の深紺に締め直し） ---------- */
 :root[data-theme="dark"] {
-  --font: "Zen Maru Gothic", "Hiragino Maru Gothic ProN", "Hiragino Kaku Gothic ProN", "Yu Gothic UI", sans-serif;
+  /* ダークだけ明朝体。ライトの丸ゴシックとは別の、静かで凛とした雰囲気に（2026-09-15 Yukiさん指示） */
+  --font: "Shippori Mincho", "Hiragino Mincho ProN", "Yu Mincho", "BIZ UDMincho", "Noto Serif JP", serif;
   --bg: #1f2637;
   --bg-accent: linear-gradient(180deg, #262e45 0%, #1f2637 55%, #1a2030 100%);
   --card: #2b3349;
@@ -2346,6 +2347,17 @@ html[data-theme="light"] #home-count { text-align: left; padding-left: 24px; col
 @media (max-width: 340px) {
   #screen-home .search-trigger:has(.search-eg) { font-size: min(1.12rem, 3.5vw) !important; }
 }
+
+/* ===== ダークの字（明朝体）まわりの調整。2026-09-15 =====
+   明朝は横線が細く、暗い地では特に痩せて見えるので、太さと字間で補う */
+html[data-theme="dark"] body { font-weight: 600; letter-spacing: .03em; }
+html[data-theme="dark"] .btn,
+html[data-theme="dark"] input,
+html[data-theme="dark"] textarea,
+html[data-theme="dark"] .opt-card,
+html[data-theme="dark"] .seg { font-weight: 700; }
+html[data-theme="dark"] .tab-btn span { font-weight: 700; letter-spacing: .04em; }
+html[data-theme="dark"] .brand-line { font-weight: 700; }
 </style>
 <div id="app">
 
