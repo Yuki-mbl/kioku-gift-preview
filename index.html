@@ -21,7 +21,9 @@
 
 /* ---------- ライト（明るいシック・目にやさしい緑） ---------- */
 :root[data-theme="light"] {
-  --font: "Zen Maru Gothic", "Hiragino Maru Gothic ProN", "Hiragino Kaku Gothic ProN", "Yu Gothic UI", sans-serif;
+  /* ライトは角ばったゴシック（スマホに入っているもの）。丸ゴシックの Zen Maru Gothic は淡い配色だけに残す。
+     2026-09-15 Yukiさん指摘：webフォントが読み込まれると丸ゴシックに変わってしまっていた */
+  --font: "Hiragino Kaku Gothic ProN", "Noto Sans JP", "Noto Sans CJK JP", "Yu Gothic UI", "Meiryo", sans-serif;
   --bg: #f9f8f1;
   --bg-accent: linear-gradient(180deg, #fbfaf4 0%, #f8f7f0 55%, #f5f5ec 100%);
   --card: #ffffff;
@@ -2444,7 +2446,7 @@ html[data-theme="light"][data-fontsize] #screen-home #home-doors .balloon-lg {
 }
 html[data-theme="light"] .balloon::before, html[data-theme="light"] .balloon::after { display: none; }
 html[data-theme="light"][data-fontsize] #screen-home #home-doors .balloon-name {
-  order: 1; flex: 1; text-align: left; color: var(--text);
+  order: 1; flex: 1; text-align: left; color: var(--accent-strong); /* 5つとも同じ深緑に（2026-09-15） */
   font-size: min(1.38rem, 6.1vw); font-weight: 700; letter-spacing: .03em;
 }
 html[data-theme="light"][data-fontsize] #screen-home #home-doors .balloon-lg .balloon-name {
