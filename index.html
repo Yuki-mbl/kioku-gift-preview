@@ -40,8 +40,10 @@
 
 /* ---------- ダーク（深夜のネイビー×真鍮ゴールド。2026-09-10 灰色がかった紺→夜空の深紺に締め直し） ---------- */
 :root[data-theme="dark"] {
-  /* ダークだけ明朝体。ライトの丸ゴシックとは別の、静かで凛とした雰囲気に（2026-09-15 Yukiさん指示） */
-  --font: "Shippori Mincho", "Hiragino Mincho ProN", "Yu Mincho", "BIZ UDMincho", "Noto Serif JP", serif;
+  /* ダークだけ明朝体。ライトの丸ゴシックとは別の、静かで凛とした雰囲気に（2026-09-15 Yukiさん指示）。
+     webフォントは使わず、スマホに入っている明朝を使う＝すぐ出る・圏外でも同じ・通信いらず。
+     iPhone＝ヒラギノ明朝／Android＝Noto Serif CJK／PC＝游明朝 */
+  --font: "Hiragino Mincho ProN", "Yu Mincho", "Noto Serif CJK JP", "Noto Serif JP", "BIZ UDMincho", serif;
   --bg: #1f2637;
   --bg-accent: linear-gradient(180deg, #262e45 0%, #1f2637 55%, #1a2030 100%);
   --card: #2b3349;
