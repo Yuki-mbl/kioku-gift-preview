@@ -2283,13 +2283,15 @@ html[data-fontsize="xlarge"] .tabb-name { font-size: min(.95rem, 4vw); }
   background: none; -webkit-text-fill-color: currentColor; color: var(--brass-ed);
   filter: none;
 }
-html[data-theme="dark"] #screen-home .home-brand { justify-content: flex-start; padding: 20px 62px 0 26px; min-height: 0; }
+html[data-theme="dark"] #screen-home .home-brand { justify-content: flex-start; padding: calc(28px + env(safe-area-inset-top)) 62px 0 26px; min-height: 0; }
 html[data-theme="dark"] #screen-home .brand-line { font-size: min(.72rem, 3vw); letter-spacing: .2em; }
 html[data-theme="dark"] #screen-home .home-brand .icon-btn {
   border: 1px solid var(--line-ed); border-radius: 50%;
-  width: 36px; height: 36px; background: none; box-shadow: none; right: 20px;
+  width: 44px; height: 44px; background: none; box-shadow: none; right: 18px;
+  /* 画面のてっぺんからの距離で置く（真ん中合わせだと、実機で上にすれすれだった。2026-09-15） */
+  top: calc(14px + env(safe-area-inset-top)); transform: none;
 }
-html[data-theme="dark"] #screen-home .home-brand .icon-btn svg { width: 19px; height: 19px; }
+html[data-theme="dark"] #screen-home .home-brand .icon-btn svg { width: 23px; height: 23px; }
 /* 目次は行の高さぶんだけ伸ばす（文字サイズ別の高さ指定を打ち消す） */
 html[data-theme="dark"][data-fontsize] #screen-home #home-doors { height: auto; }
 /* 日付：大きな数字＋横に月と曜日 */
@@ -2383,16 +2385,17 @@ html[data-theme="dark"] #screen-home .home-wrap { overflow-y: auto; }
    ========================================================= */
 .balloon-sub { display: none; } /* 帯の小さな説明はこの形では使わない */
 /* 題字：小さく字間を広く、左寄せの深緑 */
-html[data-theme="light"] #screen-home .home-brand { justify-content: flex-start; padding: 22px 62px 0 24px; min-height: 0; }
+html[data-theme="light"] #screen-home .home-brand { justify-content: flex-start; padding: calc(30px + env(safe-area-inset-top)) 62px 0 24px; min-height: 0; }
 html[data-theme="light"] #screen-home .brand-line {
   font-size: min(.78rem, 3.3vw); letter-spacing: .3em; font-weight: 700;
   background: none; -webkit-text-fill-color: currentColor; color: var(--accent); filter: none;
 }
 html[data-theme="light"] #screen-home .home-brand .icon-btn {
-  width: 36px; height: 36px; right: 20px; background: none;
+  width: 44px; height: 44px; right: 18px; background: none;
   border: 1.5px solid var(--border); border-radius: 50%; box-shadow: none;
+  top: calc(14px + env(safe-area-inset-top)); transform: none;
 }
-html[data-theme="light"] #screen-home .home-brand .icon-btn svg { width: 19px; height: 19px; color: var(--accent); }
+html[data-theme="light"] #screen-home .home-brand .icon-btn svg { width: 23px; height: 23px; color: var(--accent); }
 /* 日付：深緑で大きく、年は横に小さく添える */
 html[data-theme="light"] #screen-home .top-bar { padding: 14px 24px 2px; }
 html[data-theme="light"] .home-date-jp { color: var(--accent-strong); font-weight: 900; }
