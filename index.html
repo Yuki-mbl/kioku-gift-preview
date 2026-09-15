@@ -2208,7 +2208,12 @@ html[data-theme="dark"][data-fontsize] #screen-home #home-doors { height: auto; 
 [data-theme="dark"] .home-date-ed { display: flex; align-items: flex-end; gap: 14px; }
 [data-theme="dark"] #screen-home .top-bar { padding: 10px 26px 0; }
 [data-theme="dark"] .hd-day {
-  font-size: min(6.2rem, 27vw); font-weight: 900; line-height: .84; letter-spacing: -.03em;
+  /* 金色は「文字の形に色を塗る」やり方なので、箱が数字より低いと足元が塗り残される
+     （＝数字の下が切れて見える。2026-09-15 実機で発覚）。箱を数字より大きくして、
+     同じぶんだけ外へ寄せる＝見た目の詰まりは元のまま */
+  display: inline-block;
+  font-size: min(6.2rem, 27vw); font-weight: 900; line-height: 1; letter-spacing: -.03em;
+  padding: .08em .05em .12em; margin: -.08em -.05em -.12em;
   color: transparent; background: linear-gradient(160deg, #FFF4DA 0%, #D9B876 55%, #9A7B3F 100%);
   -webkit-background-clip: text; background-clip: text;
 }
