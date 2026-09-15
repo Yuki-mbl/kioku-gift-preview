@@ -5465,7 +5465,7 @@ function renderAlbumPhotoView() {
     ${isReal ? "" : `<p class="album-cap"><span class="nowrap">${t("（本番アプリでは、")}</span><span class="nowrap">${t("あなたのアルバムから1枚出ます）")}</span></p>`}
     <button type="button" class="btn btn-secondary btn-xl" id="album-skip">${t("思い出せました（ホームへ）")}</button>
     <div class="album-q q-soft">${t("「メモリーアルバム」に残す")}</div>
-    <div class="field meal-line"><textarea id="album-text" class="grow-input" rows="2" placeholder="${t("思い出したこと")}"></textarea>${micMini("album-text", "album-keep")}</div>
+    <div class="field meal-line"><textarea id="album-text" class="grow-input" rows="2" placeholder="${t("例：ゆき撮影")}"></textarea>${micMini("album-text", "album-keep")}</div>
     <p class="album-need" id="album-need" hidden>${t("ひと言そえると残せます")}</p>
     <button type="button" class="btn btn-primary btn-xl" id="album-keep">${t("保存")}</button>
     <button type="button" class="btn btn-secondary btn-xl" id="album-list" style="margin-top:10px;">${t("「メモリーアルバム」を見る（{n}）", { n: memos.length })}</button>`;
