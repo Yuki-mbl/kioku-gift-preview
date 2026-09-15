@@ -295,9 +295,63 @@ button { color: inherit; } /* 色未指定のボタンがブラウザ標準の�
 /* ===== オンボーディング ===== */
 .onboard-wrap {
   flex: 1;
-  display: flex; flex-direction: column; justify-content: center;
+  display: flex; flex-direction: column; justify-content: safe center;
   padding: 28px 22px 40px;
-  gap: 26px;
+  gap: 22px;
+  overflow-y: auto; /* 背の低い端末では下までたどれるように（2026-09-15 画面の色を足したため） */
+}
+/* 「画面の色」を足したぶん、はじめの画面は詰める＝「はじめる」まで1画面に収める
+   （2026-09-15。年代9つ＋性別3つ＋色3つ＋はじめる、が一度に見えるのが大事） */
+#screen-onboarding .field { margin-bottom: 14px; }
+#screen-onboarding .field.ob-theme { margin-bottom: 0; }
+#screen-onboarding .field-label { margin-bottom: 8px; }
+/* 色えらびは横並び（丸と名前を横に）＝縦を使わない */
+#screen-onboarding .theme-options { gap: 8px; }
+#screen-onboarding .theme-opt {
+  flex-direction: column; gap: 5px; padding: 8px 4px;
+  font-size: min(.88rem, 3.5vw); border-radius: 14px;
+}
+#screen-onboarding .theme-mini { width: 40px; height: 54px; padding: 6px 5px; gap: 4px; }
+#screen-onboarding .theme-mini i:first-child { height: 12px; }
+#screen-onboarding .mini-pastel i + i { height: 11px; width: 11px; }
+/* ふつうのスマホ（縦900px未満）はここから詰める。タブレットは広いままでよい */
+@media (max-height: 900px) {
+  .onboard-wrap { gap: 10px; padding: 14px 22px 16px; }
+  .onboard-code-link { font-size: .95rem; padding: 6px; margin-top: 0; }
+  .logo-mark { width: 48px; height: 48px; font-size: 1.35rem; margin-bottom: 6px; }
+  .app-logo h1 { font-size: 1.3rem; }
+  .app-sub { font-size: .88rem; }
+  .tagline { display: none; } /* 説明の一行は、ここだけ省いて「はじめる」まで見せる */
+  #screen-onboarding .card { padding: 14px; }
+  #screen-onboarding .seg { padding: 8px 4px; }
+  #screen-onboarding .field { margin-bottom: 9px; }
+  #screen-onboarding .field-label { margin-bottom: 6px; }
+}
+/* よくあるスマホ（縦800px未満）では、さらに詰める＝「はじめる」まで指を動かさずに見える */
+@media (max-height: 800px) {
+  .onboard-wrap { gap: 8px; padding: 12px 20px 14px; }
+  .logo-mark { width: 44px; height: 44px; font-size: 1.25rem; margin-bottom: 5px; }
+  .app-logo h1 { font-size: 1.22rem; }
+  .app-sub { font-size: .84rem; }
+  #screen-onboarding .card { padding: 12px; }
+  #screen-onboarding .seg { padding: 6px 4px; }
+  #screen-onboarding .field { margin-bottom: 7px; }
+  #screen-onboarding .theme-opt { padding: 6px 4px; gap: 4px; }
+  #screen-onboarding .theme-mini { width: 34px; height: 46px; padding: 5px 4px; gap: 3px; }
+  #screen-onboarding .theme-mini i:first-child { height: 10px; }
+  #screen-onboarding .mini-pastel i + i { height: 9px; width: 9px; }
+}
+/* 背のとても低い端末（320×640など）では、副題も省いてさらに詰める */
+@media (max-height: 660px) {
+  .app-sub { display: none; }
+  .onboard-wrap { gap: 6px; padding: 10px 16px 12px; }
+  .logo-mark { width: 36px; height: 36px; font-size: 1.05rem; margin-bottom: 4px; }
+  .app-logo h1 { font-size: 1.1rem; }
+  #screen-onboarding .card { padding: 10px; }
+  #screen-onboarding .seg { padding: 5px 3px; }
+  #screen-onboarding .age-group { gap: 6px; }
+  #screen-onboarding .field { margin-bottom: 6px; }
+  #screen-onboarding .theme-mini { width: 30px; height: 40px; }
 }
 .app-logo { text-align: center; }
 .logo-mark {
@@ -1196,6 +1250,33 @@ mark {
   -webkit-tap-highlight-color: transparent;
 }
 .theme-opt.selected { border-color: var(--accent); background: var(--accent-soft); }
+
+/* テーマえらびの「小さなホーム画面」。丸い色見本より、選んだ先の姿が分かる（2026-09-15） */
+.theme-mini {
+  position: relative; flex: 0 0 auto;
+  width: 48px; height: 64px; border-radius: 9px;
+  border: 1px solid var(--border); overflow: hidden;
+  padding: 7px 6px; display: flex; flex-direction: column; gap: 5px;
+}
+.theme-mini i { display: block; border-radius: 2px; }
+.theme-mini i:first-child { height: 15px; width: 62%; border-radius: 3px; } /* 日付 */
+.theme-mini i + i { height: 5px; width: 100%; }
+/* ライト：クリームの地に、緑の線と横並びの行 */
+.mini-light { background: #F6F3E9; border-color: #D7D0BE; padding-left: 12px; }
+.mini-light::before { content: ""; position: absolute; left: 7px; top: 9px; bottom: 9px; width: 2px; background: #3E7258; }
+.mini-light i:first-child { background: #2A5440; }
+.mini-light i + i { background: #C8D2C6; }
+/* ダーク：紺の地に、金の日付と細い罫 */
+.mini-dark { background: #141C35; border-color: #2B3556; }
+.mini-dark i:first-child { background: linear-gradient(160deg, #FFF4DA, #D9B876); }
+.mini-dark i + i { background: rgba(217, 184, 118, .5); }
+/* 淡い配色：生成りの地に、風船が3つ */
+.mini-pastel { background: #FBF6EE; border-color: #E6DBC9; }
+.mini-pastel i:first-child { background: #B9A184; }
+.mini-pastel i + i { height: 13px; width: 13px; border-radius: 50%; }
+.mini-pastel i:nth-child(2) { background: #ECB98C; margin-left: 1px; }
+.mini-pastel i:nth-child(3) { background: #C3A9DD; margin-left: 18px; margin-top: -6px; }
+.mini-pastel i:nth-child(4) { background: #B3D19F; margin-left: 7px; margin-top: -3px; }
 .theme-swatch { width: 28px; height: 28px; border-radius: 50%; border: 1px solid var(--border); flex-shrink: 0; }
 .swatch-light { background: linear-gradient(135deg, #f4efe4 50%, #2e7d68 50%); }
 .swatch-dark { background: linear-gradient(135deg, #17181c 50%, #7fc8af 50%); }
@@ -2480,6 +2561,20 @@ html[data-theme="dark"] .brand-line { font-weight: 700; }
               <button class="seg" data-t data-value="回答しない">回答しない</button>
             </div>
           </div>
+          <div class="field ob-theme">
+            <span class="field-label" data-t>画面の色（あとで変えられます）</span>
+            <div class="theme-options">
+              <button class="theme-opt" data-theme-opt="light">
+                <span class="theme-mini mini-light" aria-hidden="true"><i></i><i></i><i></i><i></i></span><span data-t>ライト</span>
+              </button>
+              <button class="theme-opt" data-theme-opt="dark">
+                <span class="theme-mini mini-dark" aria-hidden="true"><i></i><i></i><i></i><i></i></span><span data-t>ダーク</span>
+              </button>
+              <button class="theme-opt" data-theme-opt="pastel">
+                <span class="theme-mini mini-pastel" aria-hidden="true"><i></i><i></i><i></i><i></i></span><span data-t>淡い配色</span>
+              </button>
+            </div>
+          </div>
         </div>
         <button class="btn btn-primary btn-xl" id="ob-start" data-t>はじめる</button>
         <button type="button" class="onboard-code-link" id="ob-code-link" data-t>引き継ぎコードをお持ちの方はこちら</button>
@@ -2633,13 +2728,13 @@ html[data-theme="dark"] .brand-line { font-weight: 700; }
           <div class="settings-label" data-t>テーマ</div>
           <div class="theme-options">
             <button class="theme-opt" data-theme-opt="light">
-              <span class="theme-swatch swatch-light"></span><span data-t>ライト</span>
+              <span class="theme-mini mini-light" aria-hidden="true"><i></i><i></i><i></i><i></i></span><span data-t>ライト</span>
             </button>
             <button class="theme-opt" data-theme-opt="dark">
-              <span class="theme-swatch swatch-dark"></span><span data-t>ダーク</span>
+              <span class="theme-mini mini-dark" aria-hidden="true"><i></i><i></i><i></i><i></i></span><span data-t>ダーク</span>
             </button>
             <button class="theme-opt" data-theme-opt="pastel">
-              <span class="theme-swatch swatch-pastel"></span><span data-t>淡い配色</span>
+              <span class="theme-mini mini-pastel" aria-hidden="true"><i></i><i></i><i></i><i></i></span><span data-t>淡い配色</span>
             </button>
           </div>
         </div>
@@ -2863,6 +2958,9 @@ function applySettings() {
     store.set("mn_settings", settings);
   }
   document.documentElement.dataset.fontsize = effectiveFontSize();
+  // テーマの選択印は、はじめの画面と設定の両方に付ける（同じ .theme-opt を使っている）
+  document.querySelectorAll(".theme-opt").forEach(b =>
+    b.classList.toggle("selected", b.dataset.themeOpt === (settings.theme || "pastel")));
 }
 
 function saveEntries() { store.set("mn_entries", entries); }
@@ -6564,9 +6662,7 @@ function wireEvents() {
     btn.addEventListener("click", () => {
       settings.theme = btn.dataset.themeOpt;
       store.set("mn_settings", settings);
-      applySettings();
-      document.querySelectorAll(".theme-opt").forEach(b =>
-        b.classList.toggle("selected", b === btn));
+      applySettings(); // 選択印は applySettings が、はじめの画面と設定の両方に付け直す
     });
   });
 
