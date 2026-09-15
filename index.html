@@ -753,8 +753,12 @@ html[data-fontsize="xlarge"] #diary-text { min-height: clamp(140px, 22vh, 260px)
 /* アルバムの「思い出しました（ホームへ）」「残した思い出を見る」は1行を守る
    （小さい端末・大きい文字では折り返していたため、幅に合わせて字が縮む。2026-09-13） */
 #album-skip, #album-list { white-space: nowrap; font-size: min(1.18rem, 5.2vw); padding-left: 10px; padding-right: 10px; }
-html[data-fontsize="large"] #album-skip, html[data-fontsize="large"] #album-list { font-size: min(1.3rem, 5.2vw); }
-html[data-fontsize="xlarge"] #album-skip, html[data-fontsize="xlarge"] #album-list { font-size: min(1.4rem, 5.2vw); }
+/* 「思い出せました（書かずにホームへ）」は字数が多いので、狭い端末ではもう少し縮める（2026-09-15） */
+#album-skip { font-size: min(1.12rem, 4.3vw); }
+html[data-fontsize="large"] #album-list { font-size: min(1.3rem, 5.2vw); }
+html[data-fontsize="xlarge"] #album-list { font-size: min(1.4rem, 5.2vw); }
+html[data-fontsize="large"] #album-skip { font-size: min(1.2rem, 4.3vw); }
+html[data-fontsize="xlarge"] #album-skip { font-size: min(1.28rem, 4.3vw); }
 /* ホーム・見返すの検索バーの右にマイク（押すと検索画面が開いてそのまま聞き始める。2026-09-13） */
 .home-search-line { display: flex; align-items: center; gap: 10px; }
 .home-search-line .search-trigger { flex: 1; min-width: 0; }
@@ -5448,10 +5452,9 @@ function renderAlbumPhotoView() {
     <div class="album-lead"><span class="lead-ico">${balloonIconSvg("album")}</span>${t("スマホのアルバムから記憶をたどる")}</div>
     <div class="album-photo${isReal ? " has-img" : ""}"><span class="ph-emoji">${albumPhotoHtml(emoji)}</span></div>
     ${isReal ? "" : `<p class="album-cap"><span class="nowrap">${t("（本番アプリでは、")}</span><span class="nowrap">${t("あなたのアルバムから1枚出ます）")}</span></p>`}
-    <div class="album-q q-soft">${t("思い出すだけでも大丈夫")}</div>
-    <div class="field meal-line"><textarea id="album-text" class="grow-input" rows="2" placeholder="${t("沖縄旅行")}"></textarea>${micMini("album-text", "album-keep")}</div>
+    <button type="button" class="btn btn-secondary btn-xl" id="album-skip">${t("思い出せました（書かずにホームへ）")}</button>
+    <div class="field meal-line" style="margin-top:14px;"><textarea id="album-text" class="grow-input" rows="2" placeholder="${t("写真に添えたい言葉")}"></textarea>${micMini("album-text", "album-keep")}</div>
     <button type="button" class="btn btn-primary btn-xl" id="album-keep">${t("保存")}</button>
-    <button type="button" class="btn btn-secondary btn-xl" id="album-skip" style="margin-top:10px;">${t("思い出しました（ホームへ）")}</button>
     <button type="button" class="btn btn-secondary btn-xl" id="album-list" style="margin-top:10px;">${t("残した思い出を見る（{n}）", { n: memos.length })}</button>`;
   wireMics(document.getElementById("album-wrap")); // 話して書く
   document.getElementById("album-keep").addEventListener("click", () => {
