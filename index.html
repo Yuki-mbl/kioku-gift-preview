@@ -6501,6 +6501,18 @@ function wireMics(root) {
         // そこで①少し待ってから始め②本当に聞けているか確かめ③だめなら間を空けてやり直す（2026-09-14）
         let starting = false; // 立ち上げ中（見張りと二重に始めないための鍵）
         let failStreak = 0;   // 続けて立ち上がらなかった回数
+        // Androidは「話し終わり」の合図（stopped）のあとに、いちばん正確な「最後の答え」を送ってくる。
+        // それを待たずに聞き直すと、①正確な答えを捨ててしまい ②次の区切りの土台（base）が古いままになり
+        // 前に書いた分を上書きしてしまう。そこで少しだけ待って、届いたら確定してから聞き直す（2026-09-17）
+        let awaitingFinal = false;
+        let finalTimer = null;
+        const commitAndRestart = delay => {
+          if (finalTimer) { clearTimeout(finalTimer); finalTimer = null; }
+          if (!micActive || micActive.btn !== btn) return;
+          base = target.value;    // ここまでを確定＝次の区切りはこの続きに書く
+          sessionAt = Date.now(); // 待っている間に見張りが二重に立て直さないように
+          startListen(delay);
+        };
         const startListen = async (delayMs) => {
           if (starting) return;
           starting = true;
@@ -6509,7 +6521,8 @@ function wireMics(root) {
               const wait = (delayMs || 0) + i * 500; // やり直すたびに長めに待つ
               if (wait) await new Promise(r => setTimeout(r, wait));
               if (!micActive || micActive.btn !== btn) return;
-              sessionAt = Date.now(); heard = false; lastSaid = "";
+              sessionAt = Date.now(); heard = false; lastSaid = ""; awaitingFinal = false;
+              base = target.value; // 聞き始める瞬間の文を土台にする（ここに継ぎ足す）
               try { await SRN.start({ language: "ja-JP", maxResults: 1, partialResults: true, popup: false }); } catch (e) {}
               await new Promise(r => setTimeout(r, 500)); // 立ち上がりを待ってから確かめる
               if (!micActive || micActive.btn !== btn) return;
@@ -6524,23 +6537,36 @@ function wireMics(root) {
         const subs = [];
         subs.push(await SRN.addListener("partialResults", d => {
           const said = (((d && d.matches) || [])[0] || "").trim();
-          if (said && isMine() && micActive && micActive.btn === btn) { lastSaid = said; failStreak = 0; applySaid(said, false); }
+          if (!said || !micActive || micActive.btn !== btn) return;
+          if (awaitingFinal) { // 話し終わりのあとに届いた＝聞き取りの最終結果（途中経過より正確）
+            awaitingFinal = false;
+            failStreak = 0;
+            if (applySaid(said, true)) return; // 語尾が「保存」なら確定して終わり
+            commitAndRestart(500);
+            return;
+          }
+          if (isMine()) { lastSaid = said; failStreak = 0; applySaid(said, false); }
         }));
         subs.push(await SRN.addListener("listeningState", d => {
           if (!d || !micActive || micActive.btn !== btn) return;
           if (d.status === "started") { heard = true; return; } // ここから先の結果だけが今回の分
           if (d.status === "stopped" && isMine()) {
-            if (applySaid(lastSaid, true)) return; // 語尾が「保存」なら確定して終わり
-            base = target.value;  // ここまでを確定して、
-            sessionAt = Date.now(); // 待っている間に見張りが二重に立て直さないように
-            startListen(700);     // マイクが空くのを待ってから続きを聞く（間があっても切れない）
+            awaitingFinal = true;
+            if (finalTimer) clearTimeout(finalTimer);
+            finalTimer = setTimeout(() => { // 最後の答えが来なかったときは、途中経過を確定して続ける
+              finalTimer = null;
+              if (!awaitingFinal) return;
+              awaitingFinal = false;
+              if (applySaid(lastSaid, true)) return;
+              commitAndRestart(400);
+            }, 700);
           }
         }));
         // 見張り：認識器がエラーで黙って死んでも、こちらには何も知らされない（プラグインの作り）。
         // 定期的に「聞いているか」を確かめて、死んでいたら立て直す（2026-09-13。マイクが全く拾わない報告への対策）
         const watchdog = setInterval(async () => {
           if (!micActive || micActive.btn !== btn) { clearInterval(watchdog); return; }
-          if (starting || Date.now() - sessionAt < 1500) return; // 立ち上げ中・直後はそっとしておく
+          if (starting || awaitingFinal || Date.now() - sessionAt < 1500) return; // 立ち上げ中・最後の答え待ち・直後はそっとしておく
           try {
             const st = await SRN.isListening();
             if (st && st.listening === false && micActive && micActive.btn === btn) startListen(300);
@@ -6549,7 +6575,7 @@ function wireMics(root) {
         micActive = {
           rec: { stop: () => { try { SRN.stop(); } catch (e) {} } },
           btn, target,
-          cleanup: () => { clearInterval(watchdog); subs.forEach(x => { try { x.remove(); } catch (e) {} }); target.removeEventListener("input", onUserEdit); },
+          cleanup: () => { clearInterval(watchdog); if (finalTimer) clearTimeout(finalTimer); subs.forEach(x => { try { x.remove(); } catch (e) {} }); target.removeEventListener("input", onUserEdit); },
         };
         btn.classList.add("listening");
         btn.innerHTML = btn.dataset.idle ? micIconSvg() : `${micIconSvg()}<span class="mic-label">${t("聞いています…（押すと止まる）")}</span>`;
