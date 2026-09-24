@@ -1573,10 +1573,13 @@ mark {
 #screen-home .home-brand {
   position: relative; min-height: clamp(52px, 7.2vh, 60px);
   display: flex; align-items: center;
-  padding: clamp(6px, 1vh, 10px) 62px clamp(2px, .5vh, 6px) 20px;
+  /* 上は端末の安全域（iPhoneの時計・電池の帯）ぶんを足す。ダーク・ライトは別に指定済み。
+     Androidは本体側で余白を取るので、この値は0になる（2026-09-24 SEで設定ボタンが電池にかぶった） */
+  padding: calc(clamp(10px, 1.6vh, 14px) + env(safe-area-inset-top)) 62px clamp(2px, .5vh, 6px) 20px;
 }
 #screen-home .home-brand .icon-btn {
-  position: absolute; right: 8px; top: 50%; transform: translateY(-50%);
+  /* 画面のてっぺんからの距離で置く（真ん中合わせだと、iPhoneの時計・電池の帯にかぶる。2026-09-24） */
+  position: absolute; right: 8px; top: calc(8px + env(safe-area-inset-top)); transform: none;
   width: clamp(46px, 6.6vh, 54px); height: clamp(46px, 6.6vh, 54px);
 }
 #screen-home .home-brand .icon-btn svg { width: 28px; height: 28px; }
