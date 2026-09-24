@@ -1617,6 +1617,7 @@ mark {
    （2026-09-24。端末の余白＝時計・ジェスチャーバーのぶんで100dvhがわずかにはみ出し、ずるっと動いていた）。
    収まらないとき（長い日記・設定・規約・キーボードが出ているとき）は app.js が自動でこの錠を外す */
 html.fixed-page, html.fixed-page body { height: 100%; overflow: hidden; overscroll-behavior: none; }
+html.fixed-page #app { height: 100%; } /* これが無いと、中の「height:100%」が効かない（親の高さが決まらないため） */
 html.fixed-page .screen.active { min-height: 0; height: 100%; }
 #screen-home .search-trigger { margin-top: 0; margin-bottom: 0; padding: clamp(10px, 1.6vh, 15px) 20px; }
 #screen-home .search-trigger:has(.search-eg) { font-size: min(1.34rem, 4.4vw) !important; } /* ホームはマイクのぶん幅が狭い。例を「パン、太郎」に縮めたぶん字を大きく（2026-09-15） */
@@ -2522,6 +2523,19 @@ html[data-theme="dark"] .brand-line { font-weight: 700; }
   background: var(--accent-soft); border-radius: 8px;
   font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: .95em;
   user-select: all; -webkit-user-select: all; word-break: break-all;
+}
+
+/* 背の低い端末（iPhone SE など縦667px以下）では、ホームの中身を少し詰めて
+   「これまでの記録」の行がタブに隠れないようにする（2026-09-24 SEの実機で発覚） */
+@media (max-height: 700px) {
+  #screen-home .home-wrap { padding-bottom: 14px; }
+  html[data-theme="dark"][data-fontsize] #screen-home #home-doors .balloon,
+  html[data-theme="dark"][data-fontsize] #screen-home #home-doors .balloon-lg { min-height: clamp(46px, 6.8vh, 62px); }
+  html[data-theme="light"][data-fontsize] #screen-home #home-doors .balloon,
+  html[data-theme="light"][data-fontsize] #screen-home #home-doors .balloon-lg { min-height: clamp(50px, 7.2vh, 68px); }
+  [data-theme="dark"] .hd-day { font-size: min(4.8rem, 23vw); }
+  [data-theme="dark"] #screen-home .home-brand { padding-top: calc(18px + env(safe-area-inset-top)); }
+  [data-theme="light"] #screen-home .home-brand { padding-top: calc(20px + env(safe-area-inset-top)); }
 }
 </style>
 <div id="app">
