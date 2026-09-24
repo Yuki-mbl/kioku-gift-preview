@@ -3008,6 +3008,11 @@ function quickMemoPlugin() {
   return (window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.QuickMemo) || null;
 }
 // アプリ版のネイティブ音声認識（WebViewの音声認識が動かない端末向け。2026-09-09）
+// iPhoneかどうか（音声認識の「最後の答え」が届く順番が iPhone と Android で逆のため）
+function isIOSApp() {
+  try { return !!(window.Capacitor && window.Capacitor.getPlatform && window.Capacitor.getPlatform() === "ios"); }
+  catch (e) { return false; }
+}
 function nativeSpeech() {
   return (window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.SpeechRecognition) || null;
 }
@@ -6536,6 +6541,7 @@ function wireMics(root) {
         // 前に書いた分を上書きしてしまう。そこで少しだけ待って、届いたら確定してから聞き直す（2026-09-17）
         let awaitingFinal = false;
         let finalTimer = null;
+        let lastSaidAt = 0; // 最後に結果が届いた時刻（iPhoneは「最後の答え」→「話し終わり」の順に来る）
         const commitAndRestart = delay => {
           if (finalTimer) { clearTimeout(finalTimer); finalTimer = null; }
           if (!micActive || micActive.btn !== btn) return;
@@ -6575,12 +6581,19 @@ function wireMics(root) {
             commitAndRestart(500);
             return;
           }
-          if (isMine()) { lastSaid = said; failStreak = 0; applySaid(said, false); }
+          if (isMine()) { lastSaid = said; lastSaidAt = Date.now(); failStreak = 0; applySaid(said, false); }
         }));
         subs.push(await SRN.addListener("listeningState", d => {
           if (!d || !micActive || micActive.btn !== btn) return;
           if (d.status === "started") { heard = true; return; } // ここから先の結果だけが今回の分
           if (d.status === "stopped" && isMine()) {
+            // iPhoneは「最後の答え」を送ってから「話し終わり」を知らせる＝もう届いているので待たない。
+            // Androidは「話し終わり」のあとに最後の答えが届くので、少し待ってから確定する
+            if (isIOSApp()) {
+              if (applySaid(lastSaid, true)) return;
+              commitAndRestart(300);
+              return;
+            }
             awaitingFinal = true;
             if (finalTimer) clearTimeout(finalTimer);
             finalTimer = setTimeout(() => { // 最後の答えが来なかったときは、途中経過を確定して続ける
@@ -6888,27 +6901,38 @@ function wireEvents() {
           if (perm && perm.speechRecognition === "denied") return;
         } catch (e) {}
         let lastSaid = "";
+        let lastSaidAt = 0;
         const sessionAt = Date.now();
         let heard = false; // 前回の残り結果を受け取らないための関
         const isMine = () => heard || Date.now() - sessionAt > 700;
         const subs = [];
+        // 聞き取りは「話し終わり」のあとに届く最後の答えがいちばん正確（Android）。
+        // iPhoneは先に届く。どちらでも最後の答えで検索できるように、少しだけ待つ（2026-09-24）
+        let waitFinal = null;
+        const finishSearch = () => {
+          if (waitFinal) { clearTimeout(waitFinal); waitFinal = null; }
+          stopMic();
+          searchInput.placeholder = searchPh;
+          if (lastSaid) { lastSearchQ = null; runSearch(lastSaid); }
+        };
         subs.push(await SRN.addListener("partialResults", d => {
           const said = collapseDoubledSaid((((d && d.matches) || [])[0] || "").trim());
-          if (said && isMine() && micActive && micActive.btn === searchMic) { lastSaid = said; searchInput.value = said; }
+          if (!said || !isMine() || !micActive || micActive.btn !== searchMic) return;
+          lastSaid = said; lastSaidAt = Date.now(); searchInput.value = said;
+          if (waitFinal) finishSearch(); // 待っていた最後の答えが届いた
         }));
         subs.push(await SRN.addListener("listeningState", d => {
           if (!d || !micActive || micActive.btn !== searchMic) return;
           if (d.status === "started") { heard = true; return; }
           if (d.status === "stopped" && isMine()) {
-            stopMic();
-            searchInput.placeholder = searchPh;
-            if (lastSaid) { lastSearchQ = null; runSearch(lastSaid); }
+            if (isIOSApp()) { finishSearch(); return; } // iPhone：最後の答えはもう届いている
+            waitFinal = setTimeout(finishSearch, 700); // Android：最後の答えを待ってから検索
           }
         }));
         micActive = {
           rec: { stop: () => { try { SRN.stop(); } catch (e) {} } },
           btn: searchMic, target: searchInput,
-          cleanup: () => { subs.forEach(x => { try { x.remove(); } catch (e) {} }); },
+          cleanup: () => { if (waitFinal) clearTimeout(waitFinal); subs.forEach(x => { try { x.remove(); } catch (e) {} }); },
         };
         searchMic.classList.add("listening");
         searchInput.placeholder = t("聞いています…");
