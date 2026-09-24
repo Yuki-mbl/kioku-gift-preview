@@ -3841,7 +3841,7 @@ const STEP_DEFS = {
       <div class="field"><span class="field-label">${t("自由に書いてください")}</span>
         <div class="meal-line">
           <textarea id="diary-text" class="grow-input" rows="6" maxlength="1000" placeholder="">${esc(e.diary)}</textarea>
-          ${micMini("diary-text", "flow-skip")}
+          ${micMini("diary-text", "flow-skip", "text")}
         </div>
       </div>
       <p class="photo-hint hint-strong" id="diary-limit" hidden style="margin-top:10px;"></p>
@@ -5624,7 +5624,7 @@ function renderAlbumPhotoView() {
     ${isReal ? "" : `<p class="album-cap"><span class="nowrap">${t("（本番アプリでは、")}</span><span class="nowrap">${t("あなたのアルバムから1枚出ます）")}</span></p>`}
     <button type="button" class="btn btn-secondary btn-xl" id="album-skip">${t("思い出せました（ホームへ）")}</button>
     <div class="album-q q-soft">${t("「メモリーアルバム」に残す")}</div>
-    <div class="field meal-line"><textarea id="album-text" class="grow-input" rows="2" placeholder="${t("例：ゆき撮影")}"></textarea>${micMini("album-text", "album-keep")}</div>
+    <div class="field meal-line"><textarea id="album-text" class="grow-input" rows="2" placeholder="${t("例：ゆき撮影")}"></textarea>${micMini("album-text", "album-keep", "text")}</div>
     <p class="album-need" id="album-need" hidden>${t("ひと言そえると残せます")}</p>
     <button type="button" class="btn btn-primary btn-xl" id="album-keep">${t("保存")}</button>
     <button type="button" class="btn btn-secondary btn-xl" id="album-list" style="margin-top:10px;">${t("「メモリーアルバム」を見る（{n}）", { n: memos.length })}</button>`;
@@ -5757,7 +5757,7 @@ function renderAlbumEdit(idx) {
     <div class="album-photo${String(m.photo).startsWith("data:") ? " has-img" : ""}"><span class="ph-emoji">${albumPhotoHtml(m.photo)}</span></div>
     <div class="album-q">${t("思い出を追記")}</div>
     <label class="field"><span class="album-field-label">${t("メモ")}</span>
-      <div class="meal-line"><textarea id="edit-note" rows="3">${esc(m.note || "")}</textarea>${micMini("edit-note", "edit-save")}</div></label>
+      <div class="meal-line"><textarea id="edit-note" rows="3">${esc(m.note || "")}</textarea>${micMini("edit-note", "edit-save", "text")}</div></label>
     <label class="field"><span class="album-field-label">${t("撮影した年月")}</span>
       <input type="month" id="edit-date" value="${m.photoDate || ""}"></label>
     <button type="button" class="btn btn-primary btn-xl" id="edit-save">${t("保存")}</button>
@@ -6000,7 +6000,7 @@ function renderGratitude(justSaved) {
     ${justSaved ? `<div class="album-saved">✓ ${t("残しました。おやすみなさい。")}</div>` : ""}
     <div class="field meal-line" style="margin-bottom:12px;">
       <textarea id="grat-input" class="grow-input" rows="2" placeholder="${t("例：電車に忘れた帽子が返ってきた")}"></textarea>
-      ${micMini("grat-input", "grat-save")}
+      ${micMini("grat-input", "grat-save", "text")}
     </div>
     <button type="button" class="btn btn-green btn-xl" id="grat-save">${t("保存")}</button>
     <button type="button" class="btn btn-secondary btn-xl" id="grat-list" style="margin-top:10px;">${t("残したありがとうを見る（{n}）", { n: memos.length })}</button>
@@ -6574,10 +6574,13 @@ function micHtml(targetId) {
   return `<button type="button" class="mic-btn" data-mic="${targetId}">${micIconSvg()}<span class="mic-label">${t("話して書く")}</span></button>`;
 }
 // 欄の右に置く小さな丸マイク（1行の入力欄むけ）
-function micMini(targetId, saveBtnId) {
+// mode: "text"＝文章を話す欄（日記・メモリーアルバム・ありがとう）。区切りを入れず、聞き直しを最短にする。
+//       省略＝単語を並べる欄（食事・買い物・服装・一瞬のひらめき）。間を空けたら全角スペースで区切る。
+function micMini(targetId, saveBtnId, mode) {
   if (!SpeechRec && !nativeSpeech()) return "";
   const saveAttr = saveBtnId ? ` data-voice-save="${saveBtnId}"` : "";
-  return `<button type="button" class="mic-btn mic-mini" data-mic="${targetId}" data-idle="1"${saveAttr} aria-label="${t("話して書く")}">${micIconSvg()}</button>`;
+  const modeAttr = mode === "text" ? ` data-mic-mode="text"` : "";
+  return `<button type="button" class="mic-btn mic-mini" data-mic="${targetId}" data-idle="1"${saveAttr}${modeAttr} aria-label="${t("話して書く")}">${micIconSvg()}</button>`;
 }
 // アプリから離れたら（他のアプリを見る・タブを替える・画面が消える）マイクは止める
 document.addEventListener("visibilitychange", () => { if (document.hidden) stopMic(); });
@@ -6612,7 +6615,13 @@ function wireMics(root) {
         // Androidの認識器は「間」があるたびに終わってしまうため、終わったら自動で聞き直す
         // （もう一度押さなくても、間を空けながら続けて話せる。止めるのはマイクをもう一度押すか語尾の「保存」。
         //  2026-09-13 Yukiさん要望。ついでに、聞き直しの失敗＝2回目から効かなくなる問題も1回やり直しで対策）
-        let base = target.value; // 確定した区切りごとに更新し、全角スペースを挟んで継ぎ足していく
+        // 文章モード（日記・アルバム・ありがとう）は、区切りを入れず、聞き直しをできるだけ早くする。
+        // 息継ぎのたびに耳をふさぐ時間が長いと、話した言葉が落ちてしまうため（2026-09-25 Yukiさん指摘）
+        const textMode = btn.dataset.micMode === "text";
+        const sep = textMode ? "" : micJoiner();
+        const FINAL_WAIT = textMode ? 250 : 700;   // 最後の答えを待つ時間
+        const RESTART_WAIT = textMode ? 120 : 500; // 聞き直しまでの間
+        let base = target.value; // 確定した区切りごとに更新し、継ぎ足していく
         let lastSaid = "";
         let sessionAt = Date.now();
         let heard = false; // この区切りで実際に話し始めたか（前回の残り結果を受け取らないための関）
@@ -6628,7 +6637,6 @@ function wireMics(root) {
             if (m) { wantSave = true; said = said.slice(0, m.index).replace(/[、。．\s　]+$/, ""); }
           }
           // 欄の末尾がすでに同じ文なら継ぎ足さない（前回の残り結果がもう一度届いたとき用）
-          const sep = micJoiner();
           if (said && base && (base === said || base.endsWith(sep + said))) said = "";
           programmatic = true;
           target.value = said ? (base ? base + sep : "") + said : base;
@@ -6662,9 +6670,9 @@ function wireMics(root) {
         // 間が空いた場所を覚えておいて、そこに全角スペースを差し込む（2026-09-24 実機で発覚）
         let iosCuts = [];
         const iosDecorate = raw => {
-          if (!iosCuts.length) return raw;
+          if (textMode || !iosCuts.length) return raw; // 文章モードでは区切りを入れない
           let out = "", prev = 0;
-          for (const c of iosCuts) { if (c > prev && c <= raw.length) { out += raw.slice(prev, c) + micJoiner(); prev = c; } }
+          for (const c of iosCuts) { if (c > prev && c <= raw.length) { out += raw.slice(prev, c) + sep; prev = c; } }
           return out + raw.slice(prev);
         };
         const idleTooLong = () => Date.now() - lastHeardAt > MIC_IDLE_STOP_MS;
@@ -6706,7 +6714,7 @@ function wireMics(root) {
             lastHeardAt = Date.now();
             failStreak = 0;
             if (applySaid(said, true)) return; // 語尾が「保存」なら確定して終わり
-            commitAndRestart(500);
+            commitAndRestart(RESTART_WAIT);
             return;
           }
           if (isMine()) {
@@ -6745,7 +6753,7 @@ function wireMics(root) {
             // Androidは「話し終わり」のあとに最後の答えが届くので、少し待ってから確定する
             if (isIOSApp()) {
               if (applySaid(lastSaid, true)) return;
-              commitAndRestart(300);
+              commitAndRestart(RESTART_WAIT);
               return;
             }
             awaitingFinal = true;
@@ -6755,8 +6763,8 @@ function wireMics(root) {
               if (!awaitingFinal) return;
               awaitingFinal = false;
               if (applySaid(lastSaid, true)) return;
-              commitAndRestart(400);
-            }, 700);
+              commitAndRestart(RESTART_WAIT);
+            }, FINAL_WAIT);
           }
         }));
         // 見張り：認識器がエラーで黙って死んでも、こちらには何も知らされない（プラグインの作り）。
