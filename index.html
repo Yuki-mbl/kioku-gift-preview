@@ -1613,10 +1613,11 @@ mark {
 /* ホームは1画面に収める。どうしても入らない小さな端末だけスクロールできる（棒は場所を取らない） */
 #screen-home .home-wrap { overflow-y: auto; scrollbar-width: none; overscroll-behavior: contain; }
 #screen-home .home-wrap::-webkit-scrollbar { width: 0; height: 0; }
-/* ホームにいる間は、ページそのものを動かさない＝指で引いても画面が揺れない（2026-09-24）。
-   端末の余白（時計・ジェスチャーバー）のぶんで1画面がわずかにはみ出し、ずるっと動くのを止める */
-html.fixed-home, html.fixed-home body { height: 100%; overflow: hidden; overscroll-behavior: none; }
-html.fixed-home #screen-home { height: 100%; min-height: 0; }
+/* 中身が1画面に収まっているあいだは、ページそのものを動かさない＝指で引いても画面が揺れない
+   （2026-09-24。端末の余白＝時計・ジェスチャーバーのぶんで100dvhがわずかにはみ出し、ずるっと動いていた）。
+   収まらないとき（長い日記・設定・規約・キーボードが出ているとき）は app.js が自動でこの錠を外す */
+html.fixed-page, html.fixed-page body { height: 100%; overflow: hidden; overscroll-behavior: none; }
+html.fixed-page .screen.active { min-height: 0; height: 100%; }
 #screen-home .search-trigger { margin-top: 0; margin-bottom: 0; padding: clamp(10px, 1.6vh, 15px) 20px; }
 #screen-home .search-trigger:has(.search-eg) { font-size: min(1.34rem, 4.4vw) !important; } /* ホームはマイクのぶん幅が狭い。例を「パン、太郎」に縮めたぶん字を大きく（2026-09-15） */
 .welcome-title { text-align: center; font-size: min(clamp(1.25rem, 2.9vh, 1.42rem), 5.6vw); font-weight: 900; margin-bottom: 2px; white-space: nowrap; }
@@ -3146,10 +3147,32 @@ function showScreen(id) {
   else if (id === "screen-home") store.set("mn_resume", null);
   // 買い物ちゅうは画面を消灯させない（15分上限。触れば延長）
   if (id === "screen-shopping") acquireWake(); else releaseWake();
-  // ホームは1画面に固定（ページ自体を動かさない＝指で引いても揺れない。2026-09-24 Yukiさん要望）。
-  // 入りきらない小さな端末だけ、中身（.home-wrap）の側がそっとスクロールする
-  document.documentElement.classList.toggle("fixed-home", id === "screen-home");
   window.scrollTo(0, 0);
+  updatePageFixed(); // 1画面に収まる画面では、ページ自体を動かさない
+}
+
+
+// ---------- 収まる画面は動かさない ----------
+// 中身が1画面に収まっているときだけ、ページのスクロールを止める（指で引いてもずるっと動かない）。
+// 収まらないとき（長い日記・設定・規約、キーボードが出ているとき）は、これまでどおりスクロールできる。
+// 2026-09-24 Yukiさん要望「大きいサイズの画面ではスクロール要らない」
+let pageFixedTimer = null;
+function updatePageFixed() {
+  const html = document.documentElement;
+  const was = html.classList.contains("fixed-page");
+  if (was) html.classList.remove("fixed-page"); // 素の高さで測る
+  const fits = document.body.scrollHeight <= window.innerHeight + 2;
+  html.classList.toggle("fixed-page", fits);
+}
+function schedulePageFixed() {
+  if (pageFixedTimer) cancelAnimationFrame(pageFixedTimer);
+  pageFixedTimer = requestAnimationFrame(() => { pageFixedTimer = null; updatePageFixed(); });
+}
+function watchPageFixed() {
+  window.addEventListener("resize", schedulePageFixed);       // キーボードの開閉・画面の回転
+  window.addEventListener("orientationchange", schedulePageFixed);
+  document.addEventListener("input", schedulePageFixed, true); // 書くほどのびる欄
+  if (window.ResizeObserver) new ResizeObserver(schedulePageFixed).observe(document.body);
 }
 
 // ---------- 指のスライドで画面を移る（右＝戻る／左＝進む） ----------
@@ -6990,6 +7013,7 @@ function init() {
   wireEvents();
   pruneMealPhotos(); // 3日より古い食事写真を自動削除
   wireSwipeNav();    // 指でスライドして移動（右＝戻る／左＝進む）
+  watchPageFixed();  // 収まる画面ではページを動かさない（見張り）
   wireKeyboardInset();
   syncQuickMemoNotify(); // すぐ書けるメモ通知（アプリ版のみ。通知から書かれた分も取り込む）
   if (!profile) {
