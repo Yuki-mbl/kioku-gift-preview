@@ -6654,6 +6654,7 @@ function wireMics(root) {
         // しばらく声がしなければ、自分からマイクを止める（2026-09-24 Yukiさん指摘）。
         // Androidは聞き直すたびに「ピコ」と鳴るので、黙っている間じゅう鳴り続けてしまうため
         let lastHeardAt = Date.now();
+        let saveWordTimer = null; // iPhone用：語尾の「保存」を見つけてから確定するまでの待ち
         const idleTooLong = () => Date.now() - lastHeardAt > MIC_IDLE_STOP_MS;
         const commitAndRestart = delay => {
           if (finalTimer) { clearTimeout(finalTimer); finalTimer = null; }
@@ -6696,7 +6697,24 @@ function wireMics(root) {
             commitAndRestart(500);
             return;
           }
-          if (isMine()) { lastSaid = said; lastSaidAt = Date.now(); lastHeardAt = Date.now(); failStreak = 0; applySaid(said, false); }
+          if (isMine()) {
+            lastSaid = said; lastSaidAt = Date.now(); lastHeardAt = Date.now(); failStreak = 0;
+            applySaid(said, false);
+            // iPhoneは「話し終わり」を知らせてこない（こちらが止めるまで聞き続ける作り）。
+            // そのため語尾の「保存」を途中経過から見つける。言い終わって少し静かになってから確定する
+            // （「ほぞんしたい」のように続きがあるときに早とちりしないため）。2026-09-24 実機で発覚
+            if (isIOSApp()) {
+              if (saveWordTimer) clearTimeout(saveWordTimer);
+              if (/(?:保存|ほぞん|ホゾン)[。．\s　]*$/.test(said)) {
+                const at = said;
+                saveWordTimer = setTimeout(() => {
+                  saveWordTimer = null;
+                  if (!micActive || micActive.btn !== btn) return;
+                  if (lastSaid === at) applySaid(at, true); // まだ同じ＝言い終わっている
+                }, 700);
+              }
+            }
+          }
         }));
         subs.push(await SRN.addListener("listeningState", d => {
           if (!d || !micActive || micActive.btn !== btn) return;
@@ -6727,6 +6745,8 @@ function wireMics(root) {
         const watchdog = setInterval(async () => {
           if (!micActive || micActive.btn !== btn) { clearInterval(watchdog); return; }
           if (starting || awaitingFinal || Date.now() - sessionAt < 1500) return; // 立ち上げ中・最後の答え待ち・直後はそっとしておく
+          // しばらく声がなければ止める（iPhoneは聞き続ける作りなので、ここで止めないと止まらない）
+          if (idleTooLong()) { stopMic(); toastMemo(t("マイクを止めました（もう一度押すと聞きます）")); return; }
           try {
             const st = await SRN.isListening();
             if (st && st.listening === false && micActive && micActive.btn === btn) {
@@ -6738,7 +6758,7 @@ function wireMics(root) {
         micActive = {
           rec: { stop: () => { try { SRN.stop(); } catch (e) {} } },
           btn, target,
-          cleanup: () => { clearInterval(watchdog); if (finalTimer) clearTimeout(finalTimer); subs.forEach(x => { try { x.remove(); } catch (e) {} }); target.removeEventListener("input", onUserEdit); },
+          cleanup: () => { clearInterval(watchdog); if (finalTimer) clearTimeout(finalTimer); if (saveWordTimer) clearTimeout(saveWordTimer); subs.forEach(x => { try { x.remove(); } catch (e) {} }); target.removeEventListener("input", onUserEdit); },
         };
         btn.classList.add("listening");
         btn.innerHTML = btn.dataset.idle ? micIconSvg() : `${micIconSvg()}<span class="mic-label">${t("聞いています…（押すと止まる）")}</span>`;
