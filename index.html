@@ -3523,7 +3523,7 @@ function stepIconHtml(def) {
 function loadMemos() { return store.get("mn_memos", []); }
 function saveMemos(a) { store.set("mn_memos", a); }
 // 声がしないままこの時間が過ぎたら、マイクは自分から止まる（Androidは聞き直すたびに音が鳴るため）
-const MIC_IDLE_STOP_MS = 15000; // 15秒
+const MIC_IDLE_STOP_MS = 10000; // 10秒（2026-09-24 Yukiさん指定）
 const MEMO_MAX = 10; // たまりすぎない上限。満杯のときは追加を止めて案内する（黙って消さない）
 function addMemo(text) {
   const v = (text || "").trim();
