@@ -3522,6 +3522,8 @@ function stepIconHtml(def) {
 // 日記とは別の置き場所。済んだら消える。クイズにも検索にも出さない（思い出ではないため）
 function loadMemos() { return store.get("mn_memos", []); }
 function saveMemos(a) { store.set("mn_memos", a); }
+// 声がしないままこの時間が過ぎたら、マイクは自分から止まる（Androidは聞き直すたびに音が鳴るため）
+const MIC_IDLE_STOP_MS = 15000; // 15秒
 const MEMO_MAX = 10; // たまりすぎない上限。満杯のときは追加を止めて案内する（黙って消さない）
 function addMemo(text) {
   const v = (text || "").trim();
@@ -6632,9 +6634,14 @@ function wireMics(root) {
         let awaitingFinal = false;
         let finalTimer = null;
         let lastSaidAt = 0; // 最後に結果が届いた時刻（iPhoneは「最後の答え」→「話し終わり」の順に来る）
+        // しばらく声がしなければ、自分からマイクを止める（2026-09-24 Yukiさん指摘）。
+        // Androidは聞き直すたびに「ピコ」と鳴るので、黙っている間じゅう鳴り続けてしまうため
+        let lastHeardAt = Date.now();
+        const idleTooLong = () => Date.now() - lastHeardAt > MIC_IDLE_STOP_MS;
         const commitAndRestart = delay => {
           if (finalTimer) { clearTimeout(finalTimer); finalTimer = null; }
           if (!micActive || micActive.btn !== btn) return;
+          if (idleTooLong()) { stopMic(); toastMemo(t("マイクを止めました（もう一度押すと聞きます）")); return; }
           base = target.value;    // ここまでを確定＝次の区切りはこの続きに書く
           sessionAt = Date.now(); // 待っている間に見張りが二重に立て直さないように
           startListen(delay);
@@ -6666,16 +6673,19 @@ function wireMics(root) {
           if (!said || !micActive || micActive.btn !== btn) return;
           if (awaitingFinal) { // 話し終わりのあとに届いた＝聞き取りの最終結果（途中経過より正確）
             awaitingFinal = false;
+            lastHeardAt = Date.now();
             failStreak = 0;
             if (applySaid(said, true)) return; // 語尾が「保存」なら確定して終わり
             commitAndRestart(500);
             return;
           }
-          if (isMine()) { lastSaid = said; lastSaidAt = Date.now(); failStreak = 0; applySaid(said, false); }
+          if (isMine()) { lastSaid = said; lastSaidAt = Date.now(); lastHeardAt = Date.now(); failStreak = 0; applySaid(said, false); }
         }));
         subs.push(await SRN.addListener("listeningState", d => {
           if (!d || !micActive || micActive.btn !== btn) return;
           if (d.status === "started") { heard = true; return; } // ここから先の結果だけが今回の分
+          // ※ここで lastHeardAt は戻さない。機種によっては「聞き始め」の合図が毎回来るため、
+          //   それで時計を戻すと、黙っていてもいつまでも止まらなくなる（2026-09-24）
           if (d.status === "stopped" && isMine()) {
             // iPhoneは「最後の答え」を送ってから「話し終わり」を知らせる＝もう届いているので待たない。
             // Androidは「話し終わり」のあとに最後の答えが届くので、少し待ってから確定する
@@ -6702,7 +6712,10 @@ function wireMics(root) {
           if (starting || awaitingFinal || Date.now() - sessionAt < 1500) return; // 立ち上げ中・最後の答え待ち・直後はそっとしておく
           try {
             const st = await SRN.isListening();
-            if (st && st.listening === false && micActive && micActive.btn === btn) startListen(300);
+            if (st && st.listening === false && micActive && micActive.btn === btn) {
+              if (idleTooLong()) { stopMic(); toastMemo(t("マイクを止めました（もう一度押すと聞きます）")); return; }
+              startListen(300);
+            }
           } catch (e) {}
         }, 1000);
         micActive = {
