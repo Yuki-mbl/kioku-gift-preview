@@ -133,6 +133,9 @@ body {
 #app {
   max-width: 480px;
   margin: 0 auto;
+  /* iPhoneの時計・電池の帯を避ける。ここ1か所で全画面に効く（2026-09-24 実機で発覚）。
+     Androidは本体側で余白を取るので、この値は0になる */
+  padding-top: env(safe-area-inset-top);
   min-height: 100vh;
   min-height: 100dvh;
   position: relative;
@@ -606,7 +609,7 @@ button { color: inherit; } /* 色未指定のボタンがブラウザ標準の�
 #screen-sleep .moon-caption { font-size: clamp(.92rem, 2.1vh, 1.05rem); }
 #screen-sleep .moon-lore { font-size: clamp(.82rem, 1.8vh, .9rem); }
 #screen-sleep .moon-stars-note { font-size: clamp(.82rem, 1.9vh, .95rem); margin-top: clamp(2px, .6vh, 5px); }
-#screen-sleep #grat-input { height: auto; min-height: 0; resize: none; } /* 他の入力欄と同じ大きさ・書くほど下にのびる */
+#screen-sleep #grat-input { height: auto; min-height: calc(3.6em + 20px); resize: none; } /* 例文の2行が切れない高さ（2026-09-24） */ /* 他の入力欄と同じ大きさ・書くほど下にのびる */
 #screen-sleep #grat-save { min-height: clamp(50px, 7.5vh, 62px); padding: clamp(10px, 1.8vh, 18px) 24px; }
 .sleep-note { text-align: center; color: var(--muted); font-size: 1rem; line-height: 1.8; margin: 8px 0 18px; }
 .sleep-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
@@ -1575,11 +1578,11 @@ mark {
   display: flex; align-items: center;
   /* 上は端末の安全域（iPhoneの時計・電池の帯）ぶんを足す。ダーク・ライトは別に指定済み。
      Androidは本体側で余白を取るので、この値は0になる（2026-09-24 SEで設定ボタンが電池にかぶった） */
-  padding: calc(clamp(10px, 1.6vh, 14px) + env(safe-area-inset-top)) 62px clamp(2px, .5vh, 6px) 20px;
+  padding: clamp(10px, 1.6vh, 14px) 62px clamp(2px, .5vh, 6px) 20px;
 }
 #screen-home .home-brand .icon-btn {
   /* 画面のてっぺんからの距離で置く（真ん中合わせだと、iPhoneの時計・電池の帯にかぶる。2026-09-24） */
-  position: absolute; right: 8px; top: calc(8px + env(safe-area-inset-top)); transform: none;
+  position: absolute; right: 8px; top: 8px; transform: none;
   width: clamp(46px, 6.6vh, 54px); height: clamp(46px, 6.6vh, 54px);
 }
 #screen-home .home-brand .icon-btn svg { width: 28px; height: 28px; }
@@ -1729,7 +1732,7 @@ html.fixed-page .screen.active { min-height: 0; height: 100%; }
 .memo-sheet-head {
   /* 見出しは置かない（文字を少なく）。✕だけを右に */
   display: flex; align-items: center; justify-content: flex-end;
-  padding: calc(12px + env(safe-area-inset-top)) 14px 0 22px;
+  padding: 12px 14px 0 22px;
 }
 .memo-close {
   width: 48px; height: 48px; border-radius: 50%;
@@ -2093,7 +2096,7 @@ html[data-fontsize="xlarge"] .balloon-lg .balloon-name { font-size: min(1.3rem, 
   width: 100%; max-width: 480px; box-sizing: border-box;
   z-index: 90;
   display: flex; gap: 6px; align-items: center;
-  height: 72px; padding: 4px 10px;
+  height: calc(72px + env(safe-area-inset-bottom)); padding: 4px 10px calc(4px + env(safe-area-inset-bottom));
   background: var(--card);
   border-top: 1.5px solid var(--border);
   box-shadow: 0 -3px 12px rgba(0, 0, 0, .06);
@@ -2199,12 +2202,12 @@ html[data-fontsize="xlarge"] .tabb-name { font-size: min(.95rem, 4vw); }
 #app.has-tabs .screen.active { padding-bottom: 128px; }
 /* 保存の帯・浮きボタンはタブのすぐ上に。広告があるときだけ広告ぶんも空ける
    （広告オフ時に60pxの無駄な空きができていた。2026-09-14 Yukiさん指摘） */
-#app.has-tabs .flow-footer { bottom: 72px; }
+#app.has-tabs .flow-footer { bottom: calc(72px + env(safe-area-inset-bottom)); }
 #app.has-tabs.has-ad .flow-footer { bottom: 132px; } /* 広告＋タブの上に */
 #app.kb-open .flow-footer { bottom: 0; } /* キーボード中はタブが消えるので、キーボードのすぐ上に */
 /* 広告のない画面（設定）はタブぶんだけの余白でいい */
-#app.has-tabs:not(.has-ad) .screen.active { padding-bottom: 72px; } /* タブの高さぴったり（2026-09-14。88pxだと保存の帯とタブの間に空きができていた） */
-#app.has-tabs .shop-fab { bottom: 84px; } /* この日を書き足す等の浮きボタンはタブの上へ */
+#app.has-tabs:not(.has-ad) .screen.active { padding-bottom: calc(72px + env(safe-area-inset-bottom)); } /* タブの高さぴったり（2026-09-14。88pxだと保存の帯とタブの間に空きができていた） */
+#app.has-tabs .shop-fab { bottom: calc(84px + env(safe-area-inset-bottom)); } /* この日を書き足す等の浮きボタンはタブの上へ */
 #app.has-tabs.has-ad .shop-fab { bottom: 140px; }
 #app.has-tabs .shop-fab-spacer { height: 120px; } /* 最後の欄が浮きボタンに隠れないように */
 #app.has-tabs.has-ad .shop-fab-spacer { height: 175px; }
@@ -2319,13 +2322,13 @@ html[data-fontsize="xlarge"] .tabb-name { font-size: min(.95rem, 4vw); }
   background: none; -webkit-text-fill-color: currentColor; color: var(--brass-ed);
   filter: none;
 }
-html[data-theme="dark"] #screen-home .home-brand { justify-content: flex-start; padding: calc(28px + env(safe-area-inset-top)) 62px 0 26px; min-height: 0; }
+html[data-theme="dark"] #screen-home .home-brand { justify-content: flex-start; padding: 28px 62px 0 26px; min-height: 0; }
 html[data-theme="dark"] #screen-home .brand-line { font-size: min(.72rem, 3vw); letter-spacing: .2em; }
 html[data-theme="dark"] #screen-home .home-brand .icon-btn {
   border: 1px solid var(--line-ed); border-radius: 50%;
   width: 44px; height: 44px; background: none; box-shadow: none; right: 18px;
   /* 画面のてっぺんからの距離で置く（真ん中合わせだと、実機で上にすれすれだった。2026-09-15） */
-  top: calc(14px + env(safe-area-inset-top)); transform: none;
+  top: 14px; transform: none;
 }
 html[data-theme="dark"] #screen-home .home-brand .icon-btn svg { width: 23px; height: 23px; }
 /* 目次は行の高さぶんだけ伸ばす（文字サイズ別の高さ指定を打ち消す） */
@@ -2421,7 +2424,7 @@ html[data-theme="dark"] #screen-home .home-wrap { overflow-y: auto; }
    ========================================================= */
 .balloon-sub { display: none; } /* 帯の小さな説明はこの形では使わない */
 /* 題字：小さく字間を広く、左寄せの深緑 */
-html[data-theme="light"] #screen-home .home-brand { justify-content: flex-start; padding: calc(30px + env(safe-area-inset-top)) 62px 0 24px; min-height: 0; }
+html[data-theme="light"] #screen-home .home-brand { justify-content: flex-start; padding: 30px 62px 0 24px; min-height: 0; }
 html[data-theme="light"] #screen-home .brand-line {
   font-size: min(.78rem, 3.3vw); letter-spacing: .3em; font-weight: 700;
   background: none; -webkit-text-fill-color: currentColor; color: var(--accent); filter: none;
@@ -2429,7 +2432,7 @@ html[data-theme="light"] #screen-home .brand-line {
 html[data-theme="light"] #screen-home .home-brand .icon-btn {
   width: 44px; height: 44px; right: 18px; background: none;
   border: 1.5px solid var(--border); border-radius: 50%; box-shadow: none;
-  top: calc(14px + env(safe-area-inset-top)); transform: none;
+  top: 14px; transform: none;
 }
 html[data-theme="light"] #screen-home .home-brand .icon-btn svg { width: 23px; height: 23px; color: var(--accent); }
 /* 日付：深緑で大きく、年は横に小さく添える */
@@ -2537,8 +2540,8 @@ html[data-theme="dark"] .brand-line { font-weight: 700; }
   html[data-theme="light"][data-fontsize] #screen-home #home-doors .balloon,
   html[data-theme="light"][data-fontsize] #screen-home #home-doors .balloon-lg { min-height: clamp(50px, 7.2vh, 68px); }
   [data-theme="dark"] .hd-day { font-size: min(4.8rem, 23vw); }
-  [data-theme="dark"] #screen-home .home-brand { padding-top: calc(18px + env(safe-area-inset-top)); }
-  [data-theme="light"] #screen-home .home-brand { padding-top: calc(20px + env(safe-area-inset-top)); }
+  [data-theme="dark"] #screen-home .home-brand { padding-top: 18px; }
+  [data-theme="light"] #screen-home .home-brand { padding-top: 20px; }
 }
 </style>
 <div id="app">
@@ -3837,7 +3840,7 @@ const STEP_DEFS = {
     fields: (mode, e) => `
       <div class="field"><span class="field-label">${t("自由に書いてください")}</span>
         <div class="meal-line">
-          <textarea id="diary-text" class="grow-input" rows="6" maxlength="1000" placeholder="${t("例：孫が来た。うれしかった")}">${esc(e.diary)}</textarea>
+          <textarea id="diary-text" class="grow-input" rows="6" maxlength="1000" placeholder="">${esc(e.diary)}</textarea>
           ${micMini("diary-text", "flow-skip")}
         </div>
       </div>
@@ -6655,6 +6658,15 @@ function wireMics(root) {
         // Androidは聞き直すたびに「ピコ」と鳴るので、黙っている間じゅう鳴り続けてしまうため
         let lastHeardAt = Date.now();
         let saveWordTimer = null; // iPhone用：語尾の「保存」を見つけてから確定するまでの待ち
+        // iPhoneは「その回の全文」を送ってくるので、間を空けて話しても区切りが入らない。
+        // 間が空いた場所を覚えておいて、そこに全角スペースを差し込む（2026-09-24 実機で発覚）
+        let iosCuts = [];
+        const iosDecorate = raw => {
+          if (!iosCuts.length) return raw;
+          let out = "", prev = 0;
+          for (const c of iosCuts) { if (c > prev && c <= raw.length) { out += raw.slice(prev, c) + micJoiner(); prev = c; } }
+          return out + raw.slice(prev);
+        };
         const idleTooLong = () => Date.now() - lastHeardAt > MIC_IDLE_STOP_MS;
         const commitAndRestart = delay => {
           if (finalTimer) { clearTimeout(finalTimer); finalTimer = null; }
@@ -6672,7 +6684,7 @@ function wireMics(root) {
               const wait = (delayMs || 0) + i * 500; // やり直すたびに長めに待つ
               if (wait) await new Promise(r => setTimeout(r, wait));
               if (!micActive || micActive.btn !== btn) return;
-              sessionAt = Date.now(); heard = false; lastSaid = ""; awaitingFinal = false;
+              sessionAt = Date.now(); heard = false; lastSaid = ""; awaitingFinal = false; iosCuts = [];
               base = target.value; // 聞き始める瞬間の文を土台にする（ここに継ぎ足す）
               try { await SRN.start({ language: "ja-JP", maxResults: 1, partialResults: true, popup: false }); } catch (e) {}
               await new Promise(r => setTimeout(r, 500)); // 立ち上がりを待ってから確かめる
@@ -6698,8 +6710,15 @@ function wireMics(root) {
             return;
           }
           if (isMine()) {
+            if (isIOSApp()) {
+              // 1.2秒以上あいてから続きを話した＝そこが文の切れ目
+              const gap = Date.now() - lastSaidAt;
+              if (lastSaid && said.startsWith(lastSaid) && said.length > lastSaid.length && gap > 1200
+                  && !iosCuts.includes(lastSaid.length)) iosCuts.push(lastSaid.length);
+              if (lastSaid && !said.startsWith(lastSaid)) iosCuts = []; // 言い直された＝覚えた切れ目は捨てる
+            }
             lastSaid = said; lastSaidAt = Date.now(); lastHeardAt = Date.now(); failStreak = 0;
-            applySaid(said, false);
+            applySaid(isIOSApp() ? iosDecorate(said) : said, false);
             // iPhoneは「話し終わり」を知らせてこない（こちらが止めるまで聞き続ける作り）。
             // そのため語尾の「保存」を途中経過から見つける。言い終わって少し静かになってから確定する
             // （「ほぞんしたい」のように続きがあるときに早とちりしないため）。2026-09-24 実機で発覚
@@ -6710,7 +6729,7 @@ function wireMics(root) {
                 saveWordTimer = setTimeout(() => {
                   saveWordTimer = null;
                   if (!micActive || micActive.btn !== btn) return;
-                  if (lastSaid === at) applySaid(at, true); // まだ同じ＝言い終わっている
+                  if (lastSaid === at) applySaid(iosDecorate(at), true); // まだ同じ＝言い終わっている
                 }, 700);
               }
             }
