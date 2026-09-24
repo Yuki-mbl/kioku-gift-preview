@@ -1611,8 +1611,12 @@ mark {
 /* 風船はほどよい間隔のまま。余った高さは上下に均等に分ける（離れすぎない） */
 #screen-home #home-doors { flex: 0 0 auto; height: clamp(256px, 38vh, 340px); margin: auto 0; } /* メモの帯のぶん控えめに（風船は縮めず間隔を守る） */
 /* ホームは1画面に収める。どうしても入らない小さな端末だけスクロールできる（棒は場所を取らない） */
-#screen-home .home-wrap { overflow-y: auto; scrollbar-width: none; }
+#screen-home .home-wrap { overflow-y: auto; scrollbar-width: none; overscroll-behavior: contain; }
 #screen-home .home-wrap::-webkit-scrollbar { width: 0; height: 0; }
+/* ホームにいる間は、ページそのものを動かさない＝指で引いても画面が揺れない（2026-09-24）。
+   端末の余白（時計・ジェスチャーバー）のぶんで1画面がわずかにはみ出し、ずるっと動くのを止める */
+html.fixed-home, html.fixed-home body { height: 100%; overflow: hidden; overscroll-behavior: none; }
+html.fixed-home #screen-home { height: 100%; min-height: 0; }
 #screen-home .search-trigger { margin-top: 0; margin-bottom: 0; padding: clamp(10px, 1.6vh, 15px) 20px; }
 #screen-home .search-trigger:has(.search-eg) { font-size: min(1.34rem, 4.4vw) !important; } /* ホームはマイクのぶん幅が狭い。例を「パン、太郎」に縮めたぶん字を大きく（2026-09-15） */
 .welcome-title { text-align: center; font-size: min(clamp(1.25rem, 2.9vh, 1.42rem), 5.6vw); font-weight: 900; margin-bottom: 2px; white-space: nowrap; }
@@ -3142,6 +3146,9 @@ function showScreen(id) {
   else if (id === "screen-home") store.set("mn_resume", null);
   // 買い物ちゅうは画面を消灯させない（15分上限。触れば延長）
   if (id === "screen-shopping") acquireWake(); else releaseWake();
+  // ホームは1画面に固定（ページ自体を動かさない＝指で引いても揺れない。2026-09-24 Yukiさん要望）。
+  // 入りきらない小さな端末だけ、中身（.home-wrap）の側がそっとスクロールする
+  document.documentElement.classList.toggle("fixed-home", id === "screen-home");
   window.scrollTo(0, 0);
 }
 
