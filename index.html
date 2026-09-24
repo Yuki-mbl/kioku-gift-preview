@@ -2509,9 +2509,9 @@ html[data-theme="dark"] .brand-line { font-weight: 700; }
 
 /* Siri・ショートカットからメモを受け取ったときの小さな知らせ（2026-09-24） */
 .memo-toast {
-  white-space: nowrap;
+  /* 長い知らせは折り返す（横にはみ出さない。2026-09-24 iPhone実機） */
   position: fixed; left: 50%; bottom: 96px; transform: translateX(-50%) translateY(8px);
-  z-index: 200; max-width: min(88vw, 420px);
+  z-index: 200; max-width: min(86vw, 420px); text-align: center; line-height: 1.5;
   background: var(--card); color: var(--text);
   border: 1.5px solid var(--accent); border-radius: 999px;
   padding: 12px 20px; font-size: min(1.05rem, 4.2vw); font-weight: 700;
@@ -6671,7 +6671,7 @@ function wireMics(root) {
         const commitAndRestart = delay => {
           if (finalTimer) { clearTimeout(finalTimer); finalTimer = null; }
           if (!micActive || micActive.btn !== btn) return;
-          if (idleTooLong()) { stopMic(); toastMemo(t("マイクを止めました（もう一度押すと聞きます）")); return; }
+          if (idleTooLong()) { stopMic(); toastMemo(t("マイクを止めました")); return; }
           base = target.value;    // ここまでを確定＝次の区切りはこの続きに書く
           sessionAt = Date.now(); // 待っている間に見張りが二重に立て直さないように
           startListen(delay);
@@ -6765,11 +6765,11 @@ function wireMics(root) {
           if (!micActive || micActive.btn !== btn) { clearInterval(watchdog); return; }
           if (starting || awaitingFinal || Date.now() - sessionAt < 1500) return; // 立ち上げ中・最後の答え待ち・直後はそっとしておく
           // しばらく声がなければ止める（iPhoneは聞き続ける作りなので、ここで止めないと止まらない）
-          if (idleTooLong()) { stopMic(); toastMemo(t("マイクを止めました（もう一度押すと聞きます）")); return; }
+          if (idleTooLong()) { stopMic(); toastMemo(t("マイクを止めました")); return; }
           try {
             const st = await SRN.isListening();
             if (st && st.listening === false && micActive && micActive.btn === btn) {
-              if (idleTooLong()) { stopMic(); toastMemo(t("マイクを止めました（もう一度押すと聞きます）")); return; }
+              if (idleTooLong()) { stopMic(); toastMemo(t("マイクを止めました")); return; }
               startListen(300);
             }
           } catch (e) {}
