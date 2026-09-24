@@ -2499,6 +2499,30 @@ html[data-theme="dark"] .opt-card,
 html[data-theme="dark"] .seg { font-weight: 700; }
 html[data-theme="dark"] .tab-btn span { font-weight: 700; letter-spacing: .04em; }
 html[data-theme="dark"] .brand-line { font-weight: 700; }
+
+/* Siri・ショートカットからメモを受け取ったときの小さな知らせ（2026-09-24） */
+.memo-toast {
+  white-space: nowrap;
+  position: fixed; left: 50%; bottom: 96px; transform: translateX(-50%) translateY(8px);
+  z-index: 200; max-width: min(88vw, 420px);
+  background: var(--card); color: var(--text);
+  border: 1.5px solid var(--accent); border-radius: 999px;
+  padding: 12px 20px; font-size: min(1.05rem, 4.2vw); font-weight: 700;
+  box-shadow: var(--shadow-lg);
+  opacity: 0; pointer-events: none; transition: opacity .2s ease, transform .2s ease;
+}
+.memo-toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+@media (prefers-reduced-motion: reduce) { .memo-toast { transition: none; } }
+
+/* Siriの手順（iPhoneの設定にだけ出る） */
+.siri-steps { margin: 12px 0 0 1.2em; }
+.siri-steps li { font-size: min(1.02rem, 4.1vw); line-height: 1.85; margin-bottom: 10px; }
+.siri-url {
+  display: inline-block; margin-top: 4px; padding: 6px 10px;
+  background: var(--accent-soft); border-radius: 8px;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: .95em;
+  user-select: all; -webkit-user-select: all; word-break: break-all;
+}
 </style>
 <div id="app">
 
@@ -2793,6 +2817,18 @@ html[data-theme="dark"] .brand-line { font-weight: 700; }
             <button class="seg" data-t data-value="0">オフ</button>
           </div>
         </div>
+        <div class="card" id="siri-card" hidden>
+          <div class="settings-label" data-t>声でメモを残す（Siri）</div>
+          <p class="settings-hint" style="margin-top:0;" data-t>「ヘイ Siri、メモ」と話しかけるだけで、思いついたことをこのアプリに残せます。はじめに一度だけ、下の手順で用意してください。</p>
+          <ol class="siri-steps">
+            <li data-t>iPhoneの「ショートカット」アプリを開いて、右上の「＋」</li>
+            <li data-t>「アクションを追加」→ さがす欄に「音声入力」と入れて、<b>「テキストを音声入力」</b>を選ぶ</li>
+            <li data-t>もう一度「アクションを追加」→「URLエンコード」と入れて、<b>「テキストをURLエンコード」</b>を選ぶ</li>
+            <li data-t>もう一度「アクションを追加」→「URL」と入れて、<b>「URLを開く」</b>を選ぶ</li>
+            <li><span data-t>URLの欄に次を貼り付け、そのうしろに「エンコードされたテキスト」を差し込む</span><br><code class="siri-url">kiokugift://memo?text=</code></li>
+            <li data-t>上の名前を「メモ」にして完了。以降は「ヘイ Siri、メモ」で使えます</li>
+          </ol>
+        </div>
         <div class="card" id="iap-card">
           <div class="settings-label" data-t>広告を消す</div>
           <div class="iap-row">
@@ -3072,6 +3108,57 @@ window.addEventListener("focus", () => syncQuickMemoNotify());
 (() => {
   const plug = quickMemoPlugin();
   if (plug && plug.addListener) { try { plug.addListener("memoAdded", () => syncQuickMemoNotify()); } catch (e) {} }
+})();
+
+// ---------- Siri・ショートカットから届くメモ（iPhone用。2026-09-24） ----------
+// iPhoneには「通知欄に居座る入口」が無いので、代わりに声から入れられるようにする。
+// ショートカットが kiokugift://memo?text=… を開き、その文をここで受け取って「一瞬のひらめき」に入れる。
+// ※Androidでも同じ入口が使えるが、あちらは常駐通知があるので出番は少ない
+function appPlugin() {
+  return (window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.App) || null;
+}
+function takeMemoFromUrl(url) {
+  if (!url) return false;
+  let text = "";
+  try {
+    const u = new URL(url);
+    if (!/^kiokugift:$/i.test(u.protocol)) return false;
+    const path = (u.hostname || "") + (u.pathname || "");
+    if (!/memo/i.test(path)) return false;
+    text = u.searchParams.get("text") || u.searchParams.get("t") || "";
+  } catch (e) { return false; }
+  text = String(text).trim();
+  if (!text) return false;
+  const before = loadMemos().length;
+  addMemo(text);
+  updateMemoBadge();
+  const added = loadMemos().length > before;
+  // 開いているメモの一覧はその場で新しくする
+  const pop = document.getElementById("memo-pop");
+  if (pop && !pop.hidden) renderMemoScreen();
+  toastMemo(added ? t("メモを1つ受け取りました") : t("メモがいっぱいです（10件）"));
+  return true;
+}
+// 受け取ったことを、小さな帯でそっと知らせる（音も振動も出さない）
+function toastMemo(msg) {
+  let el = document.getElementById("memo-toast");
+  if (!el) {
+    el = document.createElement("div");
+    el.id = "memo-toast";
+    el.className = "memo-toast";
+    document.body.appendChild(el);
+  }
+  el.textContent = msg;
+  el.classList.add("show");
+  clearTimeout(toastMemo._t);
+  toastMemo._t = setTimeout(() => el.classList.remove("show"), 2600);
+}
+(() => {
+  const A = appPlugin();
+  if (!A) return;
+  try { A.addListener("appUrlOpen", d => takeMemoFromUrl(d && d.url)); } catch (e) {}
+  // アプリが閉じているときに呼ばれた場合は、立ち上がったあとに受け取る
+  try { A.getLaunchUrl().then(r => { if (r && r.url) takeMemoFromUrl(r.url); }).catch(() => {}); } catch (e) {}
 })();
 
 function buzzSave() {
@@ -4873,6 +4960,9 @@ function openDayField(ds, label, from) {
 // =========================================================
 function openSettings() {
   renderIapCard();
+  // 「声でメモ（Siri）」の手順は iPhone のときだけ（Androidは常駐通知があるので不要）
+  const siri = document.getElementById("siri-card");
+  if (siri) siri.hidden = !isIOSApp();
   document.querySelectorAll(".theme-opt").forEach(btn => {
     btn.classList.toggle("selected", btn.dataset.themeOpt === (settings.theme || "pastel"));
   });
