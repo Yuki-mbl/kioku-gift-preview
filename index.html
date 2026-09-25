@@ -6560,6 +6560,7 @@ let micStartAt = 0; // 連打・二度押しで二重にマイクが始まらな
 // 話した区切りのつなぎ文字。日本語は全角スペース、他の言語は半角スペース
 // （英語などで「apple　banana」と全角が混ざると不自然なため。2026-09-14 Yukiさん提案）
 function micJoiner() { return uiLang === "ja" ? "　" : " "; }
+let micLastStartAt = 0; // 認識器を最後に立ち上げた時刻（作り直しを急ぎすぎないため）
 // 認識結果が同じ文を二重にして返す端末対策（「昨日の写真 昨日の写真」→「昨日の写真」。2026-09-09）
 function collapseDoubledSaid(said) {
   const m = said.match(/^(.+)[ 　]+\1$/);
@@ -6615,12 +6616,14 @@ function wireMics(root) {
         // Androidの認識器は「間」があるたびに終わってしまうため、終わったら自動で聞き直す
         // （もう一度押さなくても、間を空けながら続けて話せる。止めるのはマイクをもう一度押すか語尾の「保存」。
         //  2026-09-13 Yukiさん要望。ついでに、聞き直しの失敗＝2回目から効かなくなる問題も1回やり直しで対策）
-        // 文章モード（日記・アルバム・ありがとう）は、区切りを入れず、聞き直しをできるだけ早くする。
-        // 息継ぎのたびに耳をふさぐ時間が長いと、話した言葉が落ちてしまうため（2026-09-25 Yukiさん指摘）
-        const textMode = btn.dataset.micMode === "text";
-        const sep = textMode ? "" : micJoiner();
-        const FINAL_WAIT = textMode ? 250 : 700;   // 最後の答えを待つ時間
-        const RESTART_WAIT = textMode ? 120 : 500; // 聞き直しまでの間
+        // 区切り（全角スペース）は「間の長さ」で決める（2026-09-25 Yukiさん案）。
+        // 息継ぎ（短い間）ではつなげ、次の項目に移るような長い間のときだけ区切る。
+        // 欄が単語用か文章用かで決め打ちしない＝食事を文章で話す人にも合う
+        const PAUSE_SEP_MS = 2500; // これ以上だまったら「次の話」＝区切りを入れる
+        const FINAL_WAIT = 250;    // 最後の答えを待つ時間
+        const RESTART_WAIT = 350;  // 聞き直しまでの間（速すぎると本体の認識器が落ちる）
+        let sessionSep = "";       // この区切りの先頭に入れる文字（""＝つなげる）
+        let gotFirst = false;      // この区切りで最初の結果が来たか
         let base = target.value; // 確定した区切りごとに更新し、継ぎ足していく
         let lastSaid = "";
         let sessionAt = Date.now();
@@ -6637,9 +6640,9 @@ function wireMics(root) {
             if (m) { wantSave = true; said = said.slice(0, m.index).replace(/[、。．\s　]+$/, ""); }
           }
           // 欄の末尾がすでに同じ文なら継ぎ足さない（前回の残り結果がもう一度届いたとき用）
-          if (said && base && (base === said || base.endsWith(sep + said))) said = "";
+          if (said && base && (base === said || base.endsWith(sessionSep + said))) said = "";
           programmatic = true;
-          target.value = said ? (base ? base + sep : "") + said : base;
+          target.value = said ? (base ? base + sessionSep : "") + said : base;
           target.dispatchEvent(new Event("input", { bubbles: true }));
           programmatic = false;
           if (wantSave) {
@@ -6654,6 +6657,10 @@ function wireMics(root) {
         // 聞き直しは少し間を置く（前の認識器がマイクを手放すのを待つ。すぐ始めると失敗する端末がある）
         // Androidは前の認識器がマイクを手放す前に始め直すと「黙って失敗」する（エラーはJSに届かない作り）。
         // そこで①少し待ってから始め②本当に聞けているか確かめ③だめなら間を空けてやり直す（2026-09-14）
+        // 本体の認識器は「壊して作り直す」作りなので、あまり速く繰り返すと落ちることがある
+        // （2026-09-25 Androidで、マイクを使い終わった直後にアプリが閉じる報告）。
+        // 立ち上げの間隔を必ず 600ms 以上あける
+        const MIN_START_GAP = 600;
         let starting = false; // 立ち上げ中（見張りと二重に始めないための鍵）
         let failStreak = 0;   // 続けて立ち上がらなかった回数
         // Androidは「話し終わり」の合図（stopped）のあとに、いちばん正確な「最後の答え」を送ってくる。
@@ -6670,9 +6677,9 @@ function wireMics(root) {
         // 間が空いた場所を覚えておいて、そこに全角スペースを差し込む（2026-09-24 実機で発覚）
         let iosCuts = [];
         const iosDecorate = raw => {
-          if (textMode || !iosCuts.length) return raw; // 文章モードでは区切りを入れない
+          if (!iosCuts.length) return raw;
           let out = "", prev = 0;
-          for (const c of iosCuts) { if (c > prev && c <= raw.length) { out += raw.slice(prev, c) + sep; prev = c; } }
+          for (const c of iosCuts) { if (c > prev && c <= raw.length) { out += raw.slice(prev, c) + micJoiner(); prev = c; } }
           return out + raw.slice(prev);
         };
         const idleTooLong = () => Date.now() - lastHeardAt > MIC_IDLE_STOP_MS;
@@ -6689,10 +6696,14 @@ function wireMics(root) {
           starting = true;
           try {
             for (let i = 0; i < 3; i++) {
-              const wait = (delayMs || 0) + i * 500; // やり直すたびに長めに待つ
+              let wait = (delayMs || 0) + i * 500; // やり直すたびに長めに待つ
+              const since = Date.now() - micLastStartAt;
+              if (since < MIN_START_GAP) wait = Math.max(wait, MIN_START_GAP - since); // 前の立ち上げから間をあける
               if (wait) await new Promise(r => setTimeout(r, wait));
               if (!micActive || micActive.btn !== btn) return;
+              micLastStartAt = Date.now();
               sessionAt = Date.now(); heard = false; lastSaid = ""; awaitingFinal = false; iosCuts = [];
+              gotFirst = false; sessionSep = "";
               base = target.value; // 聞き始める瞬間の文を土台にする（ここに継ぎ足す）
               try { await SRN.start({ language: "ja-JP", maxResults: 1, partialResults: true, popup: false }); } catch (e) {}
               await new Promise(r => setTimeout(r, 500)); // 立ち上がりを待ってから確かめる
@@ -6718,10 +6729,14 @@ function wireMics(root) {
             return;
           }
           if (isMine()) {
+            if (!gotFirst) { // この区切りの1つめ＝直前の声からどれだけ空いたかで決める
+              gotFirst = true;
+              sessionSep = (base && Date.now() - lastHeardAt >= PAUSE_SEP_MS) ? micJoiner() : "";
+            }
             if (isIOSApp()) {
               // 1.2秒以上あいてから続きを話した＝そこが文の切れ目
               const gap = Date.now() - lastSaidAt;
-              if (lastSaid && said.startsWith(lastSaid) && said.length > lastSaid.length && gap > 1200
+              if (lastSaid && said.startsWith(lastSaid) && said.length > lastSaid.length && gap >= PAUSE_SEP_MS
                   && !iosCuts.includes(lastSaid.length)) iosCuts.push(lastSaid.length);
               if (lastSaid && !said.startsWith(lastSaid)) iosCuts = []; // 言い直された＝覚えた切れ目は捨てる
             }
