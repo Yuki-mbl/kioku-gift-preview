@@ -2561,6 +2561,13 @@ html[data-theme="dark"] .brand-line { font-weight: 700; }
 .memo-dests { display: flex; flex-direction: column; gap: 10px; }
 .memo-dests .btn-ico svg { width: 26px; height: 26px; }
 .memo-slot.selected { border-color: var(--accent); background: var(--accent-soft); }
+
+/* 夜中（0〜3時）に開いたときの、ひと言（2026-09-28） */
+.late-night-note {
+  display: block; margin-top: 4px;
+  font-size: min(.92rem, 3.7vw); font-weight: 700; color: var(--muted); letter-spacing: .02em;
+}
+[data-theme="dark"] .late-night-note { color: var(--brass-ed); }
 </style>
 <div id="app">
 
@@ -3218,7 +3225,19 @@ function fromDateStr(s) {
   const [y, m, d] = s.split("-").map(Number);
   return new Date(y, m - 1, d);
 }
-function todayStr() { return toDateStr(new Date()); }
+// 「きょう」は朝3時まで前の日ぶん（2026-09-28 Yukiさん判断）。
+// 0時をまわってから、その日の食事やありがとうを思い出して書く人が多いため。
+// 夜中に書いたものが翌日に入ってしまうのを防ぐ。※通知の時刻は実際の時計どおり（ここは通さない）
+const DAY_START_HOUR = 3;
+function logicalToday() {
+  const d = new Date();
+  if (d.getHours() < DAY_START_HOUR) d.setDate(d.getDate() - 1);
+  d.setHours(12, 0, 0, 0); // 日付だけを使う（夏時間などのずれ防止）
+  return d;
+}
+function todayStr() { return toDateStr(logicalToday()); }
+// 夜中（0時〜3時）に開いているか＝画面にひと言出すかどうか
+function isLateNight() { const h = new Date().getHours(); return h >= 0 && h < DAY_START_HOUR; }
 function formatJP(dateStr, withYear = false) {
   const d = fromDateStr(dateStr);
   // 日本語以外は、その言語のふつうの書き方で（例：Wed, Sep 3）
@@ -3234,7 +3253,7 @@ function formatJP(dateStr, withYear = false) {
   return withYear ? `${d.getFullYear()}年${base}` : base;
 }
 function daysAgoStr(n) {
-  const d = new Date();
+  const d = logicalToday(); // 「きょう」から数える（朝3時までは前の日が「きょう」）
   d.setDate(d.getDate() - n);
   return toDateStr(d);
 }
@@ -3781,7 +3800,9 @@ function renderHome() {
     `<span class="home-date-jp">${dateHtml}<small>${t("{y}年", { y: d0.getFullYear() })}</small></span>`
     + `<span class="home-date-ed" aria-hidden="true"><b class="hd-day">${d0.getDate()}</b>`
     + `<span class="hd-side"><i class="hd-mon">${t("{m}月", { m: d0.getMonth() + 1 })}</i>`
-    + `<em class="hd-wd${wdCls}">${WD_EN[d0.getDay()]}・${uiLang === "ja" ? WD_JA[d0.getDay()] : ""}</em></span></span>`;
+    + `<em class="hd-wd${wdCls}">${WD_EN[d0.getDay()]}・${uiLang === "ja" ? WD_JA[d0.getDay()] : ""}</em></span></span>`
+    // 夜中に開いた人が「日付が違う」と驚かないように、ひと言そえる（2026-09-28）
+    + (isLateNight() ? `<span class="late-night-note">${t("朝3時まで、この日として残します")}</span>` : "");
 
   const count = Object.keys(entries).length;
   document.getElementById("home-count").textContent = t("これまでの記録：{n}日分", { n: count }); // 0日でも同じ形で（表示が日によって変わると迷うため）
