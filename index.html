@@ -6186,6 +6186,37 @@ function renderGratitude(justSaved) {
 
 // 残したありがとうの一覧
 let gratListShown = 30; // 30件ずつ表示（何年ぶんでも軽い）
+// 残したありがとうを書き直す（2026-09-28。メモリーアルバムと同じ作りにそろえる）
+function renderGratitudeEdit(idx) {
+  gratView = "edit";
+  setBackLabel("sleep-back", true);
+  const a = loadGratitude();
+  const m = a[idx];
+  if (!m) { renderGratitudeList(); return; }
+  document.getElementById("sleep-wrap").innerHTML = `
+    <div class="album-list-head">${t("ありがとうを書き直す")}</div>
+    <p class="album-cap">${formatJP(m.date)}</p>
+    <div class="field meal-line" style="margin-top:12px;">
+      <textarea id="grat-edit-text" class="grow-input" rows="3">${esc(m.text)}</textarea>
+      ${micMini("grat-edit-text", "grat-edit-save", "text")}
+    </div>
+    <button type="button" class="btn btn-green btn-xl" id="grat-edit-save">${t("保存")}</button>
+    <button type="button" class="btn btn-secondary btn-xl" id="grat-edit-cancel" style="margin-top:10px;">${t("やめる")}</button>`;
+  wireMics(document.getElementById("sleep-wrap"));
+  wireGrowInputs(document.getElementById("sleep-wrap"));
+  document.getElementById("grat-edit-save").addEventListener("click", () => {
+    const list = loadGratitude();
+    if (!list[idx]) { renderGratitudeList(); return; }
+    const v = document.getElementById("grat-edit-text").value.trim();
+    if (!v) { renderGratitudeList(); return; } // 空にしたら、消さずにそのまま戻す
+    list[idx].text = v;
+    saveGratitude(list);
+    buzzSave();
+    renderGratitudeList();
+  });
+  document.getElementById("grat-edit-cancel").addEventListener("click", renderGratitudeList);
+}
+
 function renderGratitudeList(keep) {
   if (keep !== true) gratListShown = 30;
   gratView = "list";
@@ -6197,11 +6228,12 @@ function renderGratitudeList(keep) {
   const items = a.length === 0
     ? `<p class="album-note" style="margin-top:20px;">${t("まだありません。")}<br>${t("今日の「ありがとう」から始めませんか。")}</p>`
     : shown.map((m, idx) => `
-        <div class="album-item">
+        <div class="album-item album-item-tappable" data-grat-open="${idx}">
           <div class="album-item-body">
             <div class="album-item-note">${esc(m.text)}</div>
-            <div class="album-item-date">${m.date}</div>
+            <div class="album-item-date">${formatJP(m.date)}</div>
           </div>
+          <button type="button" class="album-edit" data-grat-edit="${idx}" aria-label="${t("書き直す")}">${balloonIconSvg("pencil")}</button>
           <button type="button" class="album-del" data-idx="${idx}" aria-label="${t("消す")}">${balloonIconSvg("trash")}</button>
         </div>`).join("");
   document.getElementById("sleep-wrap").innerHTML = `
@@ -6211,6 +6243,12 @@ function renderGratitudeList(keep) {
     ${rest > 0 ? `<button type="button" class="btn btn-secondary btn-xl" id="grat-more" style="margin-top:10px;">${t("さらに{a}件見る（あと{b}件）", { a: Math.min(30, rest), b: rest })}</button>` : ""}`;
   const more = document.getElementById("grat-more");
   if (more) more.addEventListener("click", () => { gratListShown += 30; renderGratitudeList(true); });
+  // カードをタップしたら書き直せる（メモリーアルバムと同じ。2026-09-28 Yukiさん指摘）
+  document.querySelectorAll("#sleep-wrap [data-grat-open]").forEach(el =>
+    el.addEventListener("click", e => {
+      if (e.target.closest(".album-del, .confirm-inline")) return;
+      renderGratitudeEdit(Number(el.dataset.gratOpen));
+    }));
   document.querySelectorAll(".album-del").forEach(btn => {
     btn.addEventListener("click", () => {
       const idx = Number(btn.dataset.idx);
@@ -7041,6 +7079,7 @@ function wireEvents() {
     }
   });
   document.getElementById("sleep-back").addEventListener("click", () => {
+    if (gratView === "edit") { renderGratitudeList(); return; } // 書き直しからは一覧へ
     if (gratView === "list") {
       // 日別ページから来ていたら、そこへ帰る（来た道を戻る）
       if (gratReturnTo) { const r = gratReturnTo; gratReturnTo = null; goBackTo(r); return; }
