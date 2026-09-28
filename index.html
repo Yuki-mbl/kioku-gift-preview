@@ -2543,6 +2543,24 @@ html[data-theme="dark"] .brand-line { font-weight: 700; }
   [data-theme="dark"] #screen-home .home-brand { padding-top: 18px; }
   [data-theme="light"] #screen-home .home-brand { padding-top: 20px; }
 }
+
+/* メモを記録へ「うつす」（2026-09-28） */
+.memo-move {
+  flex: 0 0 auto; display: inline-flex; align-items: center; gap: 4px;
+  background: none; border: 1.5px solid var(--border); border-radius: 999px;
+  color: var(--accent-strong); font-family: inherit;
+  font-size: min(1rem, 4vw); font-weight: 800; padding: 8px 12px;
+  cursor: pointer; -webkit-tap-highlight-color: transparent;
+}
+.memo-move:active { transform: scale(.96); background: var(--accent-soft); }
+.memo-move-ar { font-size: 1.1em; line-height: 1; }
+.memo-move-text {
+  background: var(--accent-soft); border-radius: 14px; padding: 14px 16px;
+  font-size: 1.1rem; font-weight: 700; line-height: 1.6; margin-bottom: 16px; word-break: break-word;
+}
+.memo-dests { display: flex; flex-direction: column; gap: 10px; }
+.memo-dests .btn-ico svg { width: 26px; height: 26px; }
+.memo-slot.selected { border-color: var(--accent); background: var(--accent-soft); }
 </style>
 <div id="app">
 
@@ -3602,10 +3620,107 @@ function wireSheetClose(sheetId, dir, close) {
   sheet.addEventListener("touchend", e => end(e.changedTouches[0].clientX, e.changedTouches[0].clientY), { passive: true });
 }
 function closeMemo() {
+  memoMove = null;
   document.getElementById("memo-pop").hidden = true;
   updateMemoBadge();
 }
+// ---------- メモを記録へ「うつす」（2026-09-28 Yukiさん案） ----------
+// 忙しいときは、思いついたことを何でも「一瞬のひらめき」に書いておき、あとから
+// 食事・買い物・服装へ振り分ける。日記は鍵をかけている人がいるので行き先に入れない。
+// ありがとうは「夜に思い出す時間」そのものなので、ここからは入れない（Yukiさん判断）。
+let memoMove = null; // {i} ＝行き先を選ぶ / {i, dest:"meal"} ＝いつの分かを選ぶ
+const MEMO_DESTS = [
+  { key: "meal", name: "食事", icon: "daily" },
+  { key: "shopping", name: "買い物", icon: "shopping" },
+  { key: "outfit", name: "服装", icon: "outfit" },
+];
+const MEAL_SLOTS = [
+  { key: "morning", name: "朝" },
+  { key: "noon", name: "昼" },
+  { key: "evening", name: "晩" },
+  { key: "snack", name: "間食・その他" },
+];
+// いまの時刻から「たぶんこれ」を決める（押す手間をへらす）
+function mealSlotNow() {
+  const h = new Date().getHours();
+  if (h >= 4 && h < 11) return "morning";
+  if (h >= 11 && h < 16) return "noon";
+  if (h >= 16 && h < 24) return "evening";
+  return "evening"; // 深夜は前の晩のこととみなす
+}
+function joinText(oldText, add) {
+  const a = (oldText || "").trim(), b = (add || "").trim();
+  if (!a) return b;
+  if (!b) return a;
+  return a + micJoiner() + b;
+}
+// 実際にうつす。記録にその場で書き込んでから、その画面を開く（書き忘れで消えないように）
+function moveMemoTo(i, dest, slot) {
+  const a = loadMemos();
+  const m = a[i];
+  if (!m) { memoMove = null; renderMemoScreen(); return; }
+  const text = m.text;
+  const ds = todayStr();
+  if (dest === "meal") {
+    if (!entries[ds]) entries[ds] = {};
+    const meal = entries[ds].meal && entries[ds].meal.mode !== "best" ? { ...entries[ds].meal } : { mode: "full" };
+    meal.mode = "full";
+    meal[slot] = joinText(meal[slot], text);
+    entries[ds].meal = meal;
+    saveEntries();
+  } else if (dest === "shopping") {
+    const sh = loadShopping();
+    sh.other = joinText(sh.other, text);
+    saveShopping(sh);
+  } else if (dest === "outfit") {
+    setOutfit(ds, { note: joinText((outfitOf(ds) || {}).note, text) });
+  }
+  removeMemo(i);
+  memoMove = null;
+  updateMemoBadge();
+  closeMemo();
+  // その画面を開く（写真を足したいときは、その画面のカメラのボタンが使える）
+  if (dest === "meal") { startMeal(ds); flow.sub = "input"; flow.mode = "full"; renderStep(); }
+  else if (dest === "shopping") { renderShoppingHub(); showScreen("screen-shopping"); } // 書く画面を開く（移した言葉がその場で見える）
+  else if (dest === "outfit") openOutfit();
+  toastMemo(t("{d}にうつしました", { d: dest === "meal" ? t("食事") : dest === "shopping" ? t("買い物") : t("服装") }));
+}
+// 行き先をえらぶ画面（シートの中で、1画面に1つの問いだけ）
+function renderMemoMove() {
+  const a = loadMemos();
+  const m = a[memoMove.i];
+  if (!m) { memoMove = null; renderMemoScreen(); return; }
+  const wrap = document.getElementById("memo-wrap");
+  if (!memoMove.dest) {
+    wrap.innerHTML = `
+      <p class="memo-lead">${t("どこにうつしますか？")}</p>
+      <p class="memo-move-text">${esc(m.text)}</p>
+      <div class="memo-dests">
+        ${MEMO_DESTS.map(d => `<button type="button" class="btn btn-secondary btn-xl memo-dest" data-dest="${d.key}"><span class="btn-ico">${balloonIconSvg(d.icon)}</span>${t(d.name)}</button>`).join("")}
+      </div>
+      <button type="button" class="btn btn-soft btn-xl" id="memo-move-cancel" style="margin-top:14px;">${t("このまま置いておく")}</button>`;
+    wrap.querySelectorAll(".memo-dest").forEach(b => b.addEventListener("click", () => {
+      if (b.dataset.dest === "meal") { memoMove = { i: memoMove.i, dest: "meal" }; renderMemoScreen(); }
+      else moveMemoTo(memoMove.i, b.dataset.dest);
+    }));
+    document.getElementById("memo-move-cancel").addEventListener("click", () => { memoMove = null; renderMemoScreen(); });
+    return;
+  }
+  const now = mealSlotNow();
+  wrap.innerHTML = `
+    <p class="memo-lead">${t("いつの分ですか？")}</p>
+    <p class="memo-move-text">${esc(m.text)}</p>
+    <div class="memo-dests">
+      ${MEAL_SLOTS.map(sl => `<button type="button" class="btn btn-secondary btn-xl memo-slot${sl.key === now ? " selected" : ""}" data-slot="${sl.key}">${t(sl.name)}</button>`).join("")}
+    </div>
+    <button type="button" class="btn btn-soft btn-xl" id="memo-move-back" style="margin-top:14px;">${t("← 前に戻る")}</button>`;
+  wrap.querySelectorAll(".memo-slot").forEach(b =>
+    b.addEventListener("click", () => moveMemoTo(memoMove.i, "meal", b.dataset.slot)));
+  document.getElementById("memo-move-back").addEventListener("click", () => { memoMove = { i: memoMove.i }; renderMemoScreen(); });
+}
+
 function renderMemoScreen() {
+  if (memoMove) { renderMemoMove(); return; }
   const a = loadMemos();
   const full = a.length >= MEMO_MAX;
   const list = a.map((m, i) => `
@@ -3614,6 +3729,7 @@ function renderMemoScreen() {
         <svg class="balloon-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>
       </button>
       <span class="memo-text">${esc(m.text)}</span>
+      <button type="button" class="memo-move" data-memo-move="${i}">${t("うつす")}<span class="memo-move-ar" aria-hidden="true">→</span></button>
     </div>`).join("");
   // 書きとめた中身はすぐ見せない。「思い出してから開く」を押したら並ぶ
   const listPart = !a.length ? "" : (memoListOpen
@@ -3645,6 +3761,8 @@ function renderMemoScreen() {
   if (reveal) reveal.addEventListener("click", () => { memoListOpen = true; renderMemoScreen(); });
   document.querySelectorAll("#memo-wrap [data-memo-done]").forEach(b =>
     b.addEventListener("click", () => { removeMemo(Number(b.dataset.memoDone)); renderMemoScreen(); updateMemoBadge(); }));
+  document.querySelectorAll("#memo-wrap [data-memo-move]").forEach(b =>
+    b.addEventListener("click", () => { memoMove = { i: Number(b.dataset.memoMove) }; renderMemoScreen(); }));
 }
 
 function renderHome() {
