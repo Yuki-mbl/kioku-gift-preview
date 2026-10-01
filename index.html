@@ -231,19 +231,32 @@ body {
 .icon-btn.ghost { visibility: hidden; border: none; background: none; box-shadow: none; }
 .top-actions { display: flex; gap: 10px; }
 
-/* 文字つきの戻るボタン */
-.back-btn {
-  display: inline-flex; align-items: center; gap: 6px;
-  height: 48px; padding: 0 18px;
+/* 戻るボタン：全画面そろえて左下に浮かせる（2026-09-30 Yukiさん要望
+   「上にあったり下にあったりして統一されていない」。日別ページの左下がよいとのことで、そちらに寄せた）。
+   右下の「この日を書き足す」「買い物へ」などの浮きボタンと、左右で対になる */
+.back-fab {
+  position: fixed; left: 16px; bottom: 20px; z-index: 60;
+  display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+  width: auto; max-width: calc(100% - 32px); min-height: 60px;
+  padding: 16px 24px;
   border-radius: 999px;
-  border: 1.5px solid var(--border);
-  background: var(--card); color: var(--text);
-  font-family: inherit; font-size: 1.02rem; font-weight: 700;
-  box-shadow: var(--shadow); cursor: pointer;
-  -webkit-tap-highlight-color: transparent;
-  position: relative; z-index: 2;
+  border: 2px solid var(--accent);
+  background: var(--card); color: var(--accent-strong);
+  font-family: inherit; font-size: min(1.18rem, 4.4vw); font-weight: 800;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  box-shadow: 0 8px 22px rgba(0, 0, 0, .25);
+  cursor: pointer; -webkit-tap-highlight-color: transparent;
 }
-.back-btn:active { transform: scale(.96); }
+.back-fab:active { transform: scale(.96); }
+/* 広告が出ているときはその上へ（下タブぶんは 2200行あたりでさらに持ち上げる） */
+#app.has-ad .back-fab { bottom: 76px; }
+/* カレンダー・さがすは1層目。ホームへは下のタブが担うので戻るは出さない（元の作りのまま） */
+#cal-back, #search-back { display: none; }
+/* 最後の欄が浮きボタンに隠れないための余白 */
+#screen-sleep .sleep-wrap, #screen-shopping .shopping-wrap, #screen-album .album-wrap,
+#screen-legal .legal-wrap, #screen-passcode .settings-wrap, #screen-settings .settings-wrap,
+#screen-outfit:not(.one-screen) .outfit-wrap,
+#screen-transfer-code .transfer-wrap, #screen-code-entry .transfer-wrap { padding-bottom: 96px; }
 
 input[type="text"], input[type="url"], textarea, select {
   font-family: inherit;
@@ -413,21 +426,10 @@ button { color: inherit; } /* 色未指定のボタンがブラウザ標準の�
   overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
 }
 .top-bar .icon-btn.ghost { display: none; } /* 右端の透明ダミーを消して題字を端まで */
-/* 1層目の画面は上のバーを出さない（ホームへは下のタブが担う）。
-   カレンダー・さがす・設定は常に1層目。買い物・服装・アルバム・おやすみはJS（setBackLabel）が2層目でだけ出す */
-#screen-calendar .top-bar, #screen-search .top-bar, #screen-settings .top-bar { display: none; }
-/* 明朝体のページ題字（〜の記憶）は全廃。バーには戻るボタンだけ残す */
+/* 明朝体のページ題字（〜の記憶）は全廃。
+   上のバーは戻るボタンの入れ物でしかなくなったので、2026-09-30 に各画面から外した
+   （戻るは .back-fab として左下に浮かせる）。ホームの日付バーだけが .top-bar を使っている */
 .top-title { display: none; }
-
-/* 設定だけ例外：左上に「← ホームへ」を浮かせて固定（画面が長く、戻り方に迷う声があったため。2026-09-07） */
-#screen-settings .top-bar {
-  display: block; position: fixed; top: 10px; left: 50%; transform: translateX(-50%);
-  width: 100%; max-width: 480px; box-sizing: border-box;
-  padding: 0 10px; z-index: 95;
-  pointer-events: none; background: none; box-shadow: none;
-}
-#screen-settings .top-bar .back-btn { pointer-events: auto; }
-#screen-settings .settings-wrap { padding-top: 68px; } /* 浮きボタンの下に最初のカードが隠れないように */
 
 .home-wrap {
   flex: 1;
@@ -645,7 +647,7 @@ button { color: inherit; } /* 色未指定のボタンがブラウザ標準の�
 #app.night { background: #16110d; }
 #app.night #screen-sleep { background: #16110d; }
 #app.night .top-title { color: #a08c74; }
-#app.night .back-btn { background: #241c15; color: #a08c74; border-color: #382c20; box-shadow: none; }
+#app.night .back-fab { background: #241c15; color: #a08c74; border-color: #382c20; box-shadow: none; }
 #app.night .sleep-story { background: #211a13; border-color: #382c20; color: #d3bfa1; box-shadow: none; }
 #app.night .sleep-story-head { color: #8d7961; }
 #app.night .sleep-remaining { color: #8d7961; }
@@ -744,10 +746,19 @@ input[type="month"]::-webkit-calendar-picker-indicator { width: 28px; height: 28
   box-shadow: 0 8px 22px rgba(0, 0, 0, .25);
 }
 #app.has-ad .shop-fab { bottom: 76px; }
-/* 左下に置く浮きボタン（日別ページの「戻る」。右下の浮きボタンと対で使う。2026-09-13） */
-.shop-fab.fab-left { left: 16px; right: auto; padding: 16px 24px; }
-/* 左右の浮きボタンが狭い端末でぶつからないよう、日別ページだけ少し字を縮める */
-#screen-daydetail .shop-fab { font-size: min(1.18rem, 4.4vw); }
+/* 左下の「戻る」は .back-fab に一本化した（2026-09-30。旧 .shop-fab.fab-left は廃止） */
+/* 左右に浮きボタンが並ぶ画面（日別ページ・買い物）は、狭い端末でぶつからないよう字と余白を縮める。
+   買い物は右の「保存して買い物へ」が長く、左の戻ると重なっていた（2026-09-30 に気づいて修正） */
+#screen-daydetail .shop-fab, #screen-daydetail .back-fab { font-size: min(1.18rem, 4.4vw); padding: 16px 20px; }
+#screen-shopping .shop-fab, #screen-shopping .back-fab { font-size: min(1.12rem, 4.2vw); padding: 16px 20px; }
+/* 「← 一瞬のひらめきへ」は言葉が長い。買い物だけ右のボタンとぶつかるので、そこで縮める */
+#screen-shopping .back-fab.is-long { font-size: max(13px, min(.98rem, 3.6vw)); padding: 16px 14px; }
+/* iPhone SE（第1世代）など、とくに細い画面ではもう一段縮める */
+@media (max-width: 360px) {
+  #screen-daydetail .shop-fab, #screen-daydetail .back-fab { font-size: min(1.06rem, 4.0vw); padding: 16px 15px; }
+  #screen-shopping .shop-fab, #screen-shopping .back-fab { font-size: min(1.02rem, 3.9vw); padding: 16px 15px; }
+  #screen-shopping .back-fab.is-long { font-size: 13px; padding: 16px 12px; } /* 言葉のほうを短くするので、字は読める大きさを保つ */
+}
 /* 空の日の食事・服装・日記カードは中央寄せ（左下の戻ると重なっても字が隠れないように。2026-09-13） */
 #screen-daydetail .opt-card { text-align: center; }
 /* 日記の入力欄は画面の高さに合わせる：低い画面では少し低くして、
@@ -1326,6 +1337,8 @@ mark {
 
 /* 規約・プライバシー本文 */
 .legal-wrap { flex: 1; padding: 16px 22px 48px; }
+/* 題字（プライバシーポリシー／利用規約）。上のバーを廃止したので本文の先頭に置く（2026-09-30） */
+.legal-wrap .legal-head { font-size: 1.32rem; font-weight: 900; color: var(--text); margin: 4px 0 16px; letter-spacing: .04em; }
 .legal-wrap h3 { font-size: 1.14rem; font-weight: 800; color: var(--text); margin: 22px 0 8px; }
 .legal-wrap p { font-size: 1.04rem; line-height: 1.95; color: var(--text); margin-bottom: 10px; }
 .legal-wrap .legal-note { background: var(--accent-soft); color: var(--muted); font-size: 0.98rem; padding: 12px 14px; border-radius: 12px; margin-bottom: 18px; line-height: 1.7; }
@@ -2195,8 +2208,9 @@ html[data-fontsize="xlarge"] .tabb-name { font-size: min(.95rem, 4vw); }
    書いている最中（途中の位置）では見えないので、誤操作防止（案A）は変わらない */
 #app.kb-open .flow-footer { display: none; }
 #app.kb-open.kb-bottom .flow-footer { display: flex; }
-#app.kb-open .shop-fab { display: none; }
+#app.kb-open .shop-fab, #app.kb-open .back-fab { display: none; }
 #app.kb-open.kb-bottom .shop-fab { display: block; bottom: 20px; }
+#app.kb-open.kb-bottom .back-fab { display: inline-flex; bottom: 20px; }
 
 /* タブのある画面は、下がタブ＋広告に隠れないよう余白を足す */
 #app.has-tabs .screen.active { padding-bottom: 128px; }
@@ -2207,8 +2221,11 @@ html[data-fontsize="xlarge"] .tabb-name { font-size: min(.95rem, 4vw); }
 #app.kb-open .flow-footer { bottom: 0; } /* キーボード中はタブが消えるので、キーボードのすぐ上に */
 /* 広告のない画面（設定）はタブぶんだけの余白でいい */
 #app.has-tabs:not(.has-ad) .screen.active { padding-bottom: calc(72px + env(safe-area-inset-bottom)); } /* タブの高さぴったり（2026-09-14。88pxだと保存の帯とタブの間に空きができていた） */
-#app.has-tabs .shop-fab { bottom: calc(84px + env(safe-area-inset-bottom)); } /* この日を書き足す等の浮きボタンはタブの上へ */
-#app.has-tabs.has-ad .shop-fab { bottom: 140px; }
+#app.has-tabs .shop-fab, #app.has-tabs .back-fab { bottom: calc(84px + env(safe-area-inset-bottom)); } /* この日を書き足す等の浮きボタンはタブの上へ */
+#app.has-tabs.has-ad .shop-fab, #app.has-tabs.has-ad .back-fab { bottom: 140px; }
+/* 「うつしました」の知らせは浮きボタンの上に出す（2026-09-30。重なって戻るが読めなかった） */
+#app.has-tabs .memo-toast { bottom: calc(156px + env(safe-area-inset-bottom)); }
+#app.has-tabs.has-ad .memo-toast { bottom: 212px; }
 #app.has-tabs .shop-fab-spacer { height: 120px; } /* 最後の欄が浮きボタンに隠れないように */
 #app.has-tabs.has-ad .shop-fab-spacer { height: 175px; }
 /* アルバム：タブの分だけ写真を低くして、「写真とメモを残したい」までを1画面に */
@@ -2585,51 +2602,35 @@ html[data-theme="dark"] .brand-line { font-weight: 700; }
 
     <!-- ===== パスコード設定 ===== -->
     <section id="screen-passcode" class="screen">
-      <header class="top-bar">
-        <button class="back-btn" id="pc-back" data-t data-t-aria aria-label="戻る">← 戻る</button>
-        <div class="top-title" data-t>パスコード</div>
-        <span class="icon-btn ghost"></span>
-      </header>
       <div class="settings-wrap" id="pc-body"></div>
+      <button class="back-fab" id="pc-back" data-t data-t-aria aria-label="戻る">← 戻る</button>
     </section>
 
     <!-- ===== 引き継ぎコード（作る） ===== -->
     <section id="screen-transfer-code" class="screen">
-      <header class="top-bar">
-        <button class="back-btn" id="tc-back" data-t data-t-aria aria-label="戻る">← 戻る</button>
-        <div class="top-title" data-t>引き継ぎコード</div>
-        <span class="icon-btn ghost"></span>
-      </header>
       <div class="transfer-wrap">
         <p class="transfer-lead"><span data-t>新しいスマホの最初の画面で、</span><br><span data-t>この番号を入れてください。</span></p>
         <div class="transfer-code" id="transfer-code"></div>
         <p class="settings-hint" style="text-align:center;" data-t>（この画面は見本です。本番アプリで実際に引き継げます）</p>
       </div>
+      <button class="back-fab" id="tc-back" data-t data-t-aria aria-label="戻る">← 戻る</button>
     </section>
 
     <!-- ===== 引き継ぎコード（入れる） ===== -->
     <section id="screen-code-entry" class="screen">
-      <header class="top-bar">
-        <button class="back-btn" id="ce-back" data-t data-t-aria aria-label="戻る">← 戻る</button>
-        <div class="top-title" data-t>コードで引き継ぐ</div>
-        <span class="icon-btn ghost"></span>
-      </header>
       <div class="transfer-wrap">
         <p class="transfer-lead"><span data-t>前のスマホで作った</span><br><span data-t>引き継ぎコードを入れてください。</span></p>
         <input type="text" inputmode="numeric" maxlength="6" id="ce-input" class="code-input" data-t-ph placeholder="６けた">
         <button type="button" class="btn btn-primary btn-xl" id="ce-submit" data-t>引き継ぐ</button>
         <p class="settings-hint" id="ce-msg" style="text-align:center;" data-t>（この画面は見本です。本番アプリで実際に引き継げます）</p>
       </div>
+      <button class="back-fab" id="ce-back" data-t data-t-aria aria-label="戻る">← 戻る</button>
     </section>
 
     <!-- ===== 規約・プライバシー本文 ===== -->
     <section id="screen-legal" class="screen">
-      <header class="top-bar">
-        <button class="back-btn" id="legal-back" data-t data-t-aria aria-label="戻る">← 戻る</button>
-        <div class="top-title" id="legal-title">&nbsp;</div>
-        <span class="icon-btn ghost"></span>
-      </header>
       <div class="legal-wrap" id="legal-wrap"></div>
+      <button class="back-fab" id="legal-back" data-t data-t-aria aria-label="戻る">← 戻る</button>
     </section>
 
     <!-- ===== 初回設定：プロフィール ===== -->
@@ -2705,11 +2706,6 @@ html[data-theme="dark"] .brand-line { font-weight: 700; }
 
     <!-- ===== カレンダー（日々の記憶） ===== -->
     <section id="screen-calendar" class="screen">
-      <header class="top-bar">
-        <button class="back-btn" id="cal-back" data-t data-t-aria aria-label="ホームへ">← ホームへ</button>
-        <div class="top-title" data-t>日々の記憶</div>
-        <span class="icon-btn ghost"></span>
-      </header>
       <div class="cal-wrap">
         <p class="cal-encourage-lead cal-lead-top" data-t>日付をタップして書き足せます</p>
         <div class="cal-encourage cal-encourage-top">
@@ -2736,15 +2732,11 @@ html[data-theme="dark"] .brand-line { font-weight: 700; }
         </div>
         <div class="home-note" id="home-streak"></div>
       </div>
+      <button class="back-fab" id="cal-back" data-t data-t-aria aria-label="ホームへ">← ホームへ</button>
     </section>
 
     <!-- ===== さがす ===== -->
     <section id="screen-search" class="screen">
-      <header class="top-bar">
-        <button class="back-btn" id="search-back" data-t data-t-aria aria-label="ホームへ">← ホームへ</button>
-        <div class="top-title" data-t>さがす</div>
-        <span class="icon-btn ghost"></span>
-      </header>
       <div class="search-wrap">
         <div class="search-line">
           <input type="text" id="search-input" data-t-ph placeholder="記憶をさがす（パン、太郎）">
@@ -2752,6 +2744,7 @@ html[data-theme="dark"] .brand-line { font-weight: 700; }
         </div>
         <div id="search-results"></div>
       </div>
+      <button class="back-fab" id="search-back" data-t data-t-aria aria-label="ホームへ">← ホームへ</button>
     </section>
 
     <!-- ===== 日の詳細 ===== -->
@@ -2762,7 +2755,7 @@ html[data-theme="dark"] .brand-line { font-weight: 700; }
         <div id="detail-cards"></div>
         <div class="shop-fab-spacer"></div>
         <button type="button" class="btn btn-primary shop-fab" id="detail-add"><span class="btn-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20h4L19.5 8.5a2.12 2.12 0 0 0-3-3L5 17l-1 3Z"/><path d="M13.7 6.8l3.5 3.5"/></svg></span><span data-t>この日を書き足す</span></button>
-        <button type="button" class="btn btn-secondary shop-fab fab-left" id="detail-back" data-t data-t-aria aria-label="戻る">← 戻る</button>
+        <button type="button" class="back-fab" id="detail-back" data-t data-t-aria aria-label="戻る">← 戻る</button>
       </div>
     </section>
 
@@ -2781,51 +2774,30 @@ html[data-theme="dark"] .brand-line { font-weight: 700; }
 
     <!-- ===== 眠りと記憶 ===== -->
     <section id="screen-sleep" class="screen">
-      <header class="top-bar">
-        <button class="back-btn" id="sleep-back" data-t data-t-aria aria-label="ホームへ">← ホームへ</button>
-        <div class="top-title" data-t>おやすみの記憶</div>
-        <span class="icon-btn ghost"></span>
-      </header>
       <div class="sleep-wrap" id="sleep-wrap"></div>
+      <button class="back-fab" id="sleep-back" data-t data-t-aria aria-label="ホームへ">← ホームへ</button>
     </section>
 
     <!-- ===== 買い物の記憶 ===== -->
     <section id="screen-shopping" class="screen">
-      <header class="top-bar">
-        <button class="back-btn" id="shopping-back" data-t data-t-aria aria-label="ホームへ">← ホームへ</button>
-        <div class="top-title" data-t>買い物の記憶</div>
-        <span class="icon-btn ghost"></span>
-      </header>
       <div class="shopping-wrap" id="shopping-wrap"></div>
+      <button class="back-fab" id="shopping-back" data-t data-t-aria aria-label="ホームへ">← ホームへ</button>
     </section>
 
     <!-- ===== 服装の記憶（クローゼット） ===== -->
     <section id="screen-outfit" class="screen">
-      <header class="top-bar">
-        <button class="back-btn" id="outfit-back" data-t data-t-aria aria-label="ホームへ">← ホームへ</button>
-        <div class="top-title" data-t>服装の記憶</div>
-        <span class="icon-btn ghost"></span>
-      </header>
       <div class="outfit-wrap" id="outfit-wrap"></div>
+      <button class="back-fab" id="outfit-back" data-t data-t-aria aria-label="ホームへ">← ホームへ</button>
     </section>
 
     <!-- ===== メモリーアルバム ===== -->
     <section id="screen-album" class="screen">
-      <header class="top-bar">
-        <button class="back-btn" id="album-back" data-t data-t-aria aria-label="ホームへ">← ホームへ</button>
-        <div class="top-title" data-t>メモリーアルバム</div>
-        <span class="icon-btn ghost"></span>
-      </header>
       <div class="album-wrap" id="album-wrap"></div>
+      <button class="back-fab" id="album-back" data-t data-t-aria aria-label="ホームへ">← ホームへ</button>
     </section>
 
     <!-- ===== 設定 ===== -->
     <section id="screen-settings" class="screen">
-      <header class="top-bar">
-        <button class="back-btn" id="settings-back" data-t data-t-aria aria-label="ホームへ">← ホームへ</button>
-        <div class="top-title" data-t>設定</div>
-        <span class="icon-btn ghost"></span>
-      </header>
       <div class="settings-wrap">
         <div class="card">
           <div class="settings-label" data-t>テーマ</div>
@@ -2935,6 +2907,7 @@ html[data-theme="dark"] .brand-line { font-weight: 700; }
           <div id="reset-area" style="margin-top:14px;"></div>
         </div>
       </div>
+      <button class="back-fab" id="settings-back" data-t data-t-aria aria-label="ホームへ">← ホームへ</button>
     </section>
 
     <!-- 下のタブ：のこす・思い出す・見返す（見て回る画面で表示） -->
@@ -3191,7 +3164,8 @@ function toastMemo(msg) {
     el = document.createElement("div");
     el.id = "memo-toast";
     el.className = "memo-toast";
-    document.body.appendChild(el);
+    // #app の中に置く（has-tabs などの状態に合わせて位置を変えられるように。2026-09-30）
+    (document.getElementById("app") || document.body).appendChild(el);
   }
   el.textContent = msg;
   el.classList.add("show");
@@ -3422,16 +3396,30 @@ function setOneScreen(id, on) {
 
 // 指でスライドして移動する処理は wireSwipeNav() に統合（記入中・クイズ中は無効）
 
-// 1層目は上のバーごと隠す（ホームへは下のタブが担う）。
-// 2層目（カードを開いた中）だけバーを出して「← 前に戻る」
+// 1層目は戻るを出さない（ホームへは下のタブが担う）。
+// 2層目（カードを開いた中）だけ、左下に「← 前に戻る」を浮かせる。
+// 2026-09-30：上のバーを廃止して左下に統一したので、バーではなくボタン自身を出し入れする
 function setBackLabel(id, inner) {
   const b = document.getElementById(id);
   if (b) {
     b.textContent = inner ? t("← 前に戻る") : t("← ホームへ");
     b.setAttribute("aria-label", inner ? t("前に戻る") : t("ホームへ"));
-    const bar = b.closest(".top-bar");
-    if (bar) bar.style.display = inner ? "" : "none";
+    b.style.display = inner ? "" : "none";
+    b.classList.remove("is-long");
   }
+}
+// 「一瞬のひらめき」から うつした先では、戻る＝ひらめきの一覧へ（2026-09-30 Yukiさん要望）。
+// 言葉が長いので is-long を付ける（買い物だけ右の浮きボタンとぶつかるため、そこで字を縮める）
+function setMemoBackLabel(id) {
+  const b = document.getElementById(id);
+  if (!b) return;
+  // とても細い画面（iPhone SE 第1世代など）では、字を小さくするより言葉を短くする。
+  // 10px台まで縮むと、この年代の方にはまず読めないため
+  const narrow = window.innerWidth < 360;
+  b.textContent = narrow ? t("← ひらめきへ") : t("← 一瞬のひらめきへ");
+  b.setAttribute("aria-label", t("一瞬のひらめきへ"));
+  b.style.display = "";
+  b.classList.add("is-long");
 }
 
 // =========================================================
@@ -3491,6 +3479,7 @@ function setupOnboarding() {
 // ホーム
 // =========================================================
 function goHome() {
+  shoppingReturnTo = null; // 「うつす」の帰り道は、ホームへ出たら持ち越さない（2026-09-30）
   renderHome();
   showScreen("screen-home");
 }
@@ -3698,10 +3687,13 @@ function moveMemoTo(i, dest, slot) {
   memoMove = null;
   updateMemoBadge();
   closeMemo();
-  // その画面を開く（写真を足したいときは、その画面のカメラのボタンが使える）
-  if (dest === "meal") { startMeal(ds); flow.sub = "input"; flow.mode = "full"; renderStep(); }
-  else if (dest === "shopping") { renderShoppingHub(); showScreen("screen-shopping"); } // 書く画面を開く（移した言葉がその場で見える）
-  else if (dest === "outfit") openOutfit();
+  // その画面を開く（写真を足したいときは、その画面のカメラのボタンが使える）。
+  // どの行き先でも、左下の戻るで「一瞬のひらめき」へ帰れるようにする（2026-09-30 Yukiさん要望。
+  // 続けて何枚も振り分けるので、毎回ホームを経由させない）
+  const ret = { screen: "memo" };
+  if (dest === "meal") { startMeal(ds, ret); flow.sub = "input"; flow.mode = "full"; renderStep(); }
+  else if (dest === "shopping") { shoppingReturnTo = ret; renderShoppingHub(); showScreen("screen-shopping"); } // 書く画面を開く（移した言葉がその場で見える）
+  else if (dest === "outfit") { outfitReturnTo = ret; renderOutfitDay(ds); showScreen("screen-outfit"); } // その日の服装欄を開く（移した言葉がその場で見える）
   toastMemo(t("{d}にうつしました", { d: dest === "meal" ? t("食事") : dest === "shopping" ? t("買い物") : t("服装") }));
 }
 // 行き先をえらぶ画面（シートの中で、1画面に1つの問いだけ）
@@ -4320,11 +4312,23 @@ function flowHasBack() {
   return !!(flow.fromPicker || flow.returnTo);      // 「この日を書き足す」や日別ページから来た
 }
 function updateFlowBack() {
-  document.getElementById("flow-back").style.display = flowHasBack() ? "" : "none";
+  const b = document.getElementById("flow-back");
+  b.style.display = flowHasBack() ? "" : "none";
+  // 「一瞬のひらめき」から うつして来たときは、行き先が分かる言葉に（2026-09-30）
+  b.textContent = (flow.returnTo && flow.returnTo.screen === "memo") ? t("← 一瞬のひらめきへ") : t("戻る");
 }
 
 // 戻るボタン
 function prevStep() {
+  // 「一瞬のひらめき」から うつして来たときは、ひと押しで一覧へ帰す（2026-09-30 Yukiさん要望）。
+  // 途中の選択画面（全部書く／いちばん記憶にのこす）を挟むと、続けて振り分けるのが面倒になるため
+  if (flow.returnTo && flow.returnTo.screen === "memo") {
+    if (collectStep) collectStep();
+    saveEntries();
+    const r = flow.returnTo; flow.returnTo = null;
+    goBackTo(r);
+    return;
+  }
   if (flow.sub === "input") {
     // 入力画面 → 同じステップの選択画面へ（入力内容は保存しておく）
     if (collectStep) collectStep();
@@ -5095,6 +5099,9 @@ function openDayDetail(ds) {
 // 「来た道を戻る」：日別ページ（この日の記録／服装の1日）から開いた画面は、戻る・保存で元のページへ帰る（2026-09-04）
 function goBackTo(ret) {
   if (!ret) { goHome(); return; }
+  // 「うつす」で来たときは、ひらめきの一覧へ戻す。
+  // 下の画面はホームに戻しておく（一覧を閉じたときに、さっきの記録画面が残っていると迷うため）
+  if (ret.screen === "memo") { goHome(); openMemo(); return; }
   if (ret.screen === "outfitday") { renderOutfitDay(ret.ds); showScreen("screen-outfit"); return; }
   openDayDetail(ret.ds);
 }
@@ -5426,6 +5433,7 @@ let outfitView = "main";   // main | day
 let outfitDay = null;
 let outfitReturnTo = null; // 「この日の記録」から来たとき、もどる先の日付
 function openOutfit() {
+  outfitReturnTo = null; // ふつうの入口から来たときは、戻るは従来どおり
   outfitCursor = new Date();
   renderOutfitMain();
   showScreen("screen-outfit");
@@ -5583,7 +5591,8 @@ function renderOutfitDay(ds) {
   outfitDay = ds;
   setBackLabel("outfit-back", true);
   // 戻る先が分かる言葉に（重複していた下のもどるボタンは廃止）
-  document.getElementById("outfit-back").textContent = outfitReturnTo ? t("← 前に戻る") : t("← もどる"); // 文言を全画面で統一（2026-09-04）
+  if (outfitReturnTo && outfitReturnTo.screen === "memo") setMemoBackLabel("outfit-back"); // 「うつす」で来た（2026-09-30）
+  else document.getElementById("outfit-back").textContent = outfitReturnTo ? t("← 前に戻る") : t("← もどる"); // 文言を全画面で統一（2026-09-04）
   setOneScreen("screen-outfit", false); // 1日の詳細は内容に合わせて伸びる
   const o = outfitOf(ds) || {};
   // その日の他の記録も見返すと同じ形で並べる（服装は上の編集欄が担当。順は外食→食事→おやすみ…）2026-09-04
@@ -6462,8 +6471,9 @@ const LEGAL_TEXTS = {
 function openLegal(kind) {
   const doc = LEGAL_TEXTS[kind]; // ※ t は翻訳関数。規約・プライバシーの本文は言語ごとの差し替えデータにする（文単位の翻訳はしない）
   if (!doc) return;
-  document.getElementById("legal-title").textContent = doc.title;
-  document.getElementById("legal-wrap").innerHTML = doc.body;
+  // 題字は本文の先頭に置く（2026-09-30：上のバーを廃止したため。
+  // それまでは .top-title が display:none で、どちらを開いたのか分からなかった）
+  document.getElementById("legal-wrap").innerHTML = `<h2 class="legal-head">${esc(t(doc.title))}</h2>` + doc.body;
   window.scrollTo(0, 0);
   showScreen("screen-legal");
 }
@@ -6552,6 +6562,7 @@ function loadShopping() { return store.get("mn_shopping", {}); }
 function saveShopping(o) { store.set("mn_shopping", o); }
 function shoppingHasAny() { const s = loadShopping(); return SHOP_CATS.some(c => (s[c.key] || "").trim()); }
 let shopView = "recall";   // recall | hub
+let shoppingReturnTo = null; // 「一瞬のひらめき」から うつして来たとき、戻るで帰る先（2026-09-30）
 
 // 書いた文をひと品ずつに分ける（改行・読点・空白・「・」で区切る）
 function shopItemsOf(text) {
@@ -6653,6 +6664,7 @@ function closeShopPop() {
 }
 
 function openShopping() {
+  shoppingReturnTo = null; // ふつうの入口から来たときは、戻るは従来どおり
   if (shoppingHasAny()) renderShoppingRecall(); else renderShoppingHub();
   showScreen("screen-shopping");
 }
@@ -6661,6 +6673,7 @@ function openShopping() {
 function renderShoppingHub() {
   shopView = "hub";
   setBackLabel("shopping-back", shoppingHasAny());
+  if (shoppingReturnTo) setMemoBackLabel("shopping-back"); // うつして来たときは「← 一瞬のひらめきへ」
   setOneScreen("screen-shopping", false); // ページ全体でスクロール
   const s = loadShopping();
   const cards = SHOP_CATS.map(c => `
@@ -7055,7 +7068,9 @@ function wireEvents() {
       // 「この日の記録」や「この日を書き足す」から来ていたら、そこへ帰す（来た道を戻る）
       if (outfitReturnTo) {
         const d = outfitReturnTo; outfitReturnTo = null;
-        if (d && d.picker) openAddPicker(d.ds, d.ret); else openDayDetail(d);
+        if (d && d.screen === "memo") goBackTo(d);          // 「うつす」で来た（2026-09-30）
+        else if (d && d.picker) openAddPicker(d.ds, d.ret);
+        else openDayDetail(d);
         return;
       }
       renderOutfitMain();
@@ -7072,6 +7087,8 @@ function wireEvents() {
     goHome();
   });
   document.getElementById("shopping-back").addEventListener("click", () => {
+    // 「うつす」で来ていたら、ひらめきの一覧へ帰す（2026-09-30）
+    if (shoppingReturnTo) { const r = shoppingReturnTo; shoppingReturnTo = null; goBackTo(r); return; }
     if (shopView === "hub") {
       if (shoppingHasAny()) renderShoppingRecall(); else goHome(); // 入力は書くたび自動保存済み
     } else {
