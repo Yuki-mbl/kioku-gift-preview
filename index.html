@@ -754,13 +754,10 @@ input[type="month"]::-webkit-calendar-picker-indicator { width: 28px; height: 28
    買い物は右の「保存して買い物へ」が長く、左の戻ると重なっていた（2026-09-30 に気づいて修正） */
 #screen-daydetail .shop-fab, #screen-daydetail .back-fab { font-size: min(1.18rem, 4.4vw); padding: 16px 20px; }
 #screen-shopping .shop-fab, #screen-shopping .back-fab { font-size: min(1.12rem, 4.2vw); padding: 16px 20px; }
-/* 「← 一瞬のひらめきへ」は言葉が長い。買い物だけ右のボタンとぶつかるので、そこで縮める */
-#screen-shopping .back-fab.is-long { font-size: max(13px, min(.98rem, 3.6vw)); padding: 16px 14px; }
 /* iPhone SE（第1世代）など、とくに細い画面ではもう一段縮める */
 @media (max-width: 360px) {
   #screen-daydetail .shop-fab, #screen-daydetail .back-fab { font-size: min(1.06rem, 4.0vw); padding: 16px 15px; }
   #screen-shopping .shop-fab, #screen-shopping .back-fab { font-size: min(1.02rem, 3.9vw); padding: 16px 15px; }
-  #screen-shopping .back-fab.is-long { font-size: 13px; padding: 16px 12px; } /* 言葉のほうを短くするので、字は読める大きさを保つ */
 }
 /* 空の日の食事・服装・日記カードは中央寄せ（左下の戻ると重なっても字が隠れないように。2026-09-13） */
 #screen-daydetail .opt-card { text-align: center; }
@@ -3429,26 +3426,14 @@ function setBackLabel(id, inner) {
     b.textContent = t("← 戻る");
     b.setAttribute("aria-label", t("戻る"));
     b.style.display = inner ? "" : "none";
-    b.classList.remove("is-long");
     // 戻るが出ているときだけ、その下に隠れないための余白をとる（2026-10-02）。
     // 出ていない画面にも余白を付けていたため、収まるはずの画面が少しスクロールしていた
     b.closest(".screen")?.classList.toggle("with-back", !!inner);
   }
 }
-// 「一瞬のひらめき」から うつした先では、戻る＝ひらめきの一覧へ（2026-09-30 Yukiさん要望）。
-// 言葉が長いので is-long を付ける（買い物だけ右の浮きボタンとぶつかるため、そこで字を縮める）
-function setMemoBackLabel(id) {
-  const b = document.getElementById(id);
-  if (!b) return;
-  // とても細い画面（iPhone SE 第1世代など）では、字を小さくするより言葉を短くする。
-  // 10px台まで縮むと、この年代の方にはまず読めないため
-  const narrow = window.innerWidth < 360;
-  b.textContent = narrow ? t("← ひらめきへ") : t("← 一瞬のひらめきへ");
-  b.setAttribute("aria-label", t("一瞬のひらめきへ"));
-  b.style.display = "";
-  b.classList.add("is-long");
-  b.closest(".screen")?.classList.add("with-back");
-}
+// ※「一瞬のひらめき」から うつした先の戻るも、ふつうの「← 戻る」にした（2026-10-03 Yukiさん）。
+//   「ひらめきから移ってきたのは本人が分かっているので、戻るで伝わる」。
+//   そのため専用の setMemoBackLabel は廃止し、setBackLabel(id, true) を使う
 
 // =========================================================
 // 初回設定（プロフィール）
@@ -4352,7 +4337,7 @@ function updateFlowBack() {
   const b = document.getElementById("flow-back");
   b.style.display = flowHasBack() ? "" : "none";
   // 「一瞬のひらめき」から うつして来たときは、行き先が分かる言葉に（2026-09-30）
-  b.textContent = (flow.returnTo && flow.returnTo.screen === "memo") ? t("← 一瞬のひらめきへ") : t("← 戻る");
+  b.textContent = t("← 戻る");
 }
 
 // 戻るボタン
@@ -5627,7 +5612,7 @@ function renderOutfitDay(ds) {
   outfitView = "day";
   outfitDay = ds;
   setBackLabel("outfit-back", true); // 文言は「← 戻る」（2026-10-03 全画面でそろえた）
-  if (outfitReturnTo && outfitReturnTo.screen === "memo") setMemoBackLabel("outfit-back"); // 「うつす」で来た（2026-09-30）
+  if (outfitReturnTo && outfitReturnTo.screen === "memo") setBackLabel("outfit-back", true); // 「うつす」で来た（2026-09-30）
   setOneScreen("screen-outfit", false); // 1日の詳細は内容に合わせて伸びる
   const o = outfitOf(ds) || {};
   // その日の他の記録も見返すと同じ形で並べる（服装は上の編集欄が担当。順は外食→食事→おやすみ…）2026-09-04
@@ -6738,7 +6723,7 @@ function openShopping() {
 function renderShoppingHub() {
   shopView = "hub";
   setBackLabel("shopping-back", shoppingHasAny());
-  if (shoppingReturnTo) setMemoBackLabel("shopping-back"); // うつして来たときは「← 一瞬のひらめきへ」
+  if (shoppingReturnTo) setBackLabel("shopping-back", true); // うつして来たときも戻るを出す
   setOneScreen("screen-shopping", false); // ページ全体でスクロール
   const s = loadShopping();
   const cards = SHOP_CATS.map(c => `
