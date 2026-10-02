@@ -3106,7 +3106,7 @@ async function syncQuickMemoNotify() {
     const items = (r && r.items) || [];
     if (items.length) {
       const a = loadMemos();
-      // 通知から書いた分は上限10件を超えても失わない（通知側では満杯の案内が出せないため）
+      // 通知から書いた分は上限（MEMO_MAX）を超えても失わない（通知側では満杯の案内が出せないため）
       items.forEach(m => {
         const v = String((m && m.text) || "").trim();
         if (v) a.unshift({ text: v, at: (m && m.at) || Date.now() });
@@ -3157,7 +3157,7 @@ function takeMemoFromUrl(url) {
   // 開いているメモの一覧はその場で新しくする
   const pop = document.getElementById("memo-pop");
   if (pop && !pop.hidden) renderMemoScreen();
-  toastMemo(added ? t("メモを1つ受け取りました") : t("メモがいっぱいです（10件）"));
+  toastMemo(added ? t("メモを1つ受け取りました") : t("メモがいっぱいです（{n}件）", { n: MEMO_MAX }));
   return true;
 }
 // 受け取ったことを、小さな帯でそっと知らせる（音も振動も出さない）
@@ -3582,7 +3582,7 @@ function loadMemos() { return store.get("mn_memos", []); }
 function saveMemos(a) { store.set("mn_memos", a); }
 // 声がしないままこの時間が過ぎたら、マイクは自分から止まる（Androidは聞き直すたびに音が鳴るため）
 const MIC_IDLE_STOP_MS = 10000; // 10秒（2026-09-24 Yukiさん指定）
-const MEMO_MAX = 10; // たまりすぎない上限。満杯のときは追加を止めて案内する（黙って消さない）
+const MEMO_MAX = 20; // たまりすぎない上限（2026-10-02 Yukiさん指示で10→20）。満杯のときは追加を止めて案内する（黙って消さない）
 function addMemo(text) {
   const v = (text || "").trim();
   if (!v) return;
