@@ -3239,6 +3239,17 @@ function formatJP(dateStr, withYear = false) {
   const base = `${d.getMonth() + 1}月${d.getDate()}日（${wd}）`;
   return withYear ? `${d.getFullYear()}年${base}` : base;
 }
+// 曜日なしの日付（夜中の案内を1行に収めるため。2026-10-03 Yukiさん案
+// 「この（木）を入れなければ1行になるのでは？」）
+function formatJPNoWd(dateStr) {
+  const d = fromDateStr(dateStr);
+  if (uiLang !== "ja") {
+    try {
+      return new Intl.DateTimeFormat(LOCALE_TAGS[uiLang] || uiLang, { month: "short", day: "numeric" }).format(d);
+    } catch (e) {}
+  }
+  return t("{m}月{d}日", { m: d.getMonth() + 1, d: d.getDate() });
+}
 function daysAgoStr(n) {
   const d = logicalToday(); // 「きょう」から数える（朝3時までは前の日が「きょう」）
   d.setDate(d.getDate() - n);
@@ -3815,7 +3826,7 @@ function renderHome() {
     // 夜中に開いた人に、どこへ記録されるかを日付で伝える（2026-10-03 Yukiさん案で書き方を変更）
     // 2行になるときは、区切りのいい場所で折り返す（「す」だけ残らないように）
     + (isLateNight()
-        ? `<span class="late-night-note"><span class="nowrap">${t("朝3時までは")}</span><span class="nowrap">${t("{d}として記録します", { d: formatJP(todayStr()) })}</span></span>`
+        ? `<span class="late-night-note"><span class="nowrap">${t("朝3時までは")}</span><span class="nowrap">${t("{d}として記録します", { d: formatJPNoWd(todayStr()) })}</span></span>`
         : "");
 
   const count = Object.keys(entries).length;
