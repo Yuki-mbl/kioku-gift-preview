@@ -3755,9 +3755,10 @@ function renderMemoScreen() {
       <button type="button" class="memo-move" data-memo-move="${i}">${t("うつす")}<span class="memo-move-ar" aria-hidden="true">→</span></button>
     </div>`).join("");
   // 書きとめた中身はすぐ見せない。「思い出してから開く」を押したら並ぶ
+  // 下の案内（できたらチェック／クイズには出ません）は廃止（2026-10-02 Yukiさん指示。
+  // 「うつす」で振り分ける形になり、チェックの説明が合わなくなったため）
   const listPart = !a.length ? "" : (memoListOpen
-    ? `<div class="memo-list">${list}</div>
-       <p class="memo-note">${t("できたらチェックで消せます")}<br>${t("思い出しクイズには出ません")}</p>`
+    ? `<div class="memo-list">${list}</div>`
     : `<button type="button" class="memo-open memo-reveal" id="memo-reveal">${t("思い出してから開く（{n}）", { n: a.length })}</button>`);
   const writePart = full
     ? `<p class="memo-note">${t("メモは{n}個まで。", { n: MEMO_MAX })}<br>${t("できたものをチェックで消すと、また書けます")}</p>`
