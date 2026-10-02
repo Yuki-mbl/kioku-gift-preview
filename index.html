@@ -2582,10 +2582,13 @@ html[data-theme="dark"] .brand-line { font-weight: 700; }
 .memo-dests .btn-ico svg { width: 26px; height: 26px; }
 .memo-slot.selected { border-color: var(--accent); background: var(--accent-soft); }
 
-/* 夜中（0〜3時）に開いたときの、ひと言（2026-09-28） */
+/* 夜中（0〜3時）に開いたときの、ひと言。
+   大きな日付は本来の日付を出し、記録先はここで伝える（2026-10-03 Yukiさん案）。
+   薄い小さな字では読み飛ばされるので、少し大きく・濃くした */
 .late-night-note {
-  display: block; margin-top: 4px;
-  font-size: min(.92rem, 3.7vw); font-weight: 700; color: var(--muted); letter-spacing: .02em;
+  display: block; margin-top: 6px;
+  font-size: min(1.08rem, 4.4vw); font-weight: 700; color: var(--accent-strong); letter-spacing: .02em;
+  line-height: 1.5;
 }
 [data-theme="dark"] .late-night-note { color: var(--brass-ed); }
 </style>
@@ -3800,15 +3803,20 @@ function renderMemoScreen() {
 }
 
 function renderHome() {
+  // ホームの大きな日付は「本来の日付（スマホの時計と同じ）」を出す（2026-10-03 Yukiさん案）。
+  // 夜中0〜3時は記録先が前の日になるが、大きな日付まで前の日にすると、
+  // スマホの時計と食い違って「壊れた？」と思われる。日付はそのまま出して、
+  // どこに記録されるかは下のひと言で伝えるほうが迷わない
+  const shownDs = isLateNight() ? toDateStr(new Date()) : todayStr();
   // 曜日にほんのり色（日＝あたたかい色、土＝みどり）。日本語表示のときだけ
-  let dateHtml = formatJP(todayStr());
+  let dateHtml = formatJP(shownDs);
   if (uiLang === "ja") dateHtml = dateHtml
     .replace("（日）", '（<span class="wd-sun">日</span>）')
     .replace("（土）", '（<span class="wd-sat">土</span>）');
   // 日付は2通り用意し、テーマごとにCSSで出し分ける（2026-09-14 ダークのエディトリアル化）
   //  ・ふつう（ライト/淡い）＝これまでどおり「9月14日（月） 2026年」
   //  ・ダーク＝日にちを大きな数字にして、月・曜日をその横に小さく添える
-  const d0 = fromDateStr(todayStr());
+  const d0 = fromDateStr(shownDs);
   const WD_JA = "日月火水木金土", WD_EN = ["SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT"];
   const wdCls = d0.getDay() === 0 ? " wd-sun" : (d0.getDay() === 6 ? " wd-sat" : "");
   document.getElementById("home-today").innerHTML =
@@ -3816,8 +3824,11 @@ function renderHome() {
     + `<span class="home-date-ed" aria-hidden="true"><b class="hd-day">${d0.getDate()}</b>`
     + `<span class="hd-side"><i class="hd-mon">${t("{m}月", { m: d0.getMonth() + 1 })}</i>`
     + `<em class="hd-wd${wdCls}">${WD_EN[d0.getDay()]}・${uiLang === "ja" ? WD_JA[d0.getDay()] : ""}</em></span></span>`
-    // 夜中に開いた人が「日付が違う」と驚かないように、ひと言そえる（2026-09-28）
-    + (isLateNight() ? `<span class="late-night-note">${t("朝3時まで、この日として残します")}</span>` : "");
+    // 夜中に開いた人に、どこへ記録されるかを日付で伝える（2026-10-03 Yukiさん案で書き方を変更）
+    // 2行になるときは、区切りのいい場所で折り返す（「す」だけ残らないように）
+    + (isLateNight()
+        ? `<span class="late-night-note"><span class="nowrap">${t("朝3時までは")}</span><span class="nowrap">${t("{d}として記録します", { d: formatJP(todayStr()) })}</span></span>`
+        : "");
 
   const count = Object.keys(entries).length;
   document.getElementById("home-count").textContent = t("これまでの記録：{n}日分", { n: count }); // 0日でも同じ形で（表示が日によって変わると迷うため）
@@ -6818,8 +6829,10 @@ function micHtml(targetId) {
   return `<button type="button" class="mic-btn" data-mic="${targetId}">${micIconSvg()}<span class="mic-label">${t("話して書く")}</span></button>`;
 }
 // 欄の右に置く小さな丸マイク（1行の入力欄むけ）
-// mode: "text"＝文章を話す欄（日記・メモリーアルバム・ありがとう）。区切りを入れず、聞き直しを最短にする。
-//       省略＝単語を並べる欄（食事・買い物・服装・一瞬のひらめき）。間を空けたら全角スペースで区切る。
+// ※mode（"text"＝文章の欄／省略＝単語の欄）は、いまはどこからも見ていない。
+//   2026-09-25 に「欄ごとに決め打ちせず、間の長さで区切る」方式へ変えたときに役目を終えた
+//   （食事を文章で話す人がいて破綻したため。Yukiさん指摘）。
+//   呼び出し側に第3引数が残っているが、動きは全画面まったく同じ。消すなら呼び出し側もまとめて
 function micMini(targetId, saveBtnId, mode) {
   if (!SpeechRec && !nativeSpeech()) return "";
   const saveAttr = saveBtnId ? ` data-voice-save="${saveBtnId}"` : "";
