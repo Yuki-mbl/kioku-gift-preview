@@ -252,11 +252,14 @@ body {
 #app.has-ad .back-fab { bottom: 76px; }
 /* カレンダー・さがすは1層目。ホームへは下のタブが担うので戻るは出さない（元の作りのまま） */
 #cal-back, #search-back { display: none; }
-/* 最後の欄が浮きボタンに隠れないための余白 */
-#screen-sleep .sleep-wrap, #screen-shopping .shopping-wrap, #screen-album .album-wrap,
+/* 最後の欄が浮きボタンに隠れないための余白。
+   戻るがいつも出ている画面と、2層目でだけ出る画面（.with-back を JS が付ける）に分ける。
+   出ていない画面にも付けていたため、1画面に収まるはずの画面が少しスクロールしていた（2026-10-02） */
 #screen-legal .legal-wrap, #screen-passcode .settings-wrap, #screen-settings .settings-wrap,
-#screen-outfit:not(.one-screen) .outfit-wrap,
 #screen-transfer-code .transfer-wrap, #screen-code-entry .transfer-wrap { padding-bottom: 96px; }
+#screen-sleep.with-back .sleep-wrap, #screen-shopping.with-back .shopping-wrap,
+#screen-album.with-back .album-wrap,
+#screen-outfit.with-back:not(.one-screen) .outfit-wrap { padding-bottom: 96px; }
 
 input[type="text"], input[type="url"], textarea, select {
   font-family: inherit;
@@ -3295,6 +3298,11 @@ function watchPageFixed() {
   window.addEventListener("resize", schedulePageFixed);       // キーボードの開閉・画面の回転
   window.addEventListener("orientationchange", schedulePageFixed);
   document.addEventListener("input", schedulePageFixed, true); // 書くほどのびる欄
+  // 写真が読み込まれて中身が伸びたとき（2026-10-02）。
+  // いったん「収まる」と判断して錠をかけると、body は高さ100%・はみ出し隠しになるので、
+  // そのあと中身が伸びても下の見張り（ResizeObserver）には届かない＝錠がかかったままだった。
+  // 画像の読み込み完了を拾って測り直す
+  document.addEventListener("load", schedulePageFixed, true);
   if (window.ResizeObserver) new ResizeObserver(schedulePageFixed).observe(document.body);
 }
 
@@ -3406,6 +3414,9 @@ function setBackLabel(id, inner) {
     b.setAttribute("aria-label", inner ? t("前に戻る") : t("ホームへ"));
     b.style.display = inner ? "" : "none";
     b.classList.remove("is-long");
+    // 戻るが出ているときだけ、その下に隠れないための余白をとる（2026-10-02）。
+    // 出ていない画面にも余白を付けていたため、収まるはずの画面が少しスクロールしていた
+    b.closest(".screen")?.classList.toggle("with-back", !!inner);
   }
 }
 // 「一瞬のひらめき」から うつした先では、戻る＝ひらめきの一覧へ（2026-09-30 Yukiさん要望）。
@@ -3420,6 +3431,7 @@ function setMemoBackLabel(id) {
   b.setAttribute("aria-label", t("一瞬のひらめきへ"));
   b.style.display = "";
   b.classList.add("is-long");
+  b.closest(".screen")?.classList.add("with-back");
 }
 
 // =========================================================
@@ -5803,7 +5815,37 @@ function renderAlbumPhotoView() {
   });
   document.getElementById("album-skip").addEventListener("click", () => { markAlbumDone(); goHome(); });
   document.getElementById("album-list").addEventListener("click", renderAlbumList);
+  fitAlbumPhoto(); // 写真を、下のボタンが隠れない大きさにそろえる
   // 自動でキーボードは出さない（写真を見る時間を守る）
+}
+
+// 写真を「1画面に収まる大きさ」まで小さくする（2026-10-02 Yukiさん指摘）。
+// 縦長の写真（スクショなど）だと、いちばん下の「メモリーアルバムを見る」が
+// 下のタブに隠れていた。はみ出したぶんだけ写真を縮めて、全部見えるようにする。
+// どうしても入りきらないときは縮めすぎず、そこからはスクロールにまかせる
+function fitAlbumPhoto() {
+  const wrap = document.getElementById("album-wrap");
+  const img = wrap && wrap.querySelector(".album-photo img");
+  if (!img) return;
+  const apply = () => {
+    if (document.querySelector(".screen.active")?.id !== "screen-album") return;
+    if (!wrap.contains(img)) return; // 画面が描き直されていたら何もしない
+    const last = wrap.lastElementChild;
+    if (!last) return;
+    img.style.maxHeight = ""; // いったん戻して、素の大きさで測る
+    const tab = document.getElementById("tab-bar");
+    const tabTop = (tab && !tab.hidden) ? tab.getBoundingClientRect().top : window.innerHeight;
+    const over = last.getBoundingClientRect().bottom - (tabTop - 10); // はみ出している量（10pxはすき間）
+    if (over <= 0) return;
+    const cur = img.getBoundingClientRect().height;
+    img.style.maxHeight = Math.max(110, cur - over) + "px"; // 小さくしすぎない
+    schedulePageFixed(); // 高さが変わったので「スクロールが要るか」を測り直す
+  };
+  // 写真の読み込み・画面の動き（0.22秒）が終わってからでないと正しく測れないので、何度か測り直す
+  // （服装のひとこと欄と同じやり方。1回だけだと途中の高さで決めてしまう）
+  requestAnimationFrame(apply);
+  [80, 260, 500, 900].forEach(ms => setTimeout(apply, ms));
+  if (!img.complete) img.addEventListener("load", apply, { once: true });
 }
 
 // 今日はもう見た（1日1枚おわり）
