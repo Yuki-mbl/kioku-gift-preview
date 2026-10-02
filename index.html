@@ -2738,7 +2738,7 @@ html[data-theme="dark"] .brand-line { font-weight: 700; }
         </div>
         <div class="home-note" id="home-streak"></div>
       </div>
-      <button class="back-fab" id="cal-back" data-t data-t-aria aria-label="ホームへ">← ホームへ</button>
+      <button class="back-fab" id="cal-back" data-t data-t-aria aria-label="戻る">← 戻る</button>
     </section>
 
     <!-- ===== さがす ===== -->
@@ -2750,7 +2750,7 @@ html[data-theme="dark"] .brand-line { font-weight: 700; }
         </div>
         <div id="search-results"></div>
       </div>
-      <button class="back-fab" id="search-back" data-t data-t-aria aria-label="ホームへ">← ホームへ</button>
+      <button class="back-fab" id="search-back" data-t data-t-aria aria-label="戻る">← 戻る</button>
     </section>
 
     <!-- ===== 日の詳細 ===== -->
@@ -2773,7 +2773,7 @@ html[data-theme="dark"] .brand-line { font-weight: 700; }
       </header>
       <div class="flow-content" id="flow-content"></div>
       <footer class="flow-footer">
-        <button class="btn btn-secondary" id="flow-back" data-t>戻る</button>
+        <button class="btn btn-secondary" id="flow-back" data-t>← 戻る</button>
         <button class="btn btn-skip btn-xl" id="flow-skip" data-t>飛ばす</button>
       </footer>
     </section>
@@ -2781,25 +2781,25 @@ html[data-theme="dark"] .brand-line { font-weight: 700; }
     <!-- ===== 眠りと記憶 ===== -->
     <section id="screen-sleep" class="screen">
       <div class="sleep-wrap" id="sleep-wrap"></div>
-      <button class="back-fab" id="sleep-back" data-t data-t-aria aria-label="ホームへ">← ホームへ</button>
+      <button class="back-fab" id="sleep-back" data-t data-t-aria aria-label="戻る">← 戻る</button>
     </section>
 
     <!-- ===== 買い物の記憶 ===== -->
     <section id="screen-shopping" class="screen">
       <div class="shopping-wrap" id="shopping-wrap"></div>
-      <button class="back-fab" id="shopping-back" data-t data-t-aria aria-label="ホームへ">← ホームへ</button>
+      <button class="back-fab" id="shopping-back" data-t data-t-aria aria-label="戻る">← 戻る</button>
     </section>
 
     <!-- ===== 服装の記憶（クローゼット） ===== -->
     <section id="screen-outfit" class="screen">
       <div class="outfit-wrap" id="outfit-wrap"></div>
-      <button class="back-fab" id="outfit-back" data-t data-t-aria aria-label="ホームへ">← ホームへ</button>
+      <button class="back-fab" id="outfit-back" data-t data-t-aria aria-label="戻る">← 戻る</button>
     </section>
 
     <!-- ===== メモリーアルバム ===== -->
     <section id="screen-album" class="screen">
       <div class="album-wrap" id="album-wrap"></div>
-      <button class="back-fab" id="album-back" data-t data-t-aria aria-label="ホームへ">← ホームへ</button>
+      <button class="back-fab" id="album-back" data-t data-t-aria aria-label="戻る">← 戻る</button>
     </section>
 
     <!-- ===== 設定 ===== -->
@@ -2913,7 +2913,7 @@ html[data-theme="dark"] .brand-line { font-weight: 700; }
           <div id="reset-area" style="margin-top:14px;"></div>
         </div>
       </div>
-      <button class="back-fab" id="settings-back" data-t data-t-aria aria-label="ホームへ">← ホームへ</button>
+      <button class="back-fab" id="settings-back" data-t data-t-aria aria-label="戻る">← 戻る</button>
     </section>
 
     <!-- 下のタブ：のこす・思い出す・見返す（見て回る画面で表示） -->
@@ -3418,13 +3418,16 @@ function setOneScreen(id, on) {
 // 指でスライドして移動する処理は wireSwipeNav() に統合（記入中・クイズ中は無効）
 
 // 1層目は戻るを出さない（ホームへは下のタブが担う）。
-// 2層目（カードを開いた中）だけ、左下に「← 前に戻る」を浮かせる。
+// 2層目（カードを開いた中）だけ、左下に「← 戻る」を浮かせる。
 // 2026-09-30：上のバーを廃止して左下に統一したので、バーではなくボタン自身を出し入れする
 function setBackLabel(id, inner) {
   const b = document.getElementById(id);
   if (b) {
-    b.textContent = inner ? t("← 前に戻る") : t("← ホームへ");
-    b.setAttribute("aria-label", inner ? t("前に戻る") : t("ホームへ"));
+    // 文言は全画面「← 戻る」にそろえる（2026-10-03 Yukiさん指示）。
+    // 「前に戻る」「ホームへ」「もどる」が混ざっていて、行き先によって言葉が変わると迷うため。
+    // inner は文言ではなく「出すかどうか」だけに使う
+    b.textContent = t("← 戻る");
+    b.setAttribute("aria-label", t("戻る"));
     b.style.display = inner ? "" : "none";
     b.classList.remove("is-long");
     // 戻るが出ているときだけ、その下に隠れないための余白をとる（2026-10-02）。
@@ -3749,7 +3752,7 @@ function renderMemoMove() {
     <div class="memo-dests">
       ${MEAL_SLOTS.map(sl => `<button type="button" class="btn btn-secondary btn-xl memo-slot${sl.key === now ? " selected" : ""}" data-slot="${sl.key}">${t(sl.name)}</button>`).join("")}
     </div>
-    <button type="button" class="btn btn-soft btn-xl" id="memo-move-back" style="margin-top:14px;">${t("← 前に戻る")}</button>`;
+    <button type="button" class="btn btn-soft btn-xl" id="memo-move-back" style="margin-top:14px;">${t("← 戻る")}</button>`;
   wrap.querySelectorAll(".memo-slot").forEach(b =>
     b.addEventListener("click", () => moveMemoTo(memoMove.i, "meal", b.dataset.slot)));
   document.getElementById("memo-move-back").addEventListener("click", () => { memoMove = { i: memoMove.i }; renderMemoScreen(); });
@@ -4349,7 +4352,7 @@ function updateFlowBack() {
   const b = document.getElementById("flow-back");
   b.style.display = flowHasBack() ? "" : "none";
   // 「一瞬のひらめき」から うつして来たときは、行き先が分かる言葉に（2026-09-30）
-  b.textContent = (flow.returnTo && flow.returnTo.screen === "memo") ? t("← 一瞬のひらめきへ") : t("戻る");
+  b.textContent = (flow.returnTo && flow.returnTo.screen === "memo") ? t("← 一瞬のひらめきへ") : t("← 戻る");
 }
 
 // 戻るボタン
@@ -4777,7 +4780,7 @@ function renderQuizStep(content) {
             <button class="btn btn-soft" id="quiz-meal"><span class="btn-ico btn-ico-sm">${balloonIconSvg("daily")}</span><span class="nowrap">${t("今日の食事を記録")}</span></button>
           </div>
           <div class="quiz-back-row">
-            <button class="btn btn-secondary quiz-back-sm" id="quiz-next">${t("戻る")}</button>
+            <button class="btn btn-secondary quiz-back-sm" id="quiz-next">${t("← 戻る")}</button>
           </div>`
         : `<div class="quiz-judge">
             <button class="btn btn-primary btn-xl" id="quiz-next">${t("次の思い出し")}<span class="btn-ico btn-ico-r">${balloonIconSvg("sprout")}</span></button>
@@ -5289,7 +5292,7 @@ function showLock(mode) {
     <div class="lock-msg" id="lock-msg"></div>
     <div class="keypad" id="keypad"></div>
     <button type="button" class="lock-forgot" id="lock-forgot">${t("パスコードを忘れた方はこちら")}</button>
-    ${lockMode === "diary" ? `<button type="button" class="lock-forgot" id="lock-back-home">${t("← ホームへ")}</button>` : ""}`;
+    ${lockMode === "diary" ? `<button type="button" class="lock-forgot" id="lock-back-home">${t("← 戻る")}</button>` : ""}`;
   renderLockDots();
   buildKeypad();
   if (isLockedOut()) document.getElementById("lock-msg").textContent = t("5時間後にお試しください");
@@ -5623,10 +5626,8 @@ function renderOutfitToday() {
 function renderOutfitDay(ds) {
   outfitView = "day";
   outfitDay = ds;
-  setBackLabel("outfit-back", true);
-  // 戻る先が分かる言葉に（重複していた下のもどるボタンは廃止）
+  setBackLabel("outfit-back", true); // 文言は「← 戻る」（2026-10-03 全画面でそろえた）
   if (outfitReturnTo && outfitReturnTo.screen === "memo") setMemoBackLabel("outfit-back"); // 「うつす」で来た（2026-09-30）
-  else document.getElementById("outfit-back").textContent = outfitReturnTo ? t("← 前に戻る") : t("← もどる"); // 文言を全画面で統一（2026-09-04）
   setOneScreen("screen-outfit", false); // 1日の詳細は内容に合わせて伸びる
   const o = outfitOf(ds) || {};
   // その日の他の記録も見返すと同じ形で並べる（服装は上の編集欄が担当。順は外食→食事→おやすみ…）2026-09-04
@@ -5944,7 +5945,7 @@ function renderAlbumList(keep) {
   document.getElementById("album-home2")?.addEventListener("click", goHome);
 }
 
-// 思い出をひとつ開く（写真とメモを大きく。← 前に戻るで一覧へ）
+// 思い出をひとつ開く（写真とメモを大きく。← 戻るで一覧へ）
 function renderAlbumView(idx) {
   albumView = "view";
   setBackLabel("album-back", true);
