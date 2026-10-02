@@ -3071,7 +3071,17 @@ function isIOSApp() {
   catch (e) { return false; }
 }
 function nativeSpeech() {
-  return (window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.SpeechRecognition) || null;
+  const P = (window.Capacitor && window.Capacitor.Plugins) || null;
+  if (!P) return null;
+  // 自作のほう（KiokuSpeech。Android専用。2026-10-02）を優先する。
+  // 聞き直しの「ピコ」を消し、少し黙ったくらいでは終わらせない。
+  // 入っていない版（iPhone・古いAndroid）では、これまでどおり共通プラグインを使う。
+  // 呼び方・届くイベントの形は同じにしてあるので、ここ以外は変えなくてよい
+  return P.KiokuSpeech || P.SpeechRecognition || null;
+}
+// 自作のほうで聞いているか（Android。毎回「ここまでの全文」が届き、8秒黙るまで終わらない）
+function kiokuSpeech() {
+  return !!(window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.KiokuSpeech);
 }
 // アプリ版の写真えらび：「カメラで撮る／アルバムから選ぶ」を出す（2026-09-09）
 // 返り値：undefined=プラグインなし（ブラウザ）／null=やめた／文字列=写真(dataURL)
@@ -6977,8 +6987,10 @@ function wireMics(root) {
             applySaid(isIOSApp() ? iosDecorate(said) : said, false);
             // iPhoneは「話し終わり」を知らせてこない（こちらが止めるまで聞き続ける作り）。
             // そのため語尾の「保存」を途中経過から見つける。言い終わって少し静かになってから確定する
-            // （「ほぞんしたい」のように続きがあるときに早とちりしないため）。2026-09-24 実機で発覚
-            if (isIOSApp()) {
+            // （「ほぞんしたい」のように続きがあるときに早とちりしないため）。2026-09-24 実機で発覚。
+            // 2026-10-02：自作プラグインのAndroidも同じにする。8秒黙るまで終わらない作りにしたので、
+            // 「話し終わり」を待っていると「保存」と言ってもなかなか効かないため
+            if (isIOSApp() || kiokuSpeech()) {
               if (saveWordTimer) clearTimeout(saveWordTimer);
               if (/(?:保存|ほぞん|ホゾン)[。．\s　]*$/.test(said)) {
                 const at = said;
