@@ -6152,7 +6152,7 @@ function moonTonight() {
   //  それまでは月の最初の3晩だけ小さく出していた）
   const below = `
     ${isFull ? "" : `<div class="moon-till">${t("満月まで あと{n}日", { n: Math.round(toFull) })}</div>`}
-    <div class="moon-grow">${t("毎晩開くたびに星が灯っていきます。")}</div>`;
+    <div class="moon-grow">${t("毎晩開くたびに星が灯っていきます")}</div>`;
   const svg = `
     <svg viewBox="-160 -70 320 140" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="${t("今夜の月と星座")}">
       <defs>
@@ -6205,8 +6205,8 @@ function renderGratitude() {
     <div class="sleep-lead grat-lead">${t("「ありがとう」を思い出して眠りにつく時間です")}</div>
     <div class="moon-sky">${moon.svg}${moon.inSky}</div>
     <div class="moon-under">${moon.below}</div>
-    <p class="grat-think"><span class="nowrap">${t("今日の小さな「ありがとう」を、")}</span><span class="nowrap">${t("ひとつ思い浮かべてみてください。")}</span></p>
-    <p class="grat-think-sub">${t("書きとめておきたいことは、日記に残せます。")}</p>
+    <p class="grat-think"><span class="nowrap">${t("今日の小さな「ありがとう」を")}</span><span class="nowrap">${t("ひとつ思い浮かべてみてください")}</span></p>
+    <p class="grat-think-sub">${t("書きとめておきたいことは日記に残せます")}</p>
     <div class="card grat-notify">
       <div class="settings-label">${t("おやすみの通知")}</div>
       <div class="seg-group" id="grat-onoff">
