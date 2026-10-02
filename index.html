@@ -605,7 +605,17 @@ button { color: inherit; } /* 色未指定のボタンがブラウザ標準の�
 }
 .moon-stars-note { color: #e8dcaa; font-size: .95rem; font-weight: 700; margin-top: 5px; letter-spacing: .04em; }
 /* 夜空の外の説明（通常背景に小さく） */
-.moon-under { text-align: center; color: var(--text); opacity: .78; font-size: clamp(.82rem, 1.9vh, .95rem); line-height: 1.6; margin: -6px 0 clamp(4px, 1vh, 10px); }
+.moon-under { text-align: center; color: var(--text); font-size: clamp(.82rem, 1.9vh, .95rem); line-height: 1.6; margin: -6px 0 clamp(4px, 1vh, 10px); }
+.moon-till { opacity: .78; }
+/* 星が増える仕組みは、この画面を開いてもらう一番の理由。毎晩・大きく出す（2026-10-03 Yukiさん） */
+.moon-grow { font-size: min(1.12rem, 4.6vw); font-weight: 800; color: var(--accent-strong); margin-top: 4px; letter-spacing: .02em; }
+[data-theme="dark"] .moon-grow { color: var(--brass-strong-ed); }
+/* ありがとうは書かずに思い出す場所になった（2026-10-03）。その問いかけ */
+.grat-think {
+  text-align: center; margin: clamp(6px, 1.4vh, 14px) 0 4px;
+  font-size: min(1.18rem, 4.8vw); font-weight: 800; color: var(--text); line-height: 1.7;
+}
+.grat-think-sub { text-align: center; margin: 0 0 clamp(8px, 1.6vh, 16px); color: var(--muted); font-size: min(1rem, 4.1vw); line-height: 1.6; }
 /* 「のこす」までが1画面に収まるよう、低い画面では上部をほどよく圧縮 */
 #screen-sleep .sleep-lead { font-size: clamp(1.05rem, 2.6vh, 1.25rem); margin-bottom: clamp(2px, .8vh, 8px); }
 /* おやすみ導入文：1行に収める（狭い画面では文字が画面幅に合わせて縮む） */
@@ -3056,6 +3066,12 @@ function applySettings() {
 
 function saveEntries() { store.set("mn_entries", entries); }
 
+// ありがとうの記録はやめた（2026-10-03 Yukiさん判断「残したければ日記に書けばいい」）。
+// 端末に残っている古いデータは、次に開いたときに消す（中身は使わない）
+(function dropOldGratitude() {
+  try { if (localStorage.getItem("mn_gratitude") != null) localStorage.removeItem("mn_gratitude"); } catch (e) {}
+})();
+
 // 保存の手ごたえ：スマホを強めにひと震わせ（2026-09-07 Yukiさん指定）
 // アプリ版はネイティブの振動（Capacitor Haptics＝iPhoneでも震える）、
 // ブラウザ版は navigator.vibrate（Android Chromeで震える。iPhoneのブラウザだけは非対応で無反応）
@@ -3883,11 +3899,10 @@ function renderCalendar() {
   const firstDay = new Date(y, m, 1).getDay();
   const lastDate = new Date(y, m + 1, 0).getDate();
   const today = todayStr();
-  // ●印は「残したもの」全部（記録・服装・アルバム・ありがとう）
+  // ●印は「残したもの」全部（記録・服装・アルバム）
   const extraDates = new Set([
     ...Object.keys(loadOutfits()),
     ...loadAlbumMemos().filter(mm => mm.note).map(mm => mm.date),
-    ...loadGratitude().map(g => g.date),
   ]);
 
   for (let i = 0; i < firstDay; i++) {
@@ -4441,7 +4456,7 @@ function isRoutinePlace(text) {
 // 記憶確認クイズ（計3問。2026-09-09 Yukiさん決定の構成）
 //  1問目：昨日の食事（なければ3日以内の直近の食事）
 //  2問目：別の3日以内の食事
-//  3問目：アルバム（写真を見せる）・外食（直近10回・ヒント付き）・おやすみ（ありがとう、3日以内）・服装（3日以内）からひとつ
+//  3問目：アルバム（写真を見せる）・外食（直近10回・ヒント付き）・服装（3日以内）からひとつ
 //  食事の問題は3日以内だけ。足りない分は特別問題→3日以内の日記で埋め、無ければ作れる分だけ
 const QUIZ_COUNT = 3;
 function buildQuizQuestions() {
@@ -4511,7 +4526,7 @@ function buildQuizQuestions() {
 
   // ---------- 3問目：アルバム・外食・おやすみ・服装からひとつ ----------
   // （2026-09-09 Yukiさん決定の構成。種類はまんべんなく回す）
-  const specials = { album: [], eatout: [], grat: [], outfit: [] };
+  const specials = { album: [], eatout: [], outfit: [] };
   // アルバム：写真を先に見せて「何の写真か」（写真がある思い出だけ・期間無制限）
   loadAlbumMemos().forEach((m, i) => {
     const cue = albumPhotoForQuiz(m.photo);
@@ -4534,15 +4549,6 @@ function buildQuizQuestions() {
     specials.eatout.push({ ds, field: "eatout",
       q: t("{d}、{q}", { d: formatJP(ds), q: hints[Math.floor(Math.random() * hints.length)] }),
       answer: formatPlaceAnswer(eo), photo: mealPhotoList(ds) });
-  }
-  // おやすみ（ありがとうの記録）：3日以内
-  for (const ds of [yStr, d2, d3]) {
-    const texts = loadGratitude().filter(g => g.date === ds).map(g => (g.text || "").trim()).filter(Boolean);
-    if (texts.length && !used.has(`${ds}|grat`)) {
-      specials.grat.push({ ds, field: "grat",
-        q: t("{d}のおやすみ前に書いたこと、思い出せますか？", { d: formatJP(ds) }),
-        answer: texts.join("\n") });
-    }
   }
   // 服装：3日以内（写真は答えのほうに添える）
   for (const ds of [yStr, d2, d3]) {
@@ -4910,17 +4916,12 @@ function albumFieldsFor(ds) {
     .map(m => ({ label: "メモリーアルバム", text: m.note }));
 }
 
-// その日に残した「ありがとう」
-function gratitudeFieldsFor(ds) {
-  return loadGratitude().filter(g => g.date === ds).map(g => ({ label: "ありがとう", text: g.text }));
-}
-
 // その日の「記録＋服装＋アルバム＋ありがとう」をまとめた一覧（検索・詳細で共用）
 function dayFields(ds) {
   const of = outfitText(ds);
   // 服の写真があれば小さなサムネイルも添える（写真だけの日も見つけやすいように）
   const outfitField = of ? [{ label: "服装など", text: of, thumb: outfitOf(ds)?.photo || null }] : [];
-  // 表示順：服装→外食→食事→おやすみ（ありがとう）→日記→アルバム→（旧データの行った場所）2026-09-04
+  // 表示順：服装→外食→食事→日記→アルバム→（旧データの行った場所）2026-09-04
   const ef = entryFields(entries[ds] || {});
   const pick = label => ef.filter(f => f.label === label);
   // 日記ロック中は本文を見せない（2026-09-13修正：見返す→日別ページで鍵をかけた日記が読めていた。
@@ -4930,7 +4931,7 @@ function dayFields(ds) {
   if (settings.diaryPass && !diaryUnlocked) {
     diaryFields = diaryFields.map(() => ({ label: "日記", text: t("🔒 ロックされています。タップで解除できます") }));
   }
-  return [...outfitField, ...pick("外食"), ...pick("食事"), ...gratitudeFieldsFor(ds),
+  return [...outfitField, ...pick("外食"), ...pick("食事"),
           ...diaryFields, ...albumFieldsFor(ds), ...pick("行った場所")];
 }
 
@@ -5147,7 +5148,6 @@ function openDayField(ds, label, from) {
     return;
   }
   if (label.startsWith("メモリーアルバム")) { albumReturnTo = ret; renderAlbumList(); showScreen("screen-album"); return; }
-  if (label.startsWith("ありがとう")) { gratReturnTo = ret; renderGratitudeList(); showScreen("screen-sleep"); return; }
   if (label.startsWith("食事") || label.startsWith("外食")) { startMeal(ds, ret); return; }
   if (label.startsWith("日記")) {
     if (settings.diaryPass && !diaryUnlocked) { pendingUnlock = { type: "detail", ds }; showLock("diary"); return; }
@@ -5986,16 +5986,13 @@ function renderAlbumEdit(idx) {
 }
 
 // =========================================================
-// おやすみの記憶（今日の「ありがとう」を残して、心を整えて眠る）
-// ※「ありがとうの記録」は自由記憶とは別の専用データ（mn_gratitude）
+// おやすみの記憶（今夜の月と星を見て、ありがとうを思い出して眠る）
+// ※2026-10-03：「ありがとう」を書いて残す機能はやめた（残したいことは日記へ）。
+//   この画面は 月と星・おやすみの通知 の2つだけ
 // =========================================================
-function loadGratitude() { return store.get("mn_gratitude", []); }
-function saveGratitude(a) { store.set("mn_gratitude", a); }
 let notify = store.get("mn_notify", { on: true, time: "21:30" });
-let gratView = "main"; // main | list
-let gratReturnTo = null; // 日別ページから来たとき、一覧の戻るで帰る先
 
-function openSleep() { gratReturnTo = null; renderGratitude(false); showScreen("screen-sleep"); }
+function openSleep() { renderGratitude(); showScreen("screen-sleep"); }
 
 // ---------- 今夜の月（実際の月の周期 約29.5日に同期して満ち欠け） ----------
 const MOON_SYNODIC = 29.530588853; // 朔望月（日）
@@ -6150,11 +6147,12 @@ function moonTonight() {
     <div class="moon-caption">${t("今夜は {n}", { n: t(name) })}</div>
     ${lore ? `<div class="moon-lore">${t(lore)}</div>` : ""}
     <div class="moon-stars-note">⭐ ${t("今宵で{n}夜目", { n: v.count })} ・ ${constDone && fullReached && isFull ? t("{c}がむすばれました", { c: t(C.name) }) : t(C.name)}${v.count === 1 && v.prev > 0 ? t("（先月は{n}夜、月を見上げました）", { n: v.prev }) : ""}</div>`;
-  // 仕組みの説明はその月の最初の3晩だけ（星が増えるのを何度か見れば体で分かるため。
-  // 毎晩出すと文字が多くなりすぎる。月が変わるとまたそっと復習される。2026-09-14 Yukiさん了承）
+  // 星が増える仕組みは、この画面を開いてもらう一番の理由なので**毎晩・大きく**出す
+  // （2026-10-03 Yukiさん「大々的にしておかないと、ここを開く人がいなくなる」。
+  //  それまでは月の最初の3晩だけ小さく出していた）
   const below = `
-    ${isFull ? "" : `<div>${t("満月まで あと{n}日", { n: Math.round(toFull) })}</div>`}
-    ${v.count <= 3 ? `<div>${t("開いた夜の分だけ星が灯っていきます")}</div>` : ""}`;
+    ${isFull ? "" : `<div class="moon-till">${t("満月まで あと{n}日", { n: Math.round(toFull) })}</div>`}
+    <div class="moon-grow">${t("毎晩開くたびに星が灯っていきます。")}</div>`;
   const svg = `
     <svg viewBox="-160 -70 320 140" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="${t("今夜の月と星座")}">
       <defs>
@@ -6196,23 +6194,19 @@ function moonTonight() {
   return { svg, inSky, below };
 }
 
-function renderGratitude(justSaved) {
-  gratView = "main";
+// おやすみの画面：今夜の月と星、そして通知の設定だけ。
+// 2026-10-03 Yukiさん判断：「ありがとう」を書いて残すのはやめた（残したいことは日記に書けばよい）。
+// ここは“書く場所”ではなく、ありがとうを思い出して眠るための場所
+function renderGratitude() {
   setBackLabel("sleep-back", false);
-  setOneScreen("screen-sleep", false); // 通知カードがあるためスクロール可。ただし「のこす」までは1画面に収まるよう上部を圧縮
-  const memos = loadGratitude();
+  setOneScreen("screen-sleep", false); // 通知カードがあるためスクロール可
   const moon = moonTonight();
   document.getElementById("sleep-wrap").innerHTML = `
     <div class="sleep-lead grat-lead">${t("「ありがとう」を思い出して眠りにつく時間です")}</div>
     <div class="moon-sky">${moon.svg}${moon.inSky}</div>
     <div class="moon-under">${moon.below}</div>
-    ${justSaved ? `<div class="album-saved">✓ ${t("残しました。おやすみなさい。")}</div>` : ""}
-    <div class="field meal-line" style="margin-bottom:12px;">
-      <textarea id="grat-input" class="grow-input" rows="2" placeholder="${t("例：電車に忘れた帽子が返ってきた")}"></textarea>
-      ${micMini("grat-input", "grat-save", "text")}
-    </div>
-    <button type="button" class="btn btn-green btn-xl" id="grat-save">${t("保存")}</button>
-    <button type="button" class="btn btn-secondary btn-xl" id="grat-list" style="margin-top:10px;">${t("残したありがとうを見る（{n}）", { n: memos.length })}</button>
+    <p class="grat-think">${t("今日の小さな「ありがとう」を、ひとつ思い浮かべてみてください。")}</p>
+    <p class="grat-think-sub">${t("書きとめておきたいことは、日記に残せます。")}</p>
     <div class="card grat-notify">
       <div class="settings-label">${t("おやすみの通知")}</div>
       <div class="seg-group" id="grat-onoff">
@@ -6225,16 +6219,6 @@ function renderGratitude(justSaved) {
         <span class="grat-time-label">${t("に、そっとお知らせします")}</span>
       </div>
     </div>`;
-  document.getElementById("grat-save").addEventListener("click", () => {
-    const text = document.getElementById("grat-input").value.trim();
-    if (!text) return;
-    const a = loadGratitude();
-    a.unshift({ date: todayStr(), text });
-    saveGratitude(a);
-    buzzSave();
-    renderGratitude(true);
-  });
-  document.getElementById("grat-list").addEventListener("click", renderGratitudeList);
   document.querySelectorAll("#grat-onoff .seg").forEach(b => b.addEventListener("click", () => {
     const on = b.dataset.v === "1";
     if (on) requestNotifyPermission();
@@ -6248,121 +6232,38 @@ function renderGratitude(justSaved) {
   if (timeEl) timeEl.addEventListener("change", e => {
     notify.time = e.target.value || "21:30"; store.set("mn_notify", notify); scheduleGratNotify();
   });
-  wireMics(document.getElementById("sleep-wrap")); // 話して書く
-  wireGrowInputs(document.getElementById("sleep-wrap")); // 書くほど下にのびる
-  // 自動でキーボードは出さない（夜の画面が隠れないように）
   if (notify.on) { requestNotifyPermission(); scheduleGratNotify(); } // デフォルトON：開いたら許可を求めて予約
 }
 
-// 残したありがとうの一覧
-let gratListShown = 30; // 30件ずつ表示（何年ぶんでも軽い）
-// 残したありがとうを書き直す（2026-09-28。メモリーアルバムと同じ作りにそろえる）
-function renderGratitudeEdit(idx) {
-  gratView = "edit";
-  setBackLabel("sleep-back", true);
-  const a = loadGratitude();
-  const m = a[idx];
-  if (!m) { renderGratitudeList(); return; }
-  document.getElementById("sleep-wrap").innerHTML = `
-    <div class="album-list-head">${t("ありがとうを書き直す")}</div>
-    <p class="album-cap">${formatJP(m.date)}</p>
-    <div class="field meal-line" style="margin-top:12px;">
-      <textarea id="grat-edit-text" class="grow-input" rows="3">${esc(m.text)}</textarea>
-      ${micMini("grat-edit-text", "grat-edit-save", "text")}
-    </div>
-    <button type="button" class="btn btn-green btn-xl" id="grat-edit-save">${t("保存")}</button>
-    <button type="button" class="btn btn-secondary btn-xl" id="grat-edit-cancel" style="margin-top:10px;">${t("やめる")}</button>`;
-  wireMics(document.getElementById("sleep-wrap"));
-  wireGrowInputs(document.getElementById("sleep-wrap"));
-  document.getElementById("grat-edit-save").addEventListener("click", () => {
-    const list = loadGratitude();
-    if (!list[idx]) { renderGratitudeList(); return; }
-    const v = document.getElementById("grat-edit-text").value.trim();
-    if (!v) { renderGratitudeList(); return; } // 空にしたら、消さずにそのまま戻す
-    list[idx].text = v;
-    saveGratitude(list);
-    buzzSave();
-    renderGratitudeList();
-  });
-  document.getElementById("grat-edit-cancel").addEventListener("click", renderGratitudeList);
-}
-
-function renderGratitudeList(keep) {
-  if (keep !== true) gratListShown = 30;
-  gratView = "list";
-  setBackLabel("sleep-back", true);
-  setOneScreen("screen-sleep", false);
-  const a = loadGratitude();
-  const shown = a.slice(0, gratListShown);
-  const rest = a.length - shown.length;
-  const items = a.length === 0
-    ? `<p class="album-note" style="margin-top:20px;">${t("まだありません。")}<br>${t("今日の「ありがとう」から始めませんか。")}</p>`
-    : shown.map((m, idx) => `
-        <div class="album-item album-item-tappable" data-grat-open="${idx}">
-          <div class="album-item-body">
-            <div class="album-item-note">${esc(m.text)}</div>
-            <div class="album-item-date">${formatJP(m.date)}</div>
-          </div>
-          <button type="button" class="album-edit" data-grat-edit="${idx}" aria-label="${t("書き直す")}">${balloonIconSvg("pencil")}</button>
-          <button type="button" class="album-del" data-idx="${idx}" aria-label="${t("消す")}">${balloonIconSvg("trash")}</button>
-        </div>`).join("");
-  document.getElementById("sleep-wrap").innerHTML = `
-    <div class="album-list-head">${t("残したありがとう（{n}）", { n: a.length })}</div>
-    <p class="album-cap">${t("毎晩ひとつ、感謝が積もっていきます。")}</p>
-    ${items}
-    ${rest > 0 ? `<button type="button" class="btn btn-secondary btn-xl" id="grat-more" style="margin-top:10px;">${t("さらに{a}件見る（あと{b}件）", { a: Math.min(30, rest), b: rest })}</button>` : ""}`;
-  const more = document.getElementById("grat-more");
-  if (more) more.addEventListener("click", () => { gratListShown += 30; renderGratitudeList(true); });
-  // カードをタップしたら書き直せる（メモリーアルバムと同じ。2026-09-28 Yukiさん指摘）
-  document.querySelectorAll("#sleep-wrap [data-grat-open]").forEach(el =>
-    el.addEventListener("click", e => {
-      if (e.target.closest(".album-del, .confirm-inline")) return;
-      renderGratitudeEdit(Number(el.dataset.gratOpen));
-    }));
-  document.querySelectorAll(".album-del").forEach(btn => {
-    btn.addEventListener("click", () => {
-      const idx = Number(btn.dataset.idx);
-      const wrap = document.createElement("span");
-      wrap.className = "confirm-inline";
-      wrap.innerHTML = `<button type="button" class="confirm-yes">${t("消す")}</button>
-        <button type="button" class="confirm-no">${t("やめる")}</button>`;
-      btn.replaceWith(wrap);
-      wrap.querySelector(".confirm-no").addEventListener("click", () => renderGratitudeList(true));
-      wrap.querySelector(".confirm-yes").addEventListener("click", () => {
-        const list = loadGratitude(); list.splice(idx, 1); saveGratitude(list); renderGratitudeList(true);
-      });
-    });
-  });
-  document.getElementById("grat-back-main")?.addEventListener("click", () => renderGratitude(false));
-}
-
-// 毎晩の通知文言（30種）。出すたびに順番に切り替わる。※「〜しましょう」は使わない
+// 毎晩の通知文言。出すたびに順番に切り替わる。※「〜しましょう」は使わない
+// 2026-10-03：「書く・残す・記録する」と誘う言い方をやめ、**思い出す**言い方にそろえた
+// （ありがとうを書いて残す機能をやめ、この画面は思い出して眠るための場所になったため）
 const NIGHT_NOTIFY_MSGS = [
-  "今日の「ありがとう」を、記憶しますか？",
-  "うれしかったこと、ひとつ残しておく？",
-  "今日の痛みを、10段階で記録しとく？",
-  "愚痴も、ここに書きたいかな？",
+  "今日の「ありがとう」、思い出せますか？",
+  "うれしかったこと、ひとつ思い出せる？",
+  "今日の痛み、少しは和らいだかな？",
+  "言えなかったこと、胸にしまっていない？",
   "今日食べたもの、覚えてるかな？",
-  "今日行った場所、書いておく？",
+  "今日行った場所、思い出せるかな？",
   "からだの調子、10段階でいうと今日は？",
   "今日の空、どんな色だった？",
-  "明日やりたいこと、ひとつだけ書いておく？",
+  "明日やりたいこと、ひとつ思い浮かぶ？",
   "今日の「おつかれさま」、自分にかけてあげた？",
-  "だれかに言いたかったこと、ここに書いとく？",
+  "だれかに言いたかったこと、あった？",
   "今日の気分、ひとことで言うと？",
-  "心にひっかかったこと、書いて手放す？",
+  "心にひっかかったこと、そっと手放せそう？",
   "だれかの優しさ、今日はあったかな？",
   "今日の痛み、どこかにあった？",
   "今日いちばんホッとした時間は？",
   "今日の自分に、はなまるをあげる？",
   "明日の楽しみ、ひとつ思い浮かぶ？",
-  "今日の失敗も、書いておくと楽になるかも。",
+  "今日の失敗は、もう手放していいかも。",
   "だれかに「ありがとう」、言えた一日だった？",
   "今日聞いた音や声、覚えてる？",
   "がんばった自分を、ひとつほめておく？",
   "今日の天気、どうだったかな？",
   "会いたい人を、思い浮かべてみる？",
-  "おやすみ前に、今日をひとつだけ記憶しとく？",
+  "おやすみ前に、今日をひとつだけ思い出してみる？",
 ];
 // 満月の夜だけの特別な通知（26個目）。この夜はローテーションを進めない
 const FULLMOON_NOTIFY_MSG = "今宵は満月です。あなたの夜空の星も、たまってきましたか？";
@@ -7172,15 +7073,7 @@ function wireEvents() {
       goHome();
     }
   });
-  document.getElementById("sleep-back").addEventListener("click", () => {
-    if (gratView === "edit") { renderGratitudeList(); return; } // 書き直しからは一覧へ
-    if (gratView === "list") {
-      // 日別ページから来ていたら、そこへ帰る（来た道を戻る）
-      if (gratReturnTo) { const r = gratReturnTo; gratReturnTo = null; goBackTo(r); return; }
-      renderGratitude(false); return;
-    }
-    goHome();
-  });
+  document.getElementById("sleep-back").addEventListener("click", goHome); // 1層だけの画面になった（2026-10-03）
   scheduleGratNotify(); // 起動時に通知を予約（設定オンなら。アプリ版は30日ぶんOSに予約し直す）
   // アプリ版：おやすみ通知をタップしたら、おやすみの記憶画面を開く
   const SLN0 = nativeLocalNotify();
