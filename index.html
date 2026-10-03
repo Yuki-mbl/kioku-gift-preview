@@ -2570,6 +2570,16 @@ html[data-theme="dark"] .brand-line { font-weight: 700; }
 /* Siriの手順（iPhoneの設定にだけ出る） */
 .siri-steps { margin: 12px 0 0 1.2em; }
 .siri-steps li { font-size: min(1.02rem, 4.1vw); line-height: 1.85; margin-bottom: 10px; }
+/* 出来合いのショートカットを受け取るボタンと、その下の「自分で作る」（2026-10-03） */
+.siri-get {
+  display: block; width: 100%; margin-top: 12px;
+  text-align: center; text-decoration: none;
+}
+.siri-manual-toggle {
+  display: block; margin: 14px auto 0; padding: 6px 2px;
+  background: none; border: none; color: var(--muted);
+  font-size: min(.95rem, 3.8vw); text-decoration: underline; cursor: pointer;
+}
 .siri-url {
   display: inline-block; margin-top: 4px; padding: 6px 10px;
   background: var(--accent-soft); border-radius: 8px;
@@ -2868,14 +2878,23 @@ html[data-theme="dark"] .brand-line { font-weight: 700; }
         </div>
         <div class="card" id="siri-card" hidden>
           <div class="settings-label" data-t>声でメモを残す（Siri）</div>
-          <p class="settings-hint" style="margin-top:0;" data-t>「ヘイ Siri、メモ」と話しかけるだけで、思いついたことをこのアプリに残せます。はじめに一度だけ、下の手順で用意してください。</p>
-          <ol class="siri-steps">
+          <p class="settings-hint" style="margin-top:0;" data-t>「ヘイ Siri、ひらめき」と話しかけるだけで、思いついたことをこのアプリに残せます。はじめに一度だけ、用意してください。</p>
+          <div id="siri-easy" hidden>
+            <a class="btn btn-primary siri-get" id="siri-get" target="_blank" rel="noopener" data-t>ショートカットを受け取る</a>
+            <ol class="siri-steps">
+              <li data-t>上のボタンを押して、出てきた画面をいちばん下まで動かす</li>
+              <li data-t>「ショートカットを追加」を押す</li>
+              <li data-t>これで完了。「ヘイ Siri、ひらめき」で使えます</li>
+            </ol>
+            <button type="button" class="siri-manual-toggle" id="siri-manual-toggle" data-t>うまくいかないときは、自分で作る</button>
+          </div>
+          <ol class="siri-steps" id="siri-manual">
             <li data-t>iPhoneの「ショートカット」アプリを開いて、右上の「＋」</li>
             <li data-t>「アクションを追加」→ さがす欄に「音声入力」と入れて、<b>「テキストを音声入力」</b>を選ぶ</li>
             <li data-t>もう一度「アクションを追加」→「URLエンコード」と入れて、<b>「テキストをURLエンコード」</b>を選ぶ</li>
             <li data-t>もう一度「アクションを追加」→「URL」と入れて、<b>「URLを開く」</b>を選ぶ</li>
             <li><span data-t>URLの欄に次を貼り付け、そのうしろに「エンコードされたテキスト」を差し込む</span><br><code class="siri-url">kiokugift://memo?text=</code></li>
-            <li data-t>上の名前を「メモ」にして完了。以降は「ヘイ Siri、メモ」で使えます</li>
+            <li data-t>上の名前を「ひらめき」にして完了。以降は「ヘイ Siri、ひらめき」で使えます</li>
           </ol>
         </div>
         <div class="card" id="iap-card">
@@ -3200,6 +3219,11 @@ window.addEventListener("focus", () => syncQuickMemoNotify());
 // iPhoneには「通知欄に居座る入口」が無いので、代わりに声から入れられるようにする。
 // ショートカットが kiokugift://memo?text=… を開き、その文をここで受け取って「一瞬のひらめき」に入れる。
 // ※Androidでも同じ入口が使えるが、あちらは常駐通知があるので出番は少ない
+//
+// 出来合いのショートカットを配るためのiCloudリンク（2026-10-03）。
+// ショートカットアプリで作ったものを「共有→iCloudリンクをコピー」して、ここに貼る。
+// 空のあいだは、設定には今まで通り「自分で作る手順」だけが出る。
+const SIRI_SHORTCUT_URL = "";
 function appPlugin() {
   return (window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.App) || null;
 }
@@ -5205,11 +5229,25 @@ function openDayField(ds, label, from) {
 // =========================================================
 // 設定
 // =========================================================
+// 「声でメモ（Siri）」のカード。出来合いのリンクがあるときは受け取りボタン、
+// 無いときは今まで通りの「自分で作る手順」を出す（iPhoneのときだけ）。
+function renderSiriCard() {
+  const siri = document.getElementById("siri-card");
+  if (!siri) return;
+  siri.hidden = !isIOSApp();
+  const easy = document.getElementById("siri-easy");
+  const manual = document.getElementById("siri-manual");
+  const link = document.getElementById("siri-get");
+  const has = !!SIRI_SHORTCUT_URL;
+  if (link && has) link.href = SIRI_SHORTCUT_URL;
+  if (easy) easy.hidden = !has;
+  if (manual) manual.hidden = has; // 受け取りボタンがあるときは、手順は「自分で作る」を押したときだけ
+}
+
 function openSettings() {
   renderIapCard();
   // 「声でメモ（Siri）」の手順は iPhone のときだけ（Androidは常駐通知があるので不要）
-  const siri = document.getElementById("siri-card");
-  if (siri) siri.hidden = !isIOSApp();
+  renderSiriCard();
   document.querySelectorAll(".theme-opt").forEach(btn => {
     btn.classList.toggle("selected", btn.dataset.themeOpt === (settings.theme || "pastel"));
   });
@@ -7151,6 +7189,11 @@ function wireEvents() {
   document.getElementById("tab-cal").addEventListener("click", () => { saveFlowDraftIfAny(); openCalendar(); });
 
   // 設定「すぐ書けるメモ通知」（アプリ版のみ表示）
+  const siriManualToggle = document.getElementById("siri-manual-toggle");
+  if (siriManualToggle) siriManualToggle.addEventListener("click", () => {
+    const m = document.getElementById("siri-manual");
+    if (m) m.hidden = !m.hidden;
+  });
   document.querySelectorAll("#set-quickmemo .seg").forEach(b => b.addEventListener("click", () => {
     settings.quickMemoNotify = b.dataset.value === "1";
     store.set("mn_settings", settings);
