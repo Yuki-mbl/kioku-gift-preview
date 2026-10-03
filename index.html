@@ -6679,7 +6679,12 @@ function renderShoppingRecall() {
   setOneScreen("screen-shopping", false); // カードを開くと縦に伸びるためスクロール可にする
   const s = loadShopping();
   const cats = SHOP_CATS.filter(c => (s[c.key] || "").trim());
-  const cards = cats.map(c => `
+  // 書いたのが1か所だけなら、カードと「ぜんぶ答え合わせ」が同じ働きになって紛らわしい
+  // （2026-10-03 Yukiさん指摘「まとめてにしか記入してない人には、ぜんぶ答え合わせのみ」）。
+  // そのときはカードを出さず、大きいボタン1つにする。
+  // 開いたシートの中には区分の見出しが出るので、何の区分かは分からなくならない
+  const onlyOne = cats.length === 1;
+  const cards = onlyOne ? "" : cats.map(c => `
     <button type="button" class="shop-reveal" data-key="${c.key}">
       <div class="shop-head">
         <span class="shop-cat">${shopIconHtml(c)}${t(c.short || c.name)}</span>
@@ -6688,7 +6693,7 @@ function renderShoppingRecall() {
     </button>`).join("");
   document.getElementById("shopping-wrap").innerHTML = `
     <p class="shop-lead"><span class="lead-ico">${balloonIconSvg("shopping")}</span>${t("思い出しながら、お買い物")}</p>
-    <p class="shop-note">${t("先に思い出してから、タップで答え合わせ。")}</p>
+    <p class="shop-note"><span class="nowrap">${t("先に思い出してから")}</span><span class="nowrap">${t("タップで答え合わせ。")}</span></p>
     ${shopDoneBarHtml()}
     <button type="button" class="btn btn-green btn-xl" id="shop-openall">${t("ぜんぶ答え合わせ")}</button>
     ${cards}
