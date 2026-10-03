@@ -6128,8 +6128,8 @@ function moonExtraStarPos(i) {
   let x = 0, y = 0;
   for (let j = 0; j < 24; j++) {
     x = -150 + (((i + 1) * 97 + j * 53) % 298);
-    y = -60 + (((i + 1) * 61 + j * 37) % 118);
-    if (Math.hypot(x - 85, y) > 58) break; // 月と光暈を避ける
+    y = -90 + (((i + 1) * 61 + j * 37) % 178);
+    if (Math.hypot(x - 70, y) > 80) break; // 月と光暈を避ける（2026-10-03 月を大きくしたぶん広げた）
   }
   return [x, y];
 }
@@ -6148,7 +6148,7 @@ function moonTonight() {
   const constDone = v.count >= C.stars.length;
   const twinkle = (i) => `style="animation-duration:${(2.6 + (i * 0.7) % 2.6).toFixed(1)}s; animation-delay:-${((i * 0.53) % 3).toFixed(1)}s"`;
   // うっすら固定の星（月にかからない位置）
-  const baseStars = [[-150, -58, 1.1], [8, -60, 1], [148, 52, 1], [24, 56, 1.1]]
+  const baseStars = [[-150, -88, 1.1], [8, -92, 1], [148, 84, 1], [24, 88, 1.1]]
     .map(([x, y, s], i) => `<circle class="st-base" cx="${x}" cy="${y}" r="${s}" fill="#fff" style="animation-duration:${(5 + i * 0.8).toFixed(1)}s; animation-delay:-${(i * 1.3).toFixed(1)}s"/>`).join("");
   // 星座の線は満月の夜にむすばれる（それまでは星が集まるだけ。満月後は月末まで結ばれたまま）
   const fullReached = age >= (MOON_SYNODIC / 2 - 0.75);
@@ -6183,7 +6183,7 @@ function moonTonight() {
     ${isFull ? "" : `<div class="moon-till">${t("満月まで あと{n}日", { n: Math.round(toFull) })}</div>`}
     <div class="moon-grow">${t("毎晩開くたびに星が灯っていきます")}</div>`;
   const svg = `
-    <svg viewBox="-160 -70 320 140" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="${t("今夜の月と星座")}">
+    <svg viewBox="-160 -100 320 200" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="${t("今夜の月と星座")}">
       <defs>
         <radialGradient id="moon-surface" cx="38%" cy="35%" r="80%">
           <stop offset="0%" stop-color="#fffbe9"/><stop offset="55%" stop-color="#f5ead0"/><stop offset="100%" stop-color="#ddcda3"/>
@@ -6195,8 +6195,11 @@ function moonTonight() {
         <filter id="moon-soft"><feGaussianBlur stdDeviation="1.1"/></filter>
       </defs>
       ${stars}
-      <!-- 月は右側の空に。左側が今月の星座の空 -->
-      <g transform="translate(85 0)">
+      <!-- 月は右側の空に。左側が今月の星座の空。
+           2026-10-03 Yukiさん「このページのメインだから、月と星を少し大きく」：
+           空を縦に広げ（140→200）、月のかたまりごと1.32倍にした。
+           月の模様もクリップも同じ組の中なので、まとめて大きくなる -->
+      <g transform="translate(70 0) scale(1.32)">
         <circle r="66" fill="url(#moon-glow)"/>
         <circle r="44" fill="#3a4263" opacity=".55"/>
         <g clip-path="url(#moon-lit)">
@@ -6231,11 +6234,10 @@ function renderGratitude() {
   setOneScreen("screen-sleep", false); // 通知カードがあるためスクロール可
   const moon = moonTonight();
   document.getElementById("sleep-wrap").innerHTML = `
-    <div class="sleep-lead grat-lead">${t("「ありがとう」を思い出して眠りにつく時間です")}</div>
     <div class="moon-sky">${moon.svg}${moon.inSky}</div>
     <div class="moon-under">${moon.below}</div>
     <p class="grat-think"><span class="nowrap">${t("今日の小さな「ありがとう」を")}</span><span class="nowrap">${t("ひとつ思い浮かべてみてください")}</span></p>
-    <p class="grat-think-sub">${t("書きとめておきたいことは日記に残せます")}</p>
+    <p class="grat-think-sub">${t("書きとめておきたいことは日記へ")}</p>
     <div class="card grat-notify">
       <div class="settings-label">${t("おやすみの通知")}</div>
       <div class="seg-group" id="grat-onoff">
