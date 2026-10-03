@@ -5181,6 +5181,7 @@ function goBackTo(ret) {
   // 「うつす」で来たときは、ひらめきの一覧へ戻す。
   // 下の画面はホームに戻しておく（一覧を閉じたときに、さっきの記録画面が残っていると迷うため）
   if (ret.screen === "memo") { goHome(); openMemo(); return; }
+  if (ret.screen === "sleep") { openSleep(); return; } // おやすみの「日記へ →」から来た（2026-10-03）
   if (ret.screen === "outfitday") { renderOutfitDay(ret.ds); showScreen("screen-outfit"); return; }
   openDayDetail(ret.ds);
 }
@@ -5261,15 +5262,17 @@ function clearLockFails() {
 // 日記の入口。ロックは「読める中身があるとき」だけ（2026-09-15 Yukiさん指摘）。
 // まっさらな今日の欄を開くだけなら過去の日記は見えないので、書くたびに4桁を求めない。
 // すでに今日の分を書いてある／前の日を開くときは、renderStep の中でパスコードを求める
-function openDiary(dateStr) {
+// ret＝帰る先。下タブの「日記」から開いたときは無し（＝戻るは出ない。ホームへは下タブが担う）。
+// おやすみの「日記へ →」から来たときは { screen: "sleep" } を渡す（2026-10-03 Yukiさん指摘）
+function openDiary(dateStr, ret) {
   const ds = dateStr || todayStr();
   // ※ここで見る。startDiary に任せると、中で画面を出し直してロックが消えてしまう
   if (settings.diaryPass && !diaryUnlocked && ((entries[ds] || {}).diary || "").trim()) {
-    pendingUnlock = { type: "diary", ds };
+    pendingUnlock = { type: "diary", ds, ret }; // 解除したあとも帰り道を覚えておく
     showLock("diary");
     return;
   }
-  startDiary(ds);
+  startDiary(ds, ret);
 }
 
 function renderLockDots() {
@@ -5307,7 +5310,7 @@ function onKeypad(k) {
           lastSearchQ = null; // 同じ言葉でも作り直す
           runSearch(document.getElementById("search-input").value);
         }
-        else startDiary((act && act.ds) || todayStr());
+        else startDiary((act && act.ds) || todayStr(), act && act.ret);
       } else {
         applyStart();
       }
@@ -6269,7 +6272,7 @@ function renderGratitude() {
     </div>`;
   // 「書きとめておきたいことは日記へ →」から、その場で日記を開く（2026-10-03 Yukiさん案）。
   // 下のタブにも日記はあるが、言われたことをその場でできるほうが自然
-  document.getElementById("grat-diary").addEventListener("click", () => openDiary());
+  document.getElementById("grat-diary").addEventListener("click", () => openDiary(null, { screen: "sleep" }));
   document.querySelectorAll("#grat-onoff .seg").forEach(b => b.addEventListener("click", () => {
     const on = b.dataset.v === "1";
     if (on) requestNotifyPermission();
