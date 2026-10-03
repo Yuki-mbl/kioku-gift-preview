@@ -618,7 +618,23 @@ button { color: inherit; } /* 色未指定のボタンがブラウザ標準の�
   text-align: center; margin: clamp(6px, 1.4vh, 14px) 0 4px;
   font-size: min(1.18rem, 4.8vw); font-weight: 800; color: var(--text); line-height: 1.7;
 }
-.grat-think-sub { text-align: center; margin: 0 0 clamp(8px, 1.6vh, 16px); color: var(--muted); font-size: min(1rem, 4.1vw); line-height: 1.6; }
+/* ページの頭の短いあいさつ（2026-10-03 Yukiさん。長い見出しを消したぶんの7文字） */
+.sleep-greeting {
+  text-align: center; margin: 0 0 clamp(6px, 1.2vh, 12px);
+  font-size: min(1.22rem, 5.1vw); font-weight: 800; letter-spacing: .12em;
+  color: var(--accent-strong);
+}
+[data-theme="dark"] .sleep-greeting { color: var(--brass-strong-ed); }
+/* 「書きとめておきたいことは日記へ →」：押すとその場で日記が開く */
+.grat-to-diary {
+  display: block; margin: 0 auto clamp(6px, 1.4vh, 14px);
+  background: none; border: none; font-family: inherit;
+  color: var(--accent-strong); font-weight: 700;
+  font-size: min(1rem, 4.1vw); line-height: 1.6;
+  padding: 10px 14px; cursor: pointer; -webkit-tap-highlight-color: transparent;
+}
+.grat-to-diary .ar { font-size: 1.2em; line-height: 0; margin-left: 5px; vertical-align: -.08em; }
+.grat-to-diary:active { opacity: .6; }
 /* 「のこす」までが1画面に収まるよう、低い画面では上部をほどよく圧縮 */
 #screen-sleep .sleep-lead { font-size: clamp(1.05rem, 2.6vh, 1.25rem); margin-bottom: clamp(2px, .8vh, 8px); }
 /* おやすみ導入文：1行に収める（狭い画面では文字が画面幅に合わせて縮む） */
@@ -6234,10 +6250,11 @@ function renderGratitude() {
   setOneScreen("screen-sleep", false); // 通知カードがあるためスクロール可
   const moon = moonTonight();
   document.getElementById("sleep-wrap").innerHTML = `
+    <div class="sleep-greeting">${t("おやすみなさい")}</div>
     <div class="moon-sky">${moon.svg}${moon.inSky}</div>
     <div class="moon-under">${moon.below}</div>
     <p class="grat-think"><span class="nowrap">${t("今日の小さな「ありがとう」を")}</span><span class="nowrap">${t("ひとつ思い浮かべてみてください")}</span></p>
-    <p class="grat-think-sub">${t("書きとめておきたいことは日記へ")}</p>
+    <button type="button" class="grat-to-diary" id="grat-diary">${t("書きとめておきたいことは日記へ")}<span class="ar" aria-hidden="true">→</span></button>
     <div class="card grat-notify">
       <div class="settings-label">${t("おやすみの通知")}</div>
       <div class="seg-group" id="grat-onoff">
@@ -6250,6 +6267,9 @@ function renderGratitude() {
         <span class="grat-time-label">${t("に、そっとお知らせします")}</span>
       </div>
     </div>`;
+  // 「書きとめておきたいことは日記へ →」から、その場で日記を開く（2026-10-03 Yukiさん案）。
+  // 下のタブにも日記はあるが、言われたことをその場でできるほうが自然
+  document.getElementById("grat-diary").addEventListener("click", () => openDiary());
   document.querySelectorAll("#grat-onoff .seg").forEach(b => b.addEventListener("click", () => {
     const on = b.dataset.v === "1";
     if (on) requestNotifyPermission();
