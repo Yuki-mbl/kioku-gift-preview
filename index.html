@@ -3069,6 +3069,26 @@ function applySettings() {
 
 function saveEntries() { store.set("mn_entries", entries); }
 
+// ---------- 例（「例：トーストと卵」）は、慣れたら消す ----------
+// 2026-10-03 Yukiさん「毎日同じ例を見たくない。字って読んでしまうものなんです」。
+// 日数ではなく**その欄を使った回数**で数える（日数だと、服装を月1回しか開かない人は
+// 一度も見ないうちに消えてしまう）。3日ぶん使えば、もうその欄のことは覚えている。
+// 設定のオン/オフは増やさない（設定が多いほうが迷う）
+const PH_HIDE_AFTER = 3;
+function phUsed() { return store.get("mn_ph_used", {}); }
+// その欄に書いた日を1日1回だけ数える
+function notePhUse(id) {
+  if (!id) return;
+  const o = phUsed();
+  const r = o[id] || { n: 0, last: "" };
+  const d = todayStr();
+  if (r.last === d || r.n >= PH_HIDE_AFTER) return;
+  r.n++; r.last = d; o[id] = r;
+  store.set("mn_ph_used", o);
+}
+// 例を出すかどうか。使い慣れた欄では空文字＝例なし
+function phEx(id, text) { return (phUsed()[id] || {}).n >= PH_HIDE_AFTER ? "" : text; }
+
 // ありがとうの記録はやめた（2026-10-03 Yukiさん判断「残したければ日記に書けばいい」）。
 // 端末に残っている古いデータは、次に開いたときに消す（中身は使わない）
 (function dropOldGratitude() {
@@ -3338,6 +3358,12 @@ function watchPageFixed() {
   window.addEventListener("resize", schedulePageFixed);       // キーボードの開閉・画面の回転
   window.addEventListener("orientationchange", schedulePageFixed);
   document.addEventListener("input", schedulePageFixed, true); // 書くほどのびる欄
+  // その欄に書いたら「使った」と数える（例を消す判断に使う。2026-10-03）
+  document.addEventListener("input", e => {
+    const el = e.target;
+    if (el && el.id && (el.tagName === "TEXTAREA" || el.tagName === "INPUT")
+        && String(el.value || "").trim()) notePhUse(el.id);
+  }, true);
   // 写真が読み込まれて中身が伸びたとき（2026-10-02）。
   // いったん「収まる」と判断して錠をかけると、body は高さ100%・はみ出し隠しになるので、
   // そのあと中身が伸びても下の見張り（ResizeObserver）には届かない＝錠がかかったままだった。
@@ -3794,7 +3820,7 @@ function renderMemoScreen() {
   const writePart = full
     ? `<p class="memo-note">${t("メモは{n}個まで。", { n: MEMO_MAX })}<br>${t("できたものをチェックで消すと、また書けます")}</p>`
     : `<div class="memo-line">
-        <textarea id="memo-input" class="grow-input" rows="1" placeholder="${t("例：お風呂掃除　庭に水やり")}"></textarea>
+        <textarea id="memo-input" class="grow-input" rows="1" placeholder="${phEx("memo-input", t("例：お風呂掃除　庭に水やり"))}"></textarea>
         ${micMini("memo-input", "memo-save")}
       </div>
       <button type="button" class="btn btn-primary btn-xl memo-add" id="memo-save">${t("保存")}</button>`;
@@ -3939,20 +3965,20 @@ function eatoutFields(e) {
   return `
     <div class="field"><span class="field-label">${t("場所（お店の名前・友人宅など）")}</span>
       <div class="meal-line">
-        <textarea id="eo-place" rows="1" class="grow-input" placeholder="${t("例：駅前の蕎麦屋")}">${esc(s.place)}</textarea>
+        <textarea id="eo-place" rows="1" class="grow-input" placeholder="${phEx("eo-place", t("例：駅前の蕎麦屋"))}">${esc(s.place)}</textarea>
         ${micMini("eo-place", "flow-skip")}
       </div>
     </div>
     <div class="field"><span class="field-label">${t("食べたもの")}</span>
       <div class="meal-line">
-        <textarea id="eo-food" rows="1" class="grow-input" placeholder="${t("例：天ぷらそば")}">${esc(s.food)}</textarea>
+        <textarea id="eo-food" rows="1" class="grow-input" placeholder="${phEx("eo-food", t("例：天ぷらそば"))}">${esc(s.food)}</textarea>
         <span class="meal-photo-slot" data-slot="eatout"></span>
         ${micMini("eo-food", "flow-skip")}
       </div>
     </div>
     <div class="field"><span class="field-label">${t("誰と")}</span>
       <div class="meal-line">
-        <textarea id="eo-with" rows="1" class="grow-input" placeholder="${t("例：田中さんと")}">${esc(s.with)}</textarea>
+        <textarea id="eo-with" rows="1" class="grow-input" placeholder="${phEx("eo-with", t("例：田中さんと"))}">${esc(s.with)}</textarea>
         ${micMini("eo-with", "flow-skip")}
       </div>
     </div>
@@ -3982,7 +4008,7 @@ const STEP_DEFS = {
       if (mode === "best") {
         return `<div class="field"><span class="field-label">${t("記憶にのこしたい")}</span>
           <div class="meal-line">
-            <textarea id="meal-best" rows="1" class="grow-input" placeholder="${t("例：史上最高のカレー")}">${v("best")}</textarea>
+            <textarea id="meal-best" rows="1" class="grow-input" placeholder="${phEx("meal-best", t("例：史上最高のカレー"))}">${v("best")}</textarea>
             ${micMini("meal-best", "flow-skip")}
           </div>
         </div>`;
@@ -3991,7 +4017,7 @@ const STEP_DEFS = {
       const row = (slot, label, id, ph, val) => `
         <div class="field"><span class="field-label">${label}</span>
           <div class="meal-line">
-            <textarea id="${id}" rows="1" class="grow-input" placeholder="${ph}">${val}</textarea>
+            <textarea id="${id}" rows="1" class="grow-input" placeholder="${phEx(id, ph)}">${val}</textarea>
             <span class="meal-photo-slot" data-slot="${slot}"></span>
             ${micMini(id, "flow-skip")}
           </div>
@@ -5519,7 +5545,7 @@ function renderOutfitMain() {
       <div id="outfit-today-body"></div>
       <input type="file" id="outfit-file" accept="image/*" style="display:none;">
       <div class="meal-line" style="margin-top:10px;">
-        <textarea id="outfit-note" class="outfit-note-input" rows="1" placeholder="${t("例：紺スーツ　田中さん")}">${esc(today?.note || "")}</textarea>
+        <textarea id="outfit-note" class="outfit-note-input" rows="1" placeholder="${phEx("outfit-note", t("例：紺スーツ　田中さん"))}">${esc(today?.note || "")}</textarea>
         ${micMini("outfit-note", "outfit-save")}
       </div>
       <div class="outfit-btn-row">
@@ -5645,7 +5671,7 @@ function renderOutfitDay(ds) {
       <button type="button" class="btn ${o.photo ? "btn-secondary" : "btn-primary"} btn-xl btn-shrink" id="oday-pick"><span class="btn-ico btn-ico-big">${balloonIconSvg("camera")}</span>${o.photo ? t("写真を入れ替える") : t("この日の服の写真")}</button>
       <input type="file" id="oday-file-pick" accept="image/*" style="display:none;">
       <div class="meal-line" style="margin-top:12px;">
-        <textarea id="oday-note" class="outfit-note-input" rows="1" placeholder="${t("例：紺のセーター")}">${esc(o.note || "")}</textarea>
+        <textarea id="oday-note" class="outfit-note-input" rows="1" placeholder="${phEx("oday-note", t("例：紺のセーター"))}">${esc(o.note || "")}</textarea>
         ${micMini("oday-note")}
       </div>
     </div>
@@ -5806,7 +5832,7 @@ function renderAlbumPhotoView() {
     ${isReal ? "" : `<p class="album-cap"><span class="nowrap">${t("（本番アプリでは、")}</span><span class="nowrap">${t("あなたのアルバムから1枚出ます）")}</span></p>`}
     <button type="button" class="btn btn-secondary btn-xl" id="album-skip">${t("思い出せました（ホームへ）")}</button>
     <div class="album-q q-soft">${t("「メモリーアルバム」に残す")}</div>
-    <div class="field meal-line"><textarea id="album-text" class="grow-input" rows="2" placeholder="${t("例：ゆき撮影")}"></textarea>${micMini("album-text", "album-keep", "text")}</div>
+    <div class="field meal-line"><textarea id="album-text" class="grow-input" rows="2" placeholder="${phEx("album-text", t("例：ゆき撮影"))}"></textarea>${micMini("album-text", "album-keep", "text")}</div>
     <p class="album-need" id="album-need" hidden>${t("ひと言そえると残せます")}</p>
     <button type="button" class="btn btn-primary btn-xl" id="album-keep">${t("保存")}</button>
     <button type="button" class="btn btn-secondary btn-xl" id="album-list" style="margin-top:10px;">${t("「メモリーアルバム」を見る（{n}）", { n: memos.length })}</button>`;
@@ -6645,7 +6671,7 @@ function renderShoppingHub() {
     <div class="shop-edit-card shop-edit-${c.key}">
       <div class="shop-cat">${shopIconHtml(c)}${t(c.name)}</div>
       <div class="meal-line">
-        <textarea class="shop-edit-input grow-input" id="shop-${c.key}" data-key="${c.key}" rows="2" placeholder="${c.ph ? t(c.ph) : ""}">${esc(s[c.key] || "")}</textarea>
+        <textarea class="shop-edit-input grow-input" id="shop-${c.key}" data-key="${c.key}" rows="2" placeholder="${c.ph ? phEx("shop-" + c.key, t(c.ph)) : ""}">${esc(s[c.key] || "")}</textarea>
         ${micMini("shop-" + c.key, "shop-hide")}
       </div>
     </div>`);
