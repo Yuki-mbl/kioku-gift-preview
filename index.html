@@ -278,7 +278,10 @@ input:focus, textarea:focus, select:focus {
   box-shadow: 0 0 0 3px var(--accent-soft);
 }
 textarea { resize: vertical; min-height: 110px; }
-::placeholder { color: var(--muted); opacity: .9; }
+/* 「例：…」は“書いた文字”ほど大きくなくてよい。少し小さくして1行に収める
+   （2026-10-03 Yukiさん指摘：SEで例が切れていた。文字「特大」や320px幅だと
+   14欄のうち10欄があふれていた。書いた文字の大きさはそのまま） */
+::placeholder { color: var(--muted); opacity: .9; font-size: min(1.05rem, 4.2vw); }
 button { color: inherit; } /* 色未指定のボタンがブラウザ標準の黒文字にならないように（ダークテーマ対策） */
 
 .field { display: block; margin-bottom: 20px; }
@@ -3979,7 +3982,7 @@ const STEP_DEFS = {
       if (mode === "best") {
         return `<div class="field"><span class="field-label">${t("記憶にのこしたい")}</span>
           <div class="meal-line">
-            <textarea id="meal-best" rows="1" class="grow-input" placeholder="${t("例：孫と会えた／史上最高のカレー")}">${v("best")}</textarea>
+            <textarea id="meal-best" rows="1" class="grow-input" placeholder="${t("例：史上最高のカレー")}">${v("best")}</textarea>
             ${micMini("meal-best", "flow-skip")}
           </div>
         </div>`;
@@ -3996,7 +3999,7 @@ const STEP_DEFS = {
       return row("morning", t("朝"), "meal-morning", t("例：トーストと卵"), v("morning"))
         + row("noon", t("昼"), "meal-noon", t("例：そば"), v("noon"))
         + row("evening", t("晩"), "meal-evening", t("例：焼き魚"), v("evening"))
-        + row("snack", t("間食・その他"), "meal-snack", t("例：まんじゅう、コーヒー"), v("snack"));
+        + row("snack", t("間食・その他"), "meal-snack", t("例：まんじゅう"), v("snack"));
     },
     collect: (mode, e) => {
       if (mode === "eatout") return eatoutCollect(e);
