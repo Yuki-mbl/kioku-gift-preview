@@ -1807,6 +1807,23 @@ html.fixed-page .screen.active { min-height: 0; height: 100%; }
 .memo-text { flex: 1; min-width: 0; font-size: 1.12rem; font-weight: 700; line-height: 1.6; word-break: break-word; }
 .memo-note { text-align: center; color: var(--muted); font-size: 1rem; line-height: 1.7; margin-top: 4px; }
 /* 買い物の答え合わせシート（メモと同じ部品＋カテゴリ見出し） */
+/* 押すまで消えない案内（2026-10-04） */
+#alert-pop {
+  position: fixed; inset: 0; z-index: 400; background: rgba(8, 10, 22, .55);
+  display: flex; align-items: center; justify-content: center; padding: 20px;
+}
+#alert-pop[hidden] { display: none; }
+.alert-card {
+  background: var(--card); border-radius: 18px; padding: 26px 20px 20px;
+  width: 100%; max-width: 340px; text-align: center;
+  box-shadow: 0 12px 40px rgba(0, 0, 0, .25);
+}
+.alert-msg {
+  margin: 0 0 20px; color: var(--text);
+  font-size: min(1.12rem, 4.5vw); line-height: 1.85;
+}
+.alert-msg b { display: block; margin-bottom: 8px; }
+
 #shop-pop { position: fixed; inset: 0; z-index: 300; background: rgba(8, 10, 22, .55);
   display: flex; align-items: flex-start; justify-content: center; }
 #shop-pop[hidden] { display: none; }
@@ -2986,6 +3003,14 @@ html[data-theme="dark"] .brand-line { font-weight: 700; }
     </div>
 
     <!-- ===== 買い物の答え合わせ（上から降りるシート。買えたらチェックで消す） ===== -->
+    <!-- 押すまで消えない案内（記録が消える場面でだけ使う。帯では見逃されるため 2026-10-04） -->
+    <div id="alert-pop" hidden>
+      <div class="alert-card">
+        <p class="alert-msg" id="alert-msg"></p>
+        <button type="button" class="btn btn-primary btn-xl" id="alert-ok" data-t>わかりました</button>
+      </div>
+    </div>
+
     <div id="shop-pop" hidden>
       <div class="memo-sheet" id="shop-sheet">
         <div class="memo-sheet-head">
@@ -3062,8 +3087,19 @@ const store = {
 let storageWarned = false;
 function warnStorageFull() {
   if (storageWarned) return;
+  const pop = document.getElementById("alert-pop");
+  if (!pop) return; // まだ画面ができていない。次に保存するときに知らせる
   storageWarned = true;
-  try { toastMemo(t("保存できませんでした。スマホの空き容量をご確認ください")); } catch (e) {}
+  showAlert(`<b><span class="nowrap">${t("いまの記録を")}</span><span class="nowrap">${t("保存できませんでした")}</span></b>`
+    + `<span class="nowrap">${t("スマホの空き容量を増やしてから、")}</span><span class="nowrap">${t("もう一度お試しください")}</span>`);
+}
+// 押すまで消えない案内。記録が消える場面でだけ使う
+// （帯は2.6秒で消えるので、見逃すと消えたことに気づけない）
+function showAlert(html) {
+  const pop = document.getElementById("alert-pop");
+  if (!pop) return;
+  document.getElementById("alert-msg").innerHTML = html;
+  pop.hidden = false;
 }
 
 // =========================================================
@@ -7245,6 +7281,9 @@ function wireEvents() {
   document.getElementById("tab-cal").addEventListener("click", () => { saveFlowDraftIfAny(); openCalendar(); });
 
   // 設定「すぐ書けるメモ通知」（アプリ版のみ表示）
+  document.getElementById("alert-ok").addEventListener("click", () => {
+    document.getElementById("alert-pop").hidden = true;
+  });
   const siriManualToggle = document.getElementById("siri-manual-toggle");
   if (siriManualToggle) siriManualToggle.addEventListener("click", () => {
     const m = document.getElementById("siri-manual");
