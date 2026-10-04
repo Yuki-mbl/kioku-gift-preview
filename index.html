@@ -3052,9 +3052,65 @@ const store = {
   },
   set(key, value) {
     memStore[key] = value;
-    try { localStorage.setItem(key, JSON.stringify(value)); } catch {}
+    // 入りきらなかったときに黙って捨てると、閉じた瞬間に記録が消えて誰も気づけない。
+    // 必ず知らせる（2026-10-04 Yukiさん指摘）
+    try { localStorage.setItem(key, JSON.stringify(value)); return true; }
+    catch (e) { warnStorageFull(); return false; }
   },
 };
+// 保存できなかったことを一度だけ知らせる（何度も出しても困らせるだけなので）
+let storageWarned = false;
+function warnStorageFull() {
+  if (storageWarned) return;
+  storageWarned = true;
+  try { toastMemo(t("保存できませんでした。スマホの空き容量をご確認ください")); } catch (e) {}
+}
+
+// =========================================================
+// 写真の置き場（2026-10-04）
+// 写真は端末のファイルとして保存し、記録には「file:名前」だけを持つ。
+// 記録の箱（localStorage）には文字しか入らなくなるので、何年使っても溢れない。
+// ブラウザ（プレビュー）にはファイルの仕組みが無いので、これまで通りdata URLのまま扱う。
+// =========================================================
+const PHOTO_DIR = "photos";
+let photoBase = ""; // 端末の写真置き場のURI。起動時に一度だけ調べる
+function fsPlugin() {
+  return (window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.Filesystem) || null;
+}
+function isFilePhoto(s) { return String(s || "").startsWith("file:"); }
+function isInlinePhoto(s) { return String(s || "").startsWith("data:"); }
+function hasPhoto(s) { return isFilePhoto(s) || isInlinePhoto(s); }
+// <img src> に入れられる形にする
+function photoSrc(s) {
+  if (isInlinePhoto(s)) return s;
+  if (isFilePhoto(s) && photoBase && window.Capacitor && window.Capacitor.convertFileSrc) {
+    return window.Capacitor.convertFileSrc(photoBase + "/" + String(s).slice(5));
+  }
+  return "";
+}
+// data URL の写真をファイルに書き出して「file:名前」を返す（できないときは元のまま返す）
+async function toStoredPhoto(dataUrl) {
+  const fs = fsPlugin();
+  if (!fs || !photoBase || !isInlinePhoto(dataUrl)) return dataUrl;
+  try {
+    const name = "p" + Date.now() + Math.floor(Math.random() * 1000) + ".jpg";
+    await fs.writeFile({
+      path: PHOTO_DIR + "/" + name, directory: "DATA",
+      data: String(dataUrl).split(",")[1], recursive: true,
+    });
+    return "file:" + name;
+  } catch (e) { return dataUrl; }
+}
+// 写真置き場の場所を調べる（起動時に一度だけ）
+async function resolvePhotoBase() {
+  const fs = fsPlugin();
+  if (!fs) return;
+  try {
+    await fs.mkdir({ path: PHOTO_DIR, directory: "DATA", recursive: true }).catch(() => {});
+    const r = await fs.getUri({ path: PHOTO_DIR, directory: "DATA" });
+    photoBase = (r && r.uri) || "";
+  } catch (e) { photoBase = ""; }
+}
 
 let profile = store.get("mn_profile", null);
 let entries = store.get("mn_entries", {});   // { "2026-07-13": {...} }
@@ -3658,7 +3714,7 @@ const ALBUM_SAMPLE_ICONS = {
 };
 // 見本写真の表示（実写真＝data URLならそのまま画像で。昔の絵文字データもそのまま出せる）
 function albumPhotoHtml(p) {
-  if (String(p || "").startsWith("data:")) return `<img src="${p}" alt="${t("思い出の写真")}">`;
+  if (hasPhoto(p)) return `<img src="${photoSrc(p)}" alt="${t("思い出の写真")}">`;
   return ALBUM_SAMPLE_ICONS[p]
     ? `<svg class="sample-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">${ALBUM_SAMPLE_ICONS[p]}</svg>`
     : (p || "");
@@ -4189,7 +4245,7 @@ function renderMealSlot(slotEl) {
   const url = mealPhotosOf(flow.date)[slot];
   slotEl.innerHTML = url
     ? `<span class="meal-thumb-wrap">
-        <img class="meal-thumb" src="${url}" alt="${t("この食事の写真")}">
+        <img class="meal-thumb" src="${photoSrc(url)}" alt="${t("この食事の写真")}">
         <button type="button" class="meal-thumb-del" aria-label="${t("写真を消す")}">✕</button>
       </span>`
     : `<button type="button" class="meal-cam" aria-label="${t("写真を残す")}">${balloonIconSvg("camera")}</button>
@@ -4200,12 +4256,12 @@ function renderMealSlot(slotEl) {
     cam.addEventListener("click", async () => {
       const d = await pickPhotoNative(900);
       if (d === undefined) { file.click(); return; } // ブラウザは従来の選択画面
-      if (d) shrinkDataUrl(d, 900, 0.72).then(u => { setMealPhotoSlot(flow.date, slot, u); renderMealSlot(slotEl); });
+      if (d) shrinkDataUrl(d, 900, 0.72).then(toStoredPhoto).then(u => { setMealPhotoSlot(flow.date, slot, u); renderMealSlot(slotEl); });
     });
     file.addEventListener("change", () => {
       const f = file.files && file.files[0];
       if (!f) return;
-      resizePhotoToDataURL(f, 900, 0.72).then(u => { setMealPhotoSlot(flow.date, slot, u); renderMealSlot(slotEl); });
+      resizePhotoToDataURL(f, 900, 0.72).then(toStoredPhoto).then(u => { setMealPhotoSlot(flow.date, slot, u); renderMealSlot(slotEl); });
     });
   }
   const thumb = slotEl.querySelector(".meal-thumb");
@@ -4752,7 +4808,7 @@ function buildDeepQuestions(excludeKeys, max) {
 
 // クイズで見せるアルバムの写真（実写真だけ。線画の見本は写真として出さない）
 function albumPhotoForQuiz(photo) {
-  return String(photo || "").startsWith("data:") ? photo : null;
+  return hasPhoto(photo) ? photo : null;
 }
 
 function shuffle(arr) {
@@ -4821,7 +4877,7 @@ function renderQuizStep(content) {
       <div class="quiz-count">${t("{i}問目 / 全{n}問", { i: qIndex + 1, n: questions.length })}</div>
       <div class="quiz-q">${q.q}</div>
       <div class="quiz-date-ref">${t("{d}の記録から", { d: formatJP(q.dateStr, true) })}</div>
-      ${q.cue ? `<img class="quiz-photo quiz-cue" src="${q.cue}" alt="${t("手がかりの写真")}">` : ""}
+      ${q.cue ? `<img class="quiz-photo quiz-cue" src="${photoSrc(q.cue)}" alt="${t("手がかりの写真")}">` : ""}
       <p class="quiz-say">${t("声に出して言ってみて")}</p>
       <div class="quiz-reveal-slot" id="quiz-reveal-slot"></div>
       <div class="quiz-actions">
@@ -4832,7 +4888,7 @@ function renderQuizStep(content) {
       document.getElementById("quiz-reveal-slot").innerHTML = `
         <div class="quiz-answer-label">${q.photos.length ? t("あなたが残したもの") : t("あなたが入力したこと")}</div>
         <div class="quiz-answer">${esc(q.answer).replace(/\n/g, "<br>")}</div>
-        ${q.photos.map(u => `<img class="quiz-photo" src="${u}" alt="${t("この日の写真")}">`).join("")}`;
+        ${q.photos.map(u => `<img class="quiz-photo" src="${photoSrc(u)}" alt="${t("この日の写真")}">`).join("")}`;
       // 最後の問題のあとは「もっと思い出す」＋「ホームへ／今日の食事を記録」
       const moreLeft = MORE_RECALL_MAX - moreRecallUsed();
       const canMore = isLast && flow.recallOnly && !moreRecallDoneToday();
@@ -4904,7 +4960,7 @@ function renderQuizStep(content) {
       content.innerHTML = `
         <div class="step-title"><span class="step-emoji step-ico">${balloonIconSvg("recall")}</span>思い出す</div>
         <div class="quiz-count">${t("{i}問目 / 全{n}問", { i: di + 1, n: pool.length })}</div>
-        ${q.cue ? `<img class="quiz-photo quiz-cue" src="${q.cue}" alt="${t("手がかりの写真")}">` : ""}
+        ${q.cue ? `<img class="quiz-photo quiz-cue" src="${photoSrc(q.cue)}" alt="${t("手がかりの写真")}">` : ""}
         <div class="quiz-q">${q.q}</div>
         <div class="quiz-date-ref">${t("{d}の記録から", { d: formatJP(q.dateStr, true) })}</div>
         <p class="quiz-say">${t("声に出して言ってみて")}</p>
@@ -4916,7 +4972,7 @@ function renderQuizStep(content) {
         document.getElementById("quiz-reveal-slot").innerHTML = `
           <div class="quiz-answer-label">${q.photos.length ? t("あなたが残したもの") : t("あなたが入力したこと")}</div>
           <div class="quiz-answer">${esc(q.answer).replace(/\n/g, "<br>")}</div>
-          ${q.photos.map(u => `<img class="quiz-photo" src="${u}" alt="${t("この日の写真")}">`).join("")}`;
+          ${q.photos.map(u => `<img class="quiz-photo" src="${photoSrc(u)}" alt="${t("この日の写真")}">`).join("")}`;
         content.querySelector(".quiz-actions").outerHTML = `
           <div class="quiz-judge quiz-judge-2">
             <button class="btn btn-primary" id="quiz-next">${isLastD ? `${t("おしまい")}<span class="btn-ico btn-ico-r">${balloonIconSvg("sprout")}</span>` : `${t("次の思い出し")}<span class="btn-ico btn-ico-r">${balloonIconSvg("sprout")}</span>`}</button>
@@ -5167,7 +5223,7 @@ function openDayDetail(ds) {
   document.getElementById("detail-cards").innerHTML = fields.length
     ? fields.map((f, i) =>
         `<div class="card detail-card tappable" data-idx="${i}" role="button" tabindex="0">
-          <div class="detail-label">${t(f.label)}</div>${f.thumb ? `<img class="detail-thumb" src="${f.thumb}" alt="">` : ""}${linkify(f.text)}<span class="detail-chev">›</span>
+          <div class="detail-label">${t(f.label)}</div>${f.thumb ? `<img class="detail-thumb" src="${photoSrc(f.thumb)}" alt="">` : ""}${linkify(f.text)}<span class="detail-chev">›</span>
         </div>`).join("")
     : `<p class="search-hint">${t("この日の記録はまだありません。")}</p>
       <div class="detail-add-lead"><span class="step-emoji step-ico">${balloonIconSvg("pencil")}</span>${t("この日を書き足す")}</div>
@@ -5628,12 +5684,12 @@ function renderOutfitMain() {
   fileInput.addEventListener("change", () => {
     const f = fileInput.files && fileInput.files[0];
     if (!f) return;
-    resizePhotoToDataURL(f, 800, 0.7).then(url => { setOutfit(td, { photo: url }); renderOutfitMain(); });
+    resizePhotoToDataURL(f, 800, 0.7).then(toStoredPhoto).then(url => { setOutfit(td, { photo: url }); renderOutfitMain(); });
   });
   document.getElementById("outfit-shot").addEventListener("click", async () => {
     const d = await pickPhotoNative(800);
     if (d === undefined) { fileInput.click(); return; } // ブラウザは従来の選択画面
-    if (d) shrinkDataUrl(d, 800, 0.7).then(url => { setOutfit(td, { photo: url }); renderOutfitMain(); });
+    if (d) shrinkDataUrl(d, 800, 0.7).then(toStoredPhoto).then(url => { setOutfit(td, { photo: url }); renderOutfitMain(); });
   });
   const note = document.getElementById("outfit-note");
   const growNote = () => { if (CSS.supports && CSS.supports("field-sizing", "content")) return; note.style.height = "auto"; note.style.height = (note.scrollHeight + note.offsetHeight - note.clientHeight) + "px"; }; // 書くほど下にのびる（枠線ぶんも足す）
@@ -5672,7 +5728,7 @@ function renderOutfitCalendar(dir) {
     const isFuture = ds > today;
     const cls = ["cal-cell", "ocal-cell", ds === today ? "today" : "", isFuture ? "future" : "", o ? "has-outfit" : ""].join(" ");
     html += `<button class="${cls}" data-date="${ds}" ${isFuture ? "disabled" : ""}>
-      ${o?.photo ? `<img src="${o.photo}" alt="">` : ""}
+      ${o?.photo ? `<img src="${photoSrc(o.photo)}" alt="">` : ""}
       ${!o?.photo && o ? `<span class="ocal-note">${balloonIconSvg("outfit")}</span>` : ""}
       <span class="ocal-day">${d}</span>
     </button>`;
@@ -5692,7 +5748,7 @@ function renderOutfitToday() {
   const o = outfitOf(td);
   // 写真があるときだけ上に写真＋消すを出す。撮るボタンは下の1行（保存の右）に常駐
   box.innerHTML = o?.photo
-    ? `<img class="outfit-today-img outfit-today-img-center" src="${o.photo}" alt="${t("今日の服")}">
+    ? `<img class="outfit-today-img outfit-today-img-center" src="${photoSrc(o.photo)}" alt="${t("今日の服")}">
        <div class="outfit-photo-actions">
          <button type="button" class="btn btn-secondary" id="outfit-del">${t("消す")}</button>
        </div>`
@@ -5723,7 +5779,7 @@ function renderOutfitDay(ds) {
       </div>`).join("")}</div>` : "";
   document.getElementById("outfit-wrap").innerHTML = `
     <div class="outfit-day-date">${formatJP(ds, true)}</div>
-    ${o.photo ? `<img class="outfit-day-img" src="${o.photo}" alt="${t("この日の服")}">` : ""}
+    ${o.photo ? `<img class="outfit-day-img" src="${photoSrc(o.photo)}" alt="${t("この日の服")}">` : ""}
     <div class="card outfit-day-edit">
       <button type="button" class="btn ${o.photo ? "btn-secondary" : "btn-primary"} btn-xl btn-shrink" id="oday-pick"><span class="btn-ico btn-ico-big">${balloonIconSvg("camera")}</span>${o.photo ? t("写真を入れ替える") : t("この日の服の写真")}</button>
       <input type="file" id="oday-file-pick" accept="image/*" style="display:none;">
@@ -5750,12 +5806,12 @@ function renderOutfitDay(ds) {
     document.getElementById(btnId).addEventListener("click", async () => {
       const d = await pickPhotoNative(800);
       if (d === undefined) { input.click(); return; } // ブラウザは従来の選択画面
-      if (d) shrinkDataUrl(d, 800, 0.7).then(url => { setOutfit(ds, { photo: url }); renderOutfitDay(ds); });
+      if (d) shrinkDataUrl(d, 800, 0.7).then(toStoredPhoto).then(url => { setOutfit(ds, { photo: url }); renderOutfitDay(ds); });
     });
     input.addEventListener("change", () => {
       const f = input.files && input.files[0];
       if (!f) return;
-      resizePhotoToDataURL(f, 800, 0.7).then(url => { setOutfit(ds, { photo: url }); renderOutfitDay(ds); });
+      resizePhotoToDataURL(f, 800, 0.7).then(toStoredPhoto).then(url => { setOutfit(ds, { photo: url }); renderOutfitDay(ds); });
     });
   };
   pickInto("oday-pick", "oday-file-pick");
@@ -5915,7 +5971,7 @@ function renderAlbumPhotoView() {
       buzzSave();
       renderAlbumDone(true, formatYM(photoDate));
     };
-    if (isReal) shrinkDataUrl(emoji, 480, 0.6).then(finish); // 実写真は小さくして保存
+    if (isReal) shrinkDataUrl(emoji, 480, 0.6).then(toStoredPhoto).then(finish); // 実写真は小さくしてファイルへ
     else finish(emoji);
   });
   document.getElementById("album-skip").addEventListener("click", () => { markAlbumDone(); goHome(); });
@@ -7498,7 +7554,105 @@ function init() {
   }
 }
 
-init();
+// =========================================================
+// 写真のお引っ越しと片づけ（2026-10-04）
+// 前の版で記録の中に直接入っていた写真を、ファイルへ移す。
+// 書き換えは1枚ずつ、直前にもう一度読み直してから行う
+// （移している最中に新しい写真が保存されても、それを消さないため）
+// =========================================================
+async function migratePhotosToFiles() {
+  if (!fsPlugin() || !photoBase) return;
+  // 服装
+  for (const ds of Object.keys(loadOutfits())) {
+    const was = (loadOutfits()[ds] || {}).photo;
+    if (!isInlinePhoto(was)) continue;
+    const ref = await toStoredPhoto(was);
+    if (ref === was) continue;
+    const now = loadOutfits();
+    if (now[ds] && now[ds].photo === was) { now[ds].photo = ref; saveOutfits(now); }
+  }
+  // 食事（1日に朝・昼・晩…と複数ある）
+  for (const ds of Object.keys(loadMealPhotos())) {
+    const v0 = loadMealPhotos()[ds];
+    const slots = typeof v0 === "string" ? ["day"] : Object.keys(v0 || {});
+    for (const slot of slots) {
+      const cur = loadMealPhotos()[ds];
+      const was = typeof cur === "string" ? cur : (cur || {})[slot];
+      if (!isInlinePhoto(was)) continue;
+      const ref = await toStoredPhoto(was);
+      if (ref === was) continue;
+      const now = loadMealPhotos();
+      const v = now[ds];
+      if (typeof v === "string") { if (v === was) { now[ds] = { day: ref }; saveMealPhotos(now); } }
+      else if (v && v[slot] === was) { v[slot] = ref; saveMealPhotos(now); }
+    }
+  }
+  // メモリーアルバム
+  const n = loadAlbumMemos().length;
+  for (let i = 0; i < n; i++) {
+    const was = (loadAlbumMemos()[i] || {}).photo;
+    if (!isInlinePhoto(was)) continue;
+    const ref = await toStoredPhoto(was);
+    if (ref === was) continue;
+    const now = loadAlbumMemos();
+    if (now[i] && now[i].photo === was) { now[i].photo = ref; saveAlbumMemos(now); }
+  }
+}
+// 写真と記録のつじつまを合わせる（2026-10-04）
+//  ①どの記録からも使われていない写真を消す（消し忘れ・途中で終わった分の後始末）
+//  ②ファイルが無くなっている写真は、記録のほうからも外す
+//    （Googleのバックアップには写真を入れていないので、機種変で写真だけ戻らないことがある。
+//      そのとき壊れた絵を見せずに「写真なし」として扱う）
+// ※一覧が読めなかったときは、何も消さない（読めないことを「無い」と取り違えないため）
+async function sweepUnusedPhotos() {
+  const fs = fsPlugin();
+  if (!fs || !photoBase) return;
+  const mine = /^p\d+\.jpg$/;
+  let onDisk;
+  try {
+    const r = await fs.readdir({ path: PHOTO_DIR, directory: "DATA" });
+    onDisk = new Set((r.files || [])
+      .map(f => (typeof f === "string" ? f : (f && f.name)))
+      .filter(n => n && mine.test(n)));
+  } catch (e) { return; } // 読めなかった＝何もしない
+  const used = new Set();
+  const add = v => { if (isFilePhoto(v)) used.add(String(v).slice(5)); };
+
+  // ② 無くなった写真を記録から外す
+  const gone = v => isFilePhoto(v) && !onDisk.has(String(v).slice(5));
+  const o = loadOutfits(); let changed = false;
+  for (const k in o) { if (gone((o[k] || {}).photo)) { delete o[k].photo; changed = true; } }
+  if (changed) saveOutfits(o);
+  const m = loadMealPhotos(); changed = false;
+  for (const k in m) {
+    const v = m[k];
+    if (typeof v === "string") { if (gone(v)) { delete m[k]; changed = true; } continue; }
+    for (const sl in v) if (gone(v[sl])) { delete v[sl]; changed = true; }
+    if (v && !Object.keys(v).length) delete m[k];
+  }
+  if (changed) saveMealPhotos(m);
+  const al = loadAlbumMemos(); changed = false;
+  al.forEach(a => { if (a && gone(a.photo)) { a.photo = ""; changed = true; } });
+  if (changed) saveAlbumMemos(al);
+
+  // ① どこからも使われていない写真を消す
+  const o2 = loadOutfits(); for (const k in o2) add((o2[k] || {}).photo);
+  const m2 = loadMealPhotos();
+  for (const k in m2) { const v = m2[k]; if (typeof v === "string") add(v); else for (const sl in v) add(v[sl]); }
+  loadAlbumMemos().forEach(a => add(a && a.photo));
+  for (const name of onDisk) {
+    if (used.has(name)) continue;
+    await fs.deleteFile({ path: PHOTO_DIR + "/" + name, directory: "DATA" }).catch(() => {});
+  }
+}
+
+(async function boot() {
+  await resolvePhotoBase();   // 写真置き場の場所を先に調べる（表示に要る）
+  init();
+  // 画面が出てから、古い写真をファイルへ移し、使われていない写真を片づける
+  try { await migratePhotosToFiles(); } catch (e) {}
+  try { await sweepUnusedPhotos(); } catch (e) {}
+})();
 </script>
 
 <div id="pv-gate" style="position:fixed;inset:0;z-index:99999;background:#f6f3ec;display:flex;align-items:center;justify-content:center;padding:24px;">
