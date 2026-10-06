@@ -3221,6 +3221,16 @@ function notePhUse(id) {
 }
 // 例を出すかどうか。使い慣れた欄では空文字＝例なし
 function phEx(id, text) { return (phUsed()[id] || {}).n >= PH_HIDE_AFTER ? "" : text; }
+// 検索の例「（パン、太郎）」も、検索を3日つかったら消す。「記憶をさがす」は残す（2026-10-06 Yukiさん）。
+// ホーム・見返すの検索バーの例と、検索画面の入力欄の例の3か所。
+// 例を消すと「例つきの検索バー」用の小さい字の指定（:has(.search-eg)）も外れて、字が大きく戻る
+function applySearchExample() {
+  const n = (phUsed()["search-input"] || {}).n || 0;
+  if (n < PH_HIDE_AFTER) return;
+  document.querySelectorAll(".search-eg").forEach(el => el.remove());
+  const inp = document.getElementById("search-input");
+  if (inp) { inp.removeAttribute("data-t-ph"); inp.placeholder = t("記憶をさがす"); }
+}
 
 // ありがとうの記録はやめた（2026-10-03 Yukiさん判断「残したければ日記に書けばいい」）。
 // 端末に残っている古いデータは、次に開いたときに消す（中身は使わない）
@@ -3451,6 +3461,7 @@ let lastScreenId = null;
 const NO_SLIDE_SCREENS = new Set(["screen-lock", "screen-flow"]);
 function showScreen(id) {
   stopMic(); // 画面を移ったらマイクは止める
+  applySearchExample();
   document.querySelectorAll(".screen").forEach(s => s.classList.remove("active"));
   const scr = document.getElementById(id);
   scr.classList.add("active");
@@ -5179,6 +5190,7 @@ function runSearch(q) {
   q = q.trim();
   if (q === lastSearchQ) return;
   lastSearchQ = q;
+  if (q) notePhUse("search-input");
   if (!q) {
     box.innerHTML = `<p class="search-hint">${t("ことばを入れると、書いた日が出てきます。")}<br>${t("食べたもの・服装・行った場所・名前などから探せます。")}<br>${t("スペースで区切ると、いくつかの言葉でしぼり込めます。")}<br>${t("（例：牛丼　太郎）")}</p>`;
     return;
