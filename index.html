@@ -1649,7 +1649,9 @@ mark {
 #screen-calendar .cal-encourage { margin-top: clamp(6px, 1vh, 14px); }
 /* カレンダーの上に置いた励まし（2026-09-10 Yukiさん指定で下から移動・文言も変更） */
 .cal-encourage-top { margin: 4px 0 10px; }
-.cal-encourage-top p { white-space: nowrap; font-size: min(.95rem, 4vw); }
+/* 2026-10-06 Yukiさん指示：字を縮めて1行に押し込まない。入りきらないときは「今日のひと言が／未来の自分への贈り物」で折り返す
+   （大きな字の設定でもはみ出さない。前は nowrap だけが効いて、特大の字で画面からはみ出していた） */
+.cal-encourage-top p { white-space: normal; }
 
 /* =========================================================
    ホーム（検索＋カプセル型の扉×★）
@@ -2768,7 +2770,7 @@ html[data-theme="dark"] .brand-line { font-weight: 700; }
       <div class="cal-wrap">
         <p class="cal-encourage-lead cal-lead-top" data-t>日付をタップして書き足せます</p>
         <div class="cal-encourage cal-encourage-top">
-          <p><span data-t>今日のひと言が未来の自分への贈り物</span></p>
+          <p><span class="nowrap" data-t>今日のひと言が</span><span class="nowrap" data-t>未来の自分への贈り物</span></p>
         </div>
         <div class="card cal-card">
           <div class="cal-nav">
