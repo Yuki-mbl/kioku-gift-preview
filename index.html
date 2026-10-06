@@ -281,6 +281,8 @@ textarea { resize: vertical; min-height: 110px; }
 /* 「例：…」は“書いた文字”ほど大きくなくてよい。少し小さくして1行に収める
    （2026-10-03 Yukiさん指摘：SEで例が切れていた。文字「特大」や320px幅だと
    14欄のうち10欄があふれていた。書いた文字の大きさはそのまま） */
+/* 2026-10-06 Yukiさん方針：文章は画面幅に合わせて字を縮めない。入りきらないときは .nowrap の区切りで折り返す。
+   字を縮めてよいのは、決まった枠に入れる短い文字だけ（カレンダーの日付・曜日、風船の名前、下のタブ、ボタン、入力欄の例など） */
 ::placeholder { color: var(--muted); opacity: .9; font-size: min(1.05rem, 4.2vw); }
 button { color: inherit; } /* 色未指定のボタンがブラウザ標準の黒文字にならないように（ダークテーマ対策） */
 
@@ -529,7 +531,7 @@ button { color: inherit; } /* 色未指定のボタンがブラウザ標準の�
 .field-label .ar { font-size: 1.35em; line-height: 0; color: var(--accent); vertical-align: -.08em; margin: 0 1px; }
 /* 服装の「写真⬆でも 説明⬇でもOK」見出しは中央、入力の文字は左寄せ */
 .outfit-day-edit .field-label { display: block; text-align: center; }
-.outfit-hint { color: var(--text); font-size: min(1.08rem, 4.6vw); font-weight: 700; line-height: 1.5; }
+.outfit-hint { color: var(--text); font-size: 1.08rem; font-weight: 700; line-height: 1.5; }
 /* 今日の服の欄だけ、写真の枠に合わせて幅を抑える（文字は読みやすい大きさで） */
 .outfit-today-body .outfit-hint { max-width: 108px; font-size: 1.02rem; line-height: 1.6; color: var(--text); opacity: .8; }
 /* 画面上部のサブタイトル：高齢の方にも読めるよう大きく・はっきり */
@@ -611,17 +613,17 @@ button { color: inherit; } /* 色未指定のボタンがブラウザ標準の�
 .moon-under { text-align: center; color: var(--text); font-size: clamp(.82rem, 1.9vh, .95rem); line-height: 1.6; margin: -6px 0 clamp(4px, 1vh, 10px); }
 .moon-till { opacity: .78; }
 /* 星が増える仕組みは、この画面を開いてもらう一番の理由。毎晩・大きく出す（2026-10-03 Yukiさん） */
-.moon-grow { font-size: min(1.12rem, 4.6vw); font-weight: 800; color: var(--accent-strong); margin-top: 4px; letter-spacing: .02em; }
+.moon-grow { font-size: 1.12rem; font-weight: 800; color: var(--accent-strong); margin-top: 4px; letter-spacing: .02em; }
 [data-theme="dark"] .moon-grow { color: var(--brass-strong-ed); }
 /* ありがとうは書かずに思い出す場所になった（2026-10-03）。その問いかけ */
 .grat-think {
   text-align: center; margin: clamp(6px, 1.4vh, 14px) 0 4px;
-  font-size: min(1.18rem, 4.8vw); font-weight: 800; color: var(--text); line-height: 1.7;
+  font-size: 1.18rem; font-weight: 800; color: var(--text); line-height: 1.7;
 }
 /* ページの頭の短いあいさつ（2026-10-03 Yukiさん。長い見出しを消したぶんの7文字） */
 .sleep-greeting {
   text-align: center; margin: 0 0 clamp(6px, 1.2vh, 12px);
-  font-size: min(1.22rem, 5.1vw); font-weight: 800; letter-spacing: .12em;
+  font-size: 1.22rem; font-weight: 800; letter-spacing: .12em;
   color: var(--accent-strong);
 }
 [data-theme="dark"] .sleep-greeting { color: var(--brass-strong-ed); }
@@ -630,7 +632,7 @@ button { color: inherit; } /* 色未指定のボタンがブラウザ標準の�
   display: block; margin: 0 auto clamp(6px, 1.4vh, 14px);
   background: none; border: none; font-family: inherit;
   color: var(--accent-strong); font-weight: 700;
-  font-size: min(1rem, 4.1vw); line-height: 1.6;
+  font-size: 1rem; line-height: 1.6;
   padding: 10px 14px; cursor: pointer; -webkit-tap-highlight-color: transparent;
 }
 .grat-to-diary .ar { font-size: 1.2em; line-height: 0; margin-left: 5px; vertical-align: -.08em; }
@@ -802,7 +804,7 @@ html[data-fontsize="xlarge"] #diary-text { min-height: clamp(140px, 22vh, 260px)
 
 /* 「メモリーアルバム」の名前が入る行は、狭い端末・大きい文字でも1行を守る（2026-09-15） */
 #screen-album .album-q {
-  font-size: min(1.15rem, 4.9vw); white-space: nowrap;
+  font-size: 1.15rem;
   /* ここから下は「残す人」の場所。細い線で、上のボタンと分ける（2026-09-15） */
   border-top: 1px solid var(--border); margin-top: 18px; padding-top: 16px;
 }
@@ -810,7 +812,7 @@ html[data-fontsize="xlarge"] #diary-text { min-height: clamp(140px, 22vh, 260px)
 html[data-fontsize="large"] #album-list { font-size: min(1.2rem, 4.5vw); }
 html[data-fontsize="xlarge"] #album-list { font-size: min(1.26rem, 4.5vw); }
 /* メモリーアルバム：言葉がないと残せないので、空のあいだは保存を控えめに（2026-09-15） */
-.album-need { color: var(--accent-strong); font-weight: 700; text-align: center; margin: 8px 0 2px; font-size: min(1rem, 4.2vw); }
+.album-need { color: var(--accent-strong); font-weight: 700; text-align: center; margin: 8px 0 2px; font-size: 1rem; }
 #album-keep.is-waiting { opacity: .5; }
 /* 下に「「メモリーアルバム」に残す」の区切りができたので、ここは1行で言い切る（2026-09-15） */
 html[data-fontsize="large"] #album-skip { font-size: min(1.3rem, 5.2vw); }
@@ -866,11 +868,12 @@ html[data-fontsize="xlarge"] #album-skip { font-size: min(1.4rem, 5.2vw); }
 /* アルバム画面の上の一行（線画＋文字。狭い端末でも1行に収まる） */
 .album-lead {
   display: flex; align-items: center; justify-content: center; gap: 8px;
-  margin: 0 0 10px; white-space: nowrap;
+  margin: 0 0 10px;
   color: var(--accent-strong);
-  font-size: min(1.18rem, 5.2vw); font-weight: 800; letter-spacing: .02em;
+  font-size: 1.18rem; font-weight: 800; letter-spacing: .02em;
 }
 .album-lead .lead-ico { margin-right: 0; }
+.album-lead-text { min-width: 0; } /* 入りきらないときは「スマホの／アルバムから／記憶をたどる」で折り返す */
 /* ひかえめな問いかけ（思い出すだけで大丈夫） */
 .album-q.q-soft { font-size: 1.02rem; font-weight: 700; color: var(--muted); }
 .album-encourage { color: var(--accent); font-size: 1.05rem; font-weight: 700; text-align: center; line-height: 1.75; margin: 6px 0 8px; }
@@ -1011,8 +1014,9 @@ html[data-fontsize="xlarge"] #album-skip { font-size: min(1.4rem, 5.2vw); }
 /* 思い出すことの大切さ（カレンダー下のひとこと） */
 .cal-encourage { text-align: center; margin-top: 14px; line-height: 1.75; }
 .cal-encourage-lead { color: var(--accent-strong); font-weight: 800; font-size: 1.05rem; margin-bottom: 6px; }
-/* カレンダーの上の一行（1行に収まる大きさで中央に） */
-.cal-lead-top { text-align: center; margin: 0; white-space: nowrap; font-size: min(1.05rem, 4.6vw); }
+/* カレンダーの上の一行。字は縮めず、入りきらないときは「日付をタップして／書き足せます」で折り返す
+   （2026-10-06 Yukiさん指示「字が小さいのは老人には辛い」。前は1行に押し込むため特大の字で23px→17pxまで縮んでいた） */
+.cal-lead-top { text-align: center; margin: 0; }
 /* 2026-09-10 Yukiさん指定：励ましの2行も薄くしない（日記の案内と同じ濃い字＋太字に統一） */
 .cal-encourage p:not(.cal-encourage-lead) { color: var(--text); font-size: .95rem; font-weight: 700; }
 
@@ -1452,7 +1456,7 @@ mark {
 .pc-note { color: var(--muted); font-size: 1rem; line-height: 1.7; }
 .pc-status-set { color: var(--accent); font-weight: 700; }
 /* ロックの状態は2行固定。狭い画面・大きい字でもはみ出さないよう幅に合わせて縮む（2026-09-14） */
-#pc-status .nowrap { font-size: min(1em, 4.6vw); }
+
 .pc-danger {
   background: var(--card); color: var(--danger, #c85a4b);
   border: 1.5px solid var(--danger, #c85a4b);
@@ -1817,12 +1821,12 @@ html.fixed-page .screen.active { min-height: 0; height: 100%; }
 #alert-pop[hidden] { display: none; }
 .alert-card {
   background: var(--card); border-radius: 18px; padding: 26px 20px 20px;
-  width: 100%; max-width: 340px; text-align: center;
+  width: 100%; max-width: 380px; text-align: center; /* 字を縮めなくなったので枠を少し広く（2026-10-06） */
   box-shadow: 0 12px 40px rgba(0, 0, 0, .25);
 }
 .alert-msg {
   margin: 0 0 20px; color: var(--text);
-  font-size: min(1.12rem, 4.5vw); line-height: 1.85;
+  font-size: 1.12rem; line-height: 1.85;
 }
 .alert-msg b { display: block; margin-bottom: 8px; }
 
@@ -2350,7 +2354,7 @@ html[data-fontsize="xlarge"] .tabb-name { font-size: min(.95rem, 4vw); }
   #screen-outfit.one-screen { height: auto; min-height: 100vh; min-height: 100dvh; overflow: visible; }
   #screen-outfit.one-screen .outfit-wrap { flex: 0 0 auto; padding-bottom: 30px; }
 }
-#screen-outfit.one-screen .outfit-hint { font-size: min(1.02rem, 4.4vw); font-weight: 700; }
+#screen-outfit.one-screen .outfit-hint { font-size: 1.02rem; font-weight: 700; }
 #screen-outfit.one-screen .outfit-today-body .outfit-hint { font-size: clamp(.9rem,2vh,1.02rem); }
 /* 幅の狭い端末：服のアルバムが下のタブに重ならないよう、余白を少しだけ詰める */
 @media (max-width: 340px) {
@@ -2576,10 +2580,10 @@ html[data-theme="dark"] .brand-line { font-weight: 700; }
 .memo-toast {
   /* 長い知らせは折り返す（横にはみ出さない。2026-09-24 iPhone実機） */
   position: fixed; left: 50%; bottom: 96px; transform: translateX(-50%) translateY(8px);
-  z-index: 200; max-width: min(86vw, 420px); text-align: center; line-height: 1.5;
+  z-index: 200; width: max-content; max-width: min(86vw, 420px); text-align: center; line-height: 1.5;
   background: var(--card); color: var(--text);
   border: 1.5px solid var(--accent); border-radius: 999px;
-  padding: 12px 20px; font-size: min(1.05rem, 4.2vw); font-weight: 700;
+  padding: 12px 20px; font-size: 1.05rem; font-weight: 700;
   box-shadow: var(--shadow-lg);
   opacity: 0; pointer-events: none; transition: opacity .2s ease, transform .2s ease;
 }
@@ -2588,7 +2592,7 @@ html[data-theme="dark"] .brand-line { font-weight: 700; }
 
 /* Siriの手順（iPhoneの設定にだけ出る） */
 .siri-steps { margin: 12px 0 0 1.2em; }
-.siri-steps li { font-size: min(1.02rem, 4.1vw); line-height: 1.85; margin-bottom: 10px; }
+.siri-steps li { font-size: 1.02rem; line-height: 1.85; margin-bottom: 10px; }
 /* 出来合いのショートカットを受け取るボタンと、その下の「自分で作る」（2026-10-03） */
 .siri-get {
   display: block; width: 100%; margin-top: 12px;
@@ -2597,7 +2601,7 @@ html[data-theme="dark"] .brand-line { font-weight: 700; }
 .siri-manual-toggle {
   display: block; margin: 14px auto 0; padding: 6px 2px;
   background: none; border: none; color: var(--muted);
-  font-size: min(.95rem, 3.8vw); text-decoration: underline; cursor: pointer;
+  font-size: .95rem; text-decoration: underline; cursor: pointer;
 }
 .siri-url {
   display: inline-block; margin-top: 4px; padding: 6px 10px;
@@ -2642,7 +2646,7 @@ html[data-theme="dark"] .brand-line { font-weight: 700; }
    薄い小さな字では読み飛ばされるので、少し大きく・濃くした */
 .late-night-note {
   display: block; margin-top: 6px;
-  font-size: min(1.08rem, 4.4vw); font-weight: 700; color: var(--accent-strong); letter-spacing: .02em;
+  font-size: 1.08rem; font-weight: 700; color: var(--accent-strong); letter-spacing: .02em;
   line-height: 1.5;
 }
 [data-theme="dark"] .late-night-note { color: var(--brass-ed); }
@@ -2768,7 +2772,7 @@ html[data-theme="dark"] .brand-line { font-weight: 700; }
     <!-- ===== カレンダー（日々の記憶） ===== -->
     <section id="screen-calendar" class="screen">
       <div class="cal-wrap">
-        <p class="cal-encourage-lead cal-lead-top" data-t>日付をタップして書き足せます</p>
+        <p class="cal-encourage-lead cal-lead-top"><span class="nowrap" data-t>日付をタップして</span><span class="nowrap" data-t>書き足せます</span></p>
         <div class="cal-encourage cal-encourage-top">
           <p><span class="nowrap" data-t>今日のひと言が</span><span class="nowrap" data-t>未来の自分への贈り物</span></p>
         </div>
@@ -2905,7 +2909,7 @@ html[data-theme="dark"] .brand-line { font-weight: 700; }
               <li data-t>「ショートカットを追加」を押す</li>
               <li data-t>これで完了。「ヘイ Siri、ひらめき」で使えます</li>
             </ol>
-            <button type="button" class="siri-manual-toggle" id="siri-manual-toggle" data-t>うまくいかないときは、自分で作る</button>
+            <button type="button" class="siri-manual-toggle" id="siri-manual-toggle"><span class="nowrap" data-t>うまくいかないときは、</span><span class="nowrap" data-t>自分で作る</span></button>
           </div>
           <ol class="siri-steps" id="siri-manual">
             <li data-t>iPhoneの「ショートカット」アプリを開いて、右上の「＋」</li>
@@ -3093,7 +3097,7 @@ function warnStorageFull() {
   if (!pop) return; // まだ画面ができていない。次に保存するときに知らせる
   storageWarned = true;
   showAlert(`<b><span class="nowrap">${t("いまの記録を")}</span><span class="nowrap">${t("保存できませんでした")}</span></b>`
-    + `<span class="nowrap">${t("スマホの空き容量を増やしてから、")}</span><span class="nowrap">${t("もう一度お試しください")}</span>`);
+    + `<span class="nowrap">${t("スマホの空き容量を")}</span><span class="nowrap">${t("増やしてから、")}</span><span class="nowrap">${t("もう一度")}</span><span class="nowrap">${t("お試しください")}</span>`);
 }
 // 押すまで消えない案内。記録が消える場面でだけ使う
 // （帯は2.6秒で消えるので、見逃すと消えたことに気づけない）
@@ -5517,8 +5521,9 @@ function refreshPasscodeStatus() {
     btn.textContent = t("設定する");
   } else {
     // 1行に入らず半端に折り返していたので、はじめから2行に分ける（2026-09-14 Yukiさん指示）
-    s.innerHTML = `<span class="nowrap">${t("アプリのロック：{a}", { a: settings.passcode ? t("設定中 🔒") : t("なし") })}</span><br>`
-      + `<span class="nowrap">${t("日記のロック：{b}", { b: settings.diaryPass ? t("設定中 🔒") : t("なし") })}</span>`;
+    // 大きな字では「アプリのロック：／設定中 🔒」で折り返す（2026-10-06）
+    s.innerHTML = `<span class="nowrap">${t("アプリのロック：")}</span><span class="nowrap">${settings.passcode ? t("設定中 🔒") : t("なし")}</span><br>`
+      + `<span class="nowrap">${t("日記のロック：")}</span><span class="nowrap">${settings.diaryPass ? t("設定中 🔒") : t("なし")}</span>`;
     s.classList.add("pc-status-set");
     btn.textContent = t("変更・解除する");
   }
@@ -5704,7 +5709,7 @@ function renderOutfitMain() {
         <button type="button" class="btn btn-primary" id="outfit-save">${t("保存")}</button>
       </div>
       <div class="outfit-saved" id="outfit-saved" hidden>✓ ${t("残しました")}</div>
-      <p class="outfit-hint outfit-hint-center">${t("鏡の前で1枚。文字だけでも大丈夫")}</p>
+      <p class="outfit-hint outfit-hint-center"><span class="nowrap">${t("鏡の前で1枚。")}</span><span class="nowrap">${t("文字だけでも大丈夫")}</span></p>
     </div>
     <div class="card cal-card outfit-cal outfit-album">
       <div class="cal-nav oalb-head">
@@ -5950,7 +5955,7 @@ function renderAlbumPhoto(reuse) {
     if (plug) {
       // アプリ版：本物のアルバムから1枚（初回は写真の許可を求める）
       document.getElementById("album-wrap").innerHTML = `
-        <div class="album-lead"><span class="lead-ico">${balloonIconSvg("album")}</span>${t("スマホのアルバムから記憶をたどる")}</div>
+        <div class="album-lead"><span class="lead-ico">${balloonIconSvg("album")}</span><span class="album-lead-text"><span class="nowrap">${t("スマホの")}</span><span class="nowrap">${t("アルバムから")}</span><span class="nowrap">${t("記憶をたどる")}</span></span></div>
         <div class="album-photo"><span class="ph-emoji"></span></div>
         <p class="album-cap">${t("アルバムから1枚えらんでいます…")}</p>`;
       plug.getRandomPhoto().then(r => {
@@ -5978,13 +5983,13 @@ function renderAlbumPhotoView() {
   const isReal = String(emoji).startsWith("data:");
   const memos = loadAlbumMemos();
   document.getElementById("album-wrap").innerHTML = `
-    <div class="album-lead"><span class="lead-ico">${balloonIconSvg("album")}</span>${t("スマホのアルバムから記憶をたどる")}</div>
+    <div class="album-lead"><span class="lead-ico">${balloonIconSvg("album")}</span><span class="album-lead-text"><span class="nowrap">${t("スマホの")}</span><span class="nowrap">${t("アルバムから")}</span><span class="nowrap">${t("記憶をたどる")}</span></span></div>
     <div class="album-photo${isReal ? " has-img" : ""}"><span class="ph-emoji">${albumPhotoHtml(emoji)}</span></div>
     ${isReal ? "" : `<p class="album-cap"><span class="nowrap">${t("（本番アプリでは、")}</span><span class="nowrap">${t("あなたのアルバムから1枚出ます）")}</span></p>`}
     <button type="button" class="btn btn-secondary btn-xl" id="album-skip">${t("思い出せました（ホームへ）")}</button>
-    <div class="album-q q-soft">${t("「メモリーアルバム」に残す")}</div>
+    <div class="album-q q-soft"><span class="nowrap">${t("「メモリーアルバム」に")}</span><span class="nowrap">${t("残す")}</span></div>
     <div class="field meal-line"><textarea id="album-text" class="grow-input" rows="2" placeholder="${phEx("album-text", t("例：ゆき撮影"))}"></textarea>${micMini("album-text", "album-keep", "text")}</div>
-    <p class="album-need" id="album-need" hidden>${t("ひと言そえると残せます")}</p>
+    <p class="album-need" id="album-need" hidden><span class="nowrap">${t("ひと言そえると")}</span><span class="nowrap">${t("残せます")}</span></p>
     <button type="button" class="btn btn-primary btn-xl" id="album-keep">${t("保存")}</button>
     <button type="button" class="btn btn-secondary btn-xl" id="album-list" style="margin-top:10px;">${t("「メモリーアルバム」を見る（{n}）", { n: memos.length })}</button>`;
   wireMics(document.getElementById("album-wrap")); // 話して書く
@@ -6332,7 +6337,7 @@ function moonTonight() {
   //  それまでは月の最初の3晩だけ小さく出していた）
   const below = `
     ${isFull ? "" : `<div class="moon-till">${t("満月まで あと{n}日", { n: Math.round(toFull) })}</div>`}
-    <div class="moon-grow">${t("毎晩開くたびに星が灯っていきます")}</div>`;
+    <div class="moon-grow"><span class="nowrap">${t("毎晩開くたびに")}</span><span class="nowrap">${t("星が灯っていきます")}</span></div>`;
   const svg = `
     <svg viewBox="-160 -100 320 200" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="${t("今夜の月と星座")}">
       <defs>
@@ -6388,8 +6393,8 @@ function renderGratitude() {
     <div class="sleep-greeting">${t("おやすみなさい")}</div>
     <div class="moon-sky">${moon.svg}${moon.inSky}</div>
     <div class="moon-under">${moon.below}</div>
-    <p class="grat-think"><span class="nowrap">${t("今日の小さな「ありがとう」を")}</span><span class="nowrap">${t("ひとつ思い浮かべてみてください")}</span></p>
-    <button type="button" class="grat-to-diary" id="grat-diary">${t("書きとめておきたいことは日記へ")}<span class="ar" aria-hidden="true">→</span></button>
+    <p class="grat-think"><span class="nowrap">${t("今日の小さな")}</span><span class="nowrap">${t("「ありがとう」を")}</span><span class="nowrap">${t("ひとつ思い浮かべて")}</span><span class="nowrap">${t("みてください")}</span></p>
+    <button type="button" class="grat-to-diary" id="grat-diary"><span class="nowrap">${t("書きとめておきたい")}</span><span class="nowrap">${t("ことは")}</span><span class="nowrap">${t("日記へ")}<span class="ar" aria-hidden="true">→</span></span></button>
     <div class="card grat-notify">
       <div class="settings-label">${t("おやすみの通知")}</div>
       <div class="seg-group" id="grat-onoff">
