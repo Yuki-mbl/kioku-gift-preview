@@ -281,6 +281,14 @@ textarea { resize: vertical; min-height: 110px; }
 /* 「例：…」は“書いた文字”ほど大きくなくてよい。少し小さくして1行に収める
    （2026-10-03 Yukiさん指摘：SEで例が切れていた。文字「特大」や320px幅だと
    14欄のうち10欄があふれていた。書いた文字の大きさはそのまま） */
+/* 長押しで文字が選ばれないようにする（2026-10-06 Yukiさん「タブの文字が選べる仕様はふつう無い」）。
+   画面の文字は選べない。選べるのは、書く欄と、自分の記録を読む場所
+   （見返すの日ごとの記録・検索結果・アルバムの思い出・一瞬のひらめき）だけ */
+body { -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; }
+input, textarea, [contenteditable="true"],
+.detail-card, #search-results, .album-view-note, .memo-text {
+  -webkit-user-select: text; user-select: text; -webkit-touch-callout: default;
+}
 /* 2026-10-06 Yukiさん方針：文章は画面幅に合わせて字を縮めない。入りきらないときは .nowrap の区切りで折り返す。
    字を縮めてよいのは、決まった枠に入れる短い文字だけ（カレンダーの日付・曜日、風船の名前、下のタブ、ボタン、入力欄の例など）。
    例外：おやすみのいちばん下の注記「毎晩開くと星が灯って星座が現れます」は1行のまま（Yukiさん指定） */
@@ -1869,7 +1877,7 @@ html.fixed-page .screen.active { min-height: 0; height: 100%; }
 .outfit-btn-row { display: flex; gap: 10px; margin-top: 10px; }
 .outfit-btn-row #outfit-save { flex: 0 0 34%; }
 .outfit-btn-row #outfit-shot { flex: 1; min-width: 0; }
-.outfit-hint-center { text-align: center; margin: 8px 0 0; }
+.outfit-hint-center { text-align: center; margin: 18px 0 2px; } /* ボタンとくっついて見えたので間を空ける（2026-10-06 Yukiさん） */
 .meal-line textarea { flex: 1; min-width: 0; }
 
 /* 1行入力ふうの欄：長く書くと枠が下にのびて全部見える */
@@ -1898,26 +1906,28 @@ html.fixed-page .screen.active { min-height: 0; height: 100%; }
   border-radius: 16px; border: 2px solid var(--accent);
   cursor: zoom-in;
 }
-/* 写真を消す ✕（食事・今日の服で共通。2026-10-06 Yukiさん「なるべく大きく。写真によっては見えづらい」）
-   どんな写真の上でも見えるよう、配色に関係なく濃い赤の丸＋太い白のふち＋影。
-   押せる範囲は見た目より一回り広い（::before） */
+/* 写真を消す ✕（食事・今日の服で共通。2026-10-06 Yukiさん）
+   配色ごとに、そのテーマの主ボタンの色に合わせる（赤はやめた＝「一気にオシャレじゃなくなる」）。
+   細いふちで写真と分けるので、白い写真・暗い写真のどちらの上でも見える。✕は文字ではなく線で描く */
 .photo-del {
   position: absolute; z-index: 2; padding: 0;
   display: flex; align-items: center; justify-content: center;
-  border-radius: 50%; border: 3px solid #fff;
-  background: #d23f32; color: #fff;
-  font-family: inherit; font-weight: 900; line-height: 1;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, .5);
+  border-radius: 50%; border: 2px solid #fff;
+  background: var(--ink); color: var(--ink-text);   /* ライト：墨色の丸に白い✕ */
+  box-shadow: 0 1px 5px rgba(0, 0, 0, .3);
   cursor: pointer; -webkit-tap-highlight-color: transparent;
 }
-.photo-del::before { content: ""; position: absolute; inset: -6px; border-radius: 50%; }
+[data-theme="pastel"] .photo-del { background: var(--accent-strong); color: #fff; border-color: #fff; }  /* 若葉色 */
+[data-theme="dark"] .photo-del { background: var(--accent); color: #232a3c; border-color: #232a3c; }      /* 「＋」と同じ金色に紺 */
+.photo-del svg { width: 56%; height: 56%; fill: none; stroke: currentColor; stroke-width: 2.6; stroke-linecap: round; }
+.photo-del::before { content: ""; position: absolute; inset: -9px; border-radius: 50%; } /* 押せる範囲は見た目より広く */
 .photo-del:active { transform: scale(.92); }
 /* ✕の中心を写真の角に置き、半分は写真の外へ（写真を隠しすぎない） */
-.meal-thumb-del.photo-del { top: -16px; right: -16px; width: 32px; height: 32px; font-size: 16px; }
+.meal-thumb-del.photo-del { top: -13px; right: -13px; width: 26px; height: 26px; }
 /* 今日の服：写真のまわりに ✕ を置くための枠 */
-.outfit-photo-wrap { position: relative; width: fit-content; max-width: 62%; margin: 20px auto 0; } /* ✕がカードのふちにかからないよう少し下げる */
+.outfit-photo-wrap { position: relative; width: fit-content; max-width: 62%; margin: 16px auto 0; } /* ✕がカードのふちにかからないよう少し下げる */
 .outfit-photo-wrap .outfit-today-img-center { max-width: 100%; }
-.outfit-photo-wrap .photo-del { top: -20px; right: -20px; width: 40px; height: 40px; font-size: 20px; }
+.outfit-photo-wrap .photo-del { top: -16px; right: -16px; width: 32px; height: 32px; }
 
 /* 検索：日記ロック中のお知らせ行（日付・件数は伏せる） */
 .search-lock-row {
@@ -4322,7 +4332,7 @@ function renderMealSlot(slotEl) {
   slotEl.innerHTML = url
     ? `<span class="meal-thumb-wrap">
         <img class="meal-thumb" src="${photoSrc(url)}" alt="${t("この食事の写真")}">
-        <button type="button" class="meal-thumb-del photo-del" aria-label="${t("写真を消す")}">✕</button>
+        <button type="button" class="meal-thumb-del photo-del" aria-label="${t("写真を消す")}"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 7l10 10M17 7L7 17"/></svg></button>
       </span>`
     : `<button type="button" class="meal-cam" aria-label="${t("写真を残す")}">${balloonIconSvg("camera")}</button>
       <input type="file" accept="image/*" class="meal-cam-file" style="display:none;">`;
@@ -5828,7 +5838,7 @@ function renderOutfitToday() {
   box.innerHTML = o?.photo
     ? `<div class="outfit-photo-wrap">
          <img class="outfit-today-img outfit-today-img-center" src="${photoSrc(o.photo)}" alt="${t("今日の服")}">
-         <button type="button" class="photo-del" id="outfit-del" aria-label="${t("写真を消す")}">✕</button>
+         <button type="button" class="photo-del" id="outfit-del" aria-label="${t("写真を消す")}"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 7l10 10M17 7L7 17"/></svg></button>
        </div>`
     : "";
   const shot = document.getElementById("outfit-shot");
