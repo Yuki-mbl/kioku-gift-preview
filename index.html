@@ -620,10 +620,16 @@ button { color: inherit; } /* 色未指定のボタンがブラウザ標準の�
   text-align: center; margin: clamp(6px, 1.4vh, 14px) 0 4px;
   font-size: 1.18rem; font-weight: 800; color: var(--text); line-height: 1.7;
 }
-/* ページの頭の短いあいさつ（2026-10-03 Yukiさん。長い見出しを消したぶんの7文字） */
+/* 詩の3行（2026-10-06 Yukiさん）。1行ずつ改行し、入りきらないときだけ「、」のあとで折り返す */
+.moon-poem {
+  text-align: center; margin: clamp(10px, 2vh, 18px) 0 0;
+  font-size: 1.18rem; font-weight: 800; color: var(--text); line-height: 1.85;
+}
+.moon-poem .poem-line { display: block; }
+/* おやすみなさい：詩のあとに大きく（2026-10-06 ページの頭から移動） */
 .sleep-greeting {
-  text-align: center; margin: 0 0 clamp(6px, 1.2vh, 12px);
-  font-size: 1.22rem; font-weight: 800; letter-spacing: .12em;
+  text-align: center; margin: clamp(12px, 2.4vh, 22px) 0 2px;
+  font-size: 1.6rem; font-weight: 800; letter-spacing: .12em;
   color: var(--accent-strong);
 }
 [data-theme="dark"] .sleep-greeting { color: var(--brass-strong-ed); }
@@ -6210,28 +6216,28 @@ function moonLitPath(p, r) {
 function moonName(age) {
   const d = Math.min(30, Math.floor(age) + 1); // 新月からの夜数（1〜30）
   const table = [
-    [1,  "新月（しんげつ）",        "月と太陽が重なる、始まりの夜です"],
-    [2,  "二日月（ふつかづき）",    "糸のように細い、生まれたての月です"],
-    [3,  "三日月（みかづき）",      "いちばん名の知られた、細い月です"],
-    [6,  "夕月（ゆうづき）",        "日暮れの空にうかぶ、若い月です"],
-    [8,  "上弦の月（じょうげん）",  "右半分が光る、半分の月です"],
-    [9,  "九夜月（くやづき）",      "半月から少しふくらんだ月です"],
-    [10, "十日夜の月（とおかんや）","収穫を祝う夜の月です"],
-    [12, "宵月（よいづき）",        "宵の空に高くのぼる月です"],
-    [13, "十三夜（じゅうさんや）",  "満月につぐ美しさといわれる月です"],
-    [14, "小望月（こもちづき）",    "満月の前夜の、待ち遠しい月です"],
-    [15, "満月（まんげつ）",        "まんまるに満ちた、望月です"],
-    [16, "十六夜（いざよい）",      "ためらうように、少し遅れてのぼる月です"],
-    [17, "立待月（たちまちづき）",  "立って待つうちに、のぼってくる月です"],
-    [18, "居待月（いまちづき）",    "座って待つころ、のぼってくる月です"],
-    [19, "寝待月（ねまちづき）",    "寝て待つほど、月の出が遅い夜です"],
-    [20, "更待月（ふけまちづき）",  "夜更けにようやく顔を出す月です"],
-    [22, "二十日余の月",            "夜半すぎにのぼり、朝の空に残る月です"],
-    [23, "下弦の月（かげん）",      "左半分が光る、明け方の月です"],
-    [25, "暁月（あかつきづき）",    "明け方の空にうかぶ月です"],
-    [26, "有明月（ありあけづき）",  "夜明けの空に残る、細い月です"],
-    [29, "暁の細月",                "夜明けに細くうかぶ、消えゆく月です"],
-    [30, "三十日月（みそかづき）",  "姿を隠して、次の新月を待つ夜です"],
+    [1,  "新月（しんげつ）",        "月と太陽が重なる、始まりの夜"],
+    [2,  "二日月（ふつかづき）",    "糸のように細い、生まれたての月"],
+    [3,  "三日月（みかづき）",      "いちばん名の知られた、細い月"],
+    [6,  "夕月（ゆうづき）",        "日暮れの空に浮かぶ、若い月"],
+    [8,  "上弦の月（じょうげん）",  "右半分が光る、半分の月"],
+    [9,  "九夜月（くやづき）",      "半月から少しふくらんだ月"],
+    [10, "十日夜の月（とおかんや）","収穫を祝う夜の月"],
+    [12, "宵月（よいづき）",        "宵の空に高くのぼる月"],
+    [13, "十三夜（じゅうさんや）",  "満月につぐ美しさといわれる月"],
+    [14, "小望月（こもちづき）",    "満月の前夜の、待ち遠しい月"],
+    [15, "満月（まんげつ）",        "まんまるに満ちた、望月"],
+    [16, "十六夜（いざよい）",      "ためらうように、少し遅れてのぼる月"],
+    [17, "立待月（たちまちづき）",  "立って待つうちに、のぼってくる月"],
+    [18, "居待月（いまちづき）",    "座って待つころ、のぼってくる月"],
+    [19, "寝待月（ねまちづき）",    "寝て待つほど、月の出が遅い夜"],
+    [20, "更待月（ふけまちづき）",  "夜更けにようやく顔を出す月"],
+    [22, "二十日余の月",            "夜半すぎにのぼり、朝の空に残る月"],
+    [23, "下弦の月（かげん）",      "左半分が光る、明け方の月"],
+    [25, "暁月（あかつきづき）",    "明け方の空に浮かぶ月"],
+    [26, "有明月（ありあけづき）",  "夜明けの空に残る、細い月"],
+    [29, "暁の細月",                "夜明けに細く浮かぶ、消えゆく月"],
+    [30, "三十日月（みそかづき）",  "姿を隠して、次の新月を待つ夜"],
   ];
   for (const [max, name, lore] of table) if (d <= max) return { name, lore };
   return { name: "今夜の月", lore: "" };
@@ -6341,15 +6347,14 @@ function moonTonight() {
   const stars = baseStars + constLines + visitStars;
   // 夜空の中は月の名前とその由来、星の数まで。残りの説明は夜空の外（below）に出す
   const inSky = `
-    <div class="moon-caption">${t("今夜は {n}", { n: t(name) })}</div>
+    <div class="moon-caption">${t("今夜は{n}", { n: t(name) })}</div>
     ${lore ? `<div class="moon-lore">${t(lore)}</div>` : ""}
-    <div class="moon-stars-note">⭐ ${t("今宵で{n}夜目", { n: v.count })} ・ ${constDone && fullReached && isFull ? t("{c}がむすばれました", { c: t(C.name) }) : t(C.name)}${v.count === 1 && v.prev > 0 ? t("（先月は{n}夜、月を見上げました）", { n: v.prev }) : ""}</div>`;
+    <div class="moon-stars-note">⭐ ${t("{n}夜目", { n: v.count })}　${constDone && fullReached && isFull ? t("{c}がむすばれました", { c: t(C.name) }) : t(C.name)}${v.count === 1 && v.prev > 0 ? t("（先月は{n}夜、月を見上げました）", { n: v.prev }) : ""}</div>`;
   // 星が増える仕組みは、この画面を開いてもらう一番の理由なので**毎晩・大きく**出す
   // （2026-10-03 Yukiさん「大々的にしておかないと、ここを開く人がいなくなる」。
   //  それまでは月の最初の3晩だけ小さく出していた）
   const below = `
-    ${isFull ? "" : `<div class="moon-till">${t("満月まで あと{n}日", { n: Math.round(toFull) })}</div>`}
-    <div class="moon-grow"><span class="nowrap">${t("毎晩開くたびに")}</span><span class="nowrap">${t("星が灯っていきます")}</span></div>`;
+    ${isFull ? "" : `<div class="moon-till">${t("満月まで、あと{n}日", { n: Math.round(toFull) })}</div>`}`;
   const svg = `
     <svg viewBox="-160 -100 320 200" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="${t("今夜の月と星座")}">
       <defs>
@@ -6402,11 +6407,16 @@ function renderGratitude() {
   setOneScreen("screen-sleep", false); // 通知カードがあるためスクロール可
   const moon = moonTonight();
   document.getElementById("sleep-wrap").innerHTML = `
-    <div class="sleep-greeting">${t("おやすみなさい")}</div>
     <div class="moon-sky">${moon.svg}${moon.inSky}</div>
     <div class="moon-under">${moon.below}</div>
-    <p class="grat-think"><span class="nowrap">${t("今日の小さな")}</span><span class="nowrap">${t("「ありがとう」を")}</span><span class="nowrap">${t("ひとつ思い浮かべて")}</span><span class="nowrap">${t("みてください")}</span></p>
-    <button type="button" class="grat-to-diary" id="grat-diary"><span class="nowrap">${t("書きとめておきたい")}</span><span class="nowrap">${t("ことは")}</span><span class="nowrap">${t("日記へ")}<span class="ar" aria-hidden="true">→</span></span></button>
+    <!-- 3行はひとつながりの詩（2026-10-06 Yukiさん）。1行目が「開くたびに星が増える」ことを伝える -->
+    <p class="moon-poem">
+      <span class="poem-line"><span class="nowrap">${t("夜空をひらけば、")}</span><span class="nowrap">${t("星ひとつ")}</span></span>
+      <span class="poem-line"><span class="nowrap">${t("今日の記憶を、")}</span><span class="nowrap">${t("ひとつずつ")}</span></span>
+      <span class="poem-line"><span class="nowrap">${t("今日の")}</span><span class="nowrap">${t("「ありがとう」も、")}</span><span class="nowrap">${t("ひとつ")}</span></span>
+    </p>
+    <div class="sleep-greeting">${t("おやすみなさい")}</div>
+    <button type="button" class="grat-to-diary" id="grat-diary"><span class="nowrap">${t("残したい感謝は、")}</span><span class="nowrap">${t("日記へ")}<span class="ar" aria-hidden="true">→</span></span></button>
     <div class="card grat-notify">
       <div class="settings-label">${t("おやすみの通知")}</div>
       <div class="seg-group" id="grat-onoff">
