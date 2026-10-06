@@ -635,7 +635,7 @@ button { color: inherit; } /* 色未指定のボタンがブラウザ標準の�
 }
 /* おやすみなさい：詩のあとに大きく（2026-10-06 ページの頭から移動） */
 .sleep-greeting {
-  text-align: center; margin: clamp(12px, 2.4vh, 22px) 0 2px;
+  text-align: center; margin: clamp(12px, 2.4vh, 22px) 0 clamp(14px, 2.6vh, 24px); /* 下の通知カードとくっつかないように */
   font-size: 1.6rem; font-weight: 800; letter-spacing: .12em;
   color: var(--accent-strong);
 }
@@ -6422,8 +6422,8 @@ function renderGratitude() {
       <span class="poem-line"><span class="nowrap">${t("今日の記憶を、")}</span><span class="nowrap">${t("ひとつずつ")}</span></span>
       <span class="poem-line"><span class="nowrap">${t("今日の")}</span><span class="nowrap">${t("「ありがとう」も、")}</span><span class="nowrap">${t("ひとつ")}</span></span>
     </p>
+    <button type="button" class="grat-to-diary" id="grat-diary"><span class="nowrap">${t("残したい感謝は")}</span><span class="nowrap">${t("日記へ")}<span class="ar" aria-hidden="true">→</span></span></button>
     <div class="sleep-greeting">${t("おやすみなさい")}</div>
-    <button type="button" class="grat-to-diary" id="grat-diary"><span class="nowrap">${t("残したい感謝は、")}</span><span class="nowrap">${t("日記へ")}<span class="ar" aria-hidden="true">→</span></span></button>
     <div class="card grat-notify">
       <div class="settings-label">${t("おやすみの通知")}</div>
       <div class="seg-group" id="grat-onoff">
