@@ -283,7 +283,7 @@ textarea { resize: vertical; min-height: 110px; }
    14欄のうち10欄があふれていた。書いた文字の大きさはそのまま） */
 /* 2026-10-06 Yukiさん方針：文章は画面幅に合わせて字を縮めない。入りきらないときは .nowrap の区切りで折り返す。
    字を縮めてよいのは、決まった枠に入れる短い文字だけ（カレンダーの日付・曜日、風船の名前、下のタブ、ボタン、入力欄の例など）。
-   例外：おやすみのいちばん下の注記「毎晩開くたびに星が灯っていきます」は1行のまま（Yukiさん指定） */
+   例外：おやすみのいちばん下の注記「毎晩開くと星が灯って星座が現れます」は1行のまま（Yukiさん指定） */
 ::placeholder { color: var(--muted); opacity: .9; font-size: min(1.05rem, 4.2vw); }
 button { color: inherit; } /* 色未指定のボタンがブラウザ標準の黒文字にならないように（ダークテーマ対策） */
 
@@ -6436,7 +6436,7 @@ function renderGratitude() {
         <span class="grat-time-label">${t("に、そっとお知らせします")}</span>
       </div>
     </div>
-    <p class="sleep-footnote">${t("毎晩開くたびに星が灯っていきます")}</p>`;
+    <p class="sleep-footnote">${t("毎晩開くと星が灯って星座が現れます")}</p>`;
   // 「書きとめておきたいことは日記へ →」から、その場で日記を開く（2026-10-03 Yukiさん案）。
   // 下のタブにも日記はあるが、言われたことをその場でできるほうが自然
   document.getElementById("grat-diary").addEventListener("click", () => openDiary(null, { screen: "sleep" }));
