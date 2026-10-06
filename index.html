@@ -282,7 +282,8 @@ textarea { resize: vertical; min-height: 110px; }
    （2026-10-03 Yukiさん指摘：SEで例が切れていた。文字「特大」や320px幅だと
    14欄のうち10欄があふれていた。書いた文字の大きさはそのまま） */
 /* 2026-10-06 Yukiさん方針：文章は画面幅に合わせて字を縮めない。入りきらないときは .nowrap の区切りで折り返す。
-   字を縮めてよいのは、決まった枠に入れる短い文字だけ（カレンダーの日付・曜日、風船の名前、下のタブ、ボタン、入力欄の例など） */
+   字を縮めてよいのは、決まった枠に入れる短い文字だけ（カレンダーの日付・曜日、風船の名前、下のタブ、ボタン、入力欄の例など）。
+   例外：おやすみのいちばん下の注記「毎晩開くたびに星が灯っていきます」は1行のまま（Yukiさん指定） */
 ::placeholder { color: var(--muted); opacity: .9; font-size: min(1.05rem, 4.2vw); }
 button { color: inherit; } /* 色未指定のボタンがブラウザ標準の黒文字にならないように（ダークテーマ対策） */
 
@@ -626,6 +627,12 @@ button { color: inherit; } /* 色未指定のボタンがブラウザ標準の�
   font-size: 1.18rem; font-weight: 800; color: var(--text); line-height: 1.85;
 }
 .moon-poem .poem-line { display: block; }
+/* いちばん下の注記（2026-10-06 Yukiさん「通知よりも下に、追記みたいに」）。
+   これは例外的に1行のまま（小さい画面では字を縮める）。Yukiさんの指定 */
+.sleep-footnote {
+  text-align: center; white-space: nowrap; margin: 16px 0 0;
+  font-size: min(.95rem, 4.4vw); font-weight: 700; color: var(--muted); letter-spacing: .02em;
+}
 /* おやすみなさい：詩のあとに大きく（2026-10-06 ページの頭から移動） */
 .sleep-greeting {
   text-align: center; margin: clamp(12px, 2.4vh, 22px) 0 2px;
@@ -6428,7 +6435,8 @@ function renderGratitude() {
         <input type="time" id="grat-time" value="${notify.time}">
         <span class="grat-time-label">${t("に、そっとお知らせします")}</span>
       </div>
-    </div>`;
+    </div>
+    <p class="sleep-footnote">${t("毎晩開くたびに星が灯っていきます")}</p>`;
   // 「書きとめておきたいことは日記へ →」から、その場で日記を開く（2026-10-03 Yukiさん案）。
   // 下のタブにも日記はあるが、言われたことをその場でできるほうが自然
   document.getElementById("grat-diary").addEventListener("click", () => openDiary(null, { screen: "sleep" }));
