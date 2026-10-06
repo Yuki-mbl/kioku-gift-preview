@@ -1863,14 +1863,12 @@ html.fixed-page .screen.active { min-height: 0; height: 100%; }
   max-height: clamp(120px, 20vh, 180px);
   border-radius: 12px; border: 1.5px solid var(--border);
 }
-.outfit-photo-actions { display: flex; gap: 8px; justify-content: center; margin-top: 8px; }
 /* 服装の日別ページ：その日の記録カード（見返すと同じ見た目で並ぶ） */
 .outfit-day-recs { display: flex; flex-direction: column; gap: 14px; margin-top: 14px; }
 /* 保存（左）と今日の服（右）をひと並びに（カードをコンパクトに。2026-09-04） */
 .outfit-btn-row { display: flex; gap: 10px; margin-top: 10px; }
 .outfit-btn-row #outfit-save { flex: 0 0 34%; }
 .outfit-btn-row #outfit-shot { flex: 1; min-width: 0; }
-.outfit-photo-actions .btn { padding: 10px 16px; font-size: .98rem; }
 .outfit-hint-center { text-align: center; margin: 8px 0 0; }
 .meal-line textarea { flex: 1; min-width: 0; }
 
@@ -1900,14 +1898,26 @@ html.fixed-page .screen.active { min-height: 0; height: 100%; }
   border-radius: 16px; border: 2px solid var(--accent);
   cursor: zoom-in;
 }
-.meal-thumb-del {
-  position: absolute; top: -9px; right: -9px;
-  width: 26px; height: 26px; border-radius: 50%;
-  border: none; background: var(--danger); color: #fff;
-  font-size: .85rem; line-height: 1; font-family: inherit;
-  cursor: pointer; box-shadow: var(--shadow);
-  -webkit-tap-highlight-color: transparent;
+/* 写真を消す ✕（食事・今日の服で共通。2026-10-06 Yukiさん「なるべく大きく。写真によっては見えづらい」）
+   どんな写真の上でも見えるよう、配色に関係なく濃い赤の丸＋太い白のふち＋影。
+   押せる範囲は見た目より一回り広い（::before） */
+.photo-del {
+  position: absolute; z-index: 2; padding: 0;
+  display: flex; align-items: center; justify-content: center;
+  border-radius: 50%; border: 3px solid #fff;
+  background: #d23f32; color: #fff;
+  font-family: inherit; font-weight: 900; line-height: 1;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, .5);
+  cursor: pointer; -webkit-tap-highlight-color: transparent;
 }
+.photo-del::before { content: ""; position: absolute; inset: -6px; border-radius: 50%; }
+.photo-del:active { transform: scale(.92); }
+/* ✕の中心を写真の角に置き、半分は写真の外へ（写真を隠しすぎない） */
+.meal-thumb-del.photo-del { top: -16px; right: -16px; width: 32px; height: 32px; font-size: 16px; }
+/* 今日の服：写真のまわりに ✕ を置くための枠 */
+.outfit-photo-wrap { position: relative; width: fit-content; max-width: 62%; margin: 20px auto 0; } /* ✕がカードのふちにかからないよう少し下げる */
+.outfit-photo-wrap .outfit-today-img-center { max-width: 100%; }
+.outfit-photo-wrap .photo-del { top: -20px; right: -20px; width: 40px; height: 40px; font-size: 20px; }
 
 /* 検索：日記ロック中のお知らせ行（日付・件数は伏せる） */
 .search-lock-row {
@@ -4312,7 +4322,7 @@ function renderMealSlot(slotEl) {
   slotEl.innerHTML = url
     ? `<span class="meal-thumb-wrap">
         <img class="meal-thumb" src="${photoSrc(url)}" alt="${t("この食事の写真")}">
-        <button type="button" class="meal-thumb-del" aria-label="${t("写真を消す")}">✕</button>
+        <button type="button" class="meal-thumb-del photo-del" aria-label="${t("写真を消す")}">✕</button>
       </span>`
     : `<button type="button" class="meal-cam" aria-label="${t("写真を残す")}">${balloonIconSvg("camera")}</button>
       <input type="file" accept="image/*" class="meal-cam-file" style="display:none;">`;
@@ -5814,11 +5824,11 @@ function renderOutfitToday() {
   if (!box) return;
   const td = todayStr(); // ※ t は翻訳関数
   const o = outfitOf(td);
-  // 写真があるときだけ上に写真＋消すを出す。撮るボタンは下の1行（保存の右）に常駐
+  // 写真があるときだけ上に写真を出し、右上の ✕ で消す（2026-10-06 下の段の「消す」から変更＝食事の写真とそろえた）。撮るボタンは下の1行（保存の右）に常駐
   box.innerHTML = o?.photo
-    ? `<img class="outfit-today-img outfit-today-img-center" src="${photoSrc(o.photo)}" alt="${t("今日の服")}">
-       <div class="outfit-photo-actions">
-         <button type="button" class="btn btn-secondary" id="outfit-del">${t("消す")}</button>
+    ? `<div class="outfit-photo-wrap">
+         <img class="outfit-today-img outfit-today-img-center" src="${photoSrc(o.photo)}" alt="${t("今日の服")}">
+         <button type="button" class="photo-del" id="outfit-del" aria-label="${t("写真を消す")}">✕</button>
        </div>`
     : "";
   const shot = document.getElementById("outfit-shot");
