@@ -7067,7 +7067,10 @@ function wireMics(root) {
         // 本体の認識器は「壊して作り直す」作りなので、あまり速く繰り返すと落ちることがある
         // （2026-09-25 Androidで、マイクを使い終わった直後にアプリが閉じる報告）。
         // 立ち上げの間隔を必ず 600ms 以上あける
-        const MIN_START_GAP = isIOSApp() ? 250 : 600; // iPhoneは落ちる心配がないので短く
+        // 2026-10-07：「iPhoneは落ちる心配がない」は誤りだった。話している途中に落ちる報告（Yukiさん・iPhone SE）。
+        // iPhoneのマイク部品は、止めたあと「最後の答え」を返して後片づけを終えるまで時間がかかり、
+        // その前に聞き直すと、古い後片づけが新しいマイクを止めたり空の中身を使ったりして落ちる
+        const MIN_START_GAP = isIOSApp() ? 600 : 600;
         let starting = false; // 立ち上げ中（見張りと二重に始めないための鍵）
         let failStreak = 0;   // 続けて立ち上がらなかった回数
         // Androidは「話し終わり」の合図（stopped）のあとに、いちばん正確な「最後の答え」を送ってくる。
@@ -7088,6 +7091,16 @@ function wireMics(root) {
         // 聞き直せばそこまでが確定し（base）、次の区切りは必ずその続きに書かれる＝Androidと同じ理屈。
         // 黙っている最中に切るので、声を取りこぼすこともない
         let pauseTimer = null;
+        // iPhoneで区切りのために止めたときの印。止めると「止まった」が2回来る：
+        //  1回目＝止めた直後（まだ後片づけ中）／2回目＝最後の答えを返して後片づけが終わった
+        // 2回目を待ってから聞き直す（来なければ最大2秒で次へ）（2026-10-07 落ちる対策）
+        let iosCut = null;
+        const finishIosCut = () => {
+          if (!iosCut) return;
+          clearTimeout(iosCut.timer);
+          iosCut = null;
+          commitAndRestart(RESTART_WAIT);
+        };
         const armPauseCut = () => {
           if (!isIOSApp()) return; // Androidは認識器が自分で区切ってくれる
           clearTimeout(pauseTimer);
@@ -7096,6 +7109,7 @@ function wireMics(root) {
             if (!micActive || micActive.btn !== btn) return;
             if (!String(target.value || "").trim()) return; // まだ何も話していない
             if (idleTooLong()) return;                      // 10秒の自動停止にまかせる
+            iosCut = { first: false, timer: null };
             try { micActive.rec.stop(); } catch (e) {}      // 止める→listeningStateで確定して聞き直す
           }, PAUSE_SEP_MS);
         };
@@ -7181,6 +7195,17 @@ function wireMics(root) {
             // iPhoneは「最後の答え」を送ってから「話し終わり」を知らせる＝もう届いているので待たない。
             // Androidは「話し終わり」のあとに最後の答えが届くので、少し待ってから確定する
             if (isIOSApp()) {
+              if (starting) return; // 立ち上げ中に届いた「止まった」は前の回の後片づけ＝無視する
+              if (iosCut) {
+                if (!iosCut.first) { // 1回目：ここまでを確定し、後片づけが終わるのを待つ
+                  iosCut.first = true;
+                  if (applySaid(lastSaid, true)) { clearTimeout(iosCut.timer); iosCut = null; return; }
+                  iosCut.timer = setTimeout(finishIosCut, 2000);
+                  return;
+                }
+                finishIosCut(); // 2回目：後片づけが終わった＝安全に聞き直せる
+                return;
+              }
               if (applySaid(lastSaid, true)) return;
               commitAndRestart(RESTART_WAIT);
               return;
@@ -7200,7 +7225,7 @@ function wireMics(root) {
         // 定期的に「聞いているか」を確かめて、死んでいたら立て直す（2026-09-13。マイクが全く拾わない報告への対策）
         const watchdog = setInterval(async () => {
           if (!micActive || micActive.btn !== btn) { clearInterval(watchdog); return; }
-          if (starting || awaitingFinal || Date.now() - sessionAt < 1500) return; // 立ち上げ中・最後の答え待ち・直後はそっとしておく
+          if (starting || awaitingFinal || iosCut || Date.now() - sessionAt < 1500) return; // 立ち上げ中・最後の答え待ち・iPhoneの後片づけ待ち・直後はそっとしておく
           // しばらく声がなければ止める（iPhoneは聞き続ける作りなので、ここで止めないと止まらない）
           if (idleTooLong()) { stopMic(); toastMemo(t("マイクを止めました")); return; }
           try {
