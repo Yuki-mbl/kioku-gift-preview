@@ -3368,8 +3368,13 @@ const SIRI_SHORTCUT_URL = "https://www.icloud.com/shortcuts/854f267f6b1b42e6bb36
 function appPlugin() {
   return (window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.App) || null;
 }
+// アプリが閉じていたときに Siri から開くと、同じURLが「開かれた知らせ（appUrlOpen）」と
+// 「起動したときのURL（getLaunchUrl）」の両方で届き、メモが2回入っていた（2026-10-07 Yukiさん・iPhone）。
+// 同じURLが5秒以内にもう一度来たら、2回目は受け取らない
+let lastMemoUrl = "", lastMemoUrlAt = 0;
 function takeMemoFromUrl(url) {
   if (!url) return false;
+  if (url === lastMemoUrl && Date.now() - lastMemoUrlAt < 5000) return false;
   let text = "";
   try {
     const u = new URL(url);
@@ -3378,6 +3383,7 @@ function takeMemoFromUrl(url) {
     if (!/memo/i.test(path)) return false;
     text = u.searchParams.get("text") || u.searchParams.get("t") || "";
   } catch (e) { return false; }
+  lastMemoUrl = url; lastMemoUrlAt = Date.now();
   text = String(text).trim();
   if (!text) return false;
   const before = loadMemos().length;
@@ -4007,7 +4013,7 @@ function renderMemoScreen() {
       </div>
       <button type="button" class="btn btn-primary btn-xl memo-add" id="memo-save">${t("保存")}</button>`;
   document.getElementById("memo-wrap").innerHTML = `
-    <p class="memo-lead">${t("一瞬のひらめき・あとでやること")}</p>
+    <p class="memo-lead"><span class="nowrap">${t("一瞬のひらめき・")}</span><span class="nowrap">${t("あとでやること")}</span></p>
     ${writePart}
     ${listPart}`;
   wireMics(document.getElementById("memo-wrap"));
