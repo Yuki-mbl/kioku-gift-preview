@@ -1873,6 +1873,12 @@ html.fixed-page .screen.active { min-height: 0; height: 100%; }
 }
 /* 服装の日別ページ：その日の記録カード（見返すと同じ見た目で並ぶ） */
 .outfit-day-recs { display: flex; flex-direction: column; gap: 14px; margin-top: 14px; }
+/* 服の1日：ほかの記録の見出し・服の箱の中の「消す」（2026-10-12） */
+.outfit-day-recs-head { margin: 22px 4px 0; color: var(--muted); font-size: 1rem; font-weight: 600; }
+.outfit-day-recs-head + .outfit-day-recs { margin-top: 8px; }
+.oday-del-row { display: flex; justify-content: center; margin-top: 14px; }
+.oday-del { min-height: 44px; padding: 8px 20px; border-radius: 999px; border: 1.5px solid var(--border);
+  background: transparent; color: var(--muted); font: inherit; font-size: 1rem; cursor: pointer; }
 /* 保存（左）と今日の服（右）をひと並びに（カードをコンパクトに。2026-09-04） */
 .outfit-btn-row { display: flex; gap: 10px; margin-top: 10px; }
 .outfit-btn-row #outfit-save { flex: 0 0 34%; }
@@ -5882,7 +5888,9 @@ function renderOutfitDay(ds) {
   // ただし**服装カレンダーの日付から開いたときだけ**（2026-09-14 Yukiさん指摘）。
   // 日別ページや「この日を書き足す」から来たときは、直前の画面に同じ一覧が出ているので繰り返さない
   const recs = outfitReturnTo ? [] : dayFields(ds).filter(f => f.label !== "服装など");
+  // 服とは別のものだと分かるよう見出しをつける（2026-10-12 Yukiさん「服のページなのに外食が載ってる」）
   const recHtml = recs.length ? `
+    <p class="outfit-day-recs-head">${t("この日のほかの記録")}</p>
     <div class="outfit-day-recs">${recs.map((f, i) => `
       <div class="card detail-card tappable" data-oidx="${i}" role="button" tabindex="0">
         <div class="detail-label">${t(f.label)}</div>${linkify(f.text)}<span class="detail-chev">›</span>
@@ -5897,9 +5905,10 @@ function renderOutfitDay(ds) {
         <textarea id="oday-note" class="outfit-note-input" rows="1" placeholder="${phEx("oday-note", t("例：紺のセーター"))}">${esc(o.note || "")}</textarea>
         ${micMini("oday-note")}
       </div>
+      ${(o.photo || o.note) ? `<div class="oday-del-row"><button type="button" class="oday-del" id="outfit-day-del">${t("この日の服を消す")}</button></div>` : ""}
     </div>
-    ${recHtml}
-    ${(o.photo || o.note) ? `<button type="button" class="btn btn-secondary btn-xl" id="outfit-day-del" style="margin-top:14px;">${t("この日の服を消す")}</button>` : ""}`;
+    ${recHtml}`;
+  // 「この日の服を消す」は服の箱の中・控えめな見た目に（2026-10-12。前は一番下で「← 戻る」と重なっていた）
   // 記録カードをタップ → その項目の置き場所へ（見返すの日別画面と同じ動き）
   document.querySelectorAll("#outfit-wrap .detail-card.tappable").forEach(card => {
     const go = e => {
