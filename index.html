@@ -3893,7 +3893,7 @@ function closeMemo() {
 // 忙しいときは、思いついたことを何でも「一瞬のひらめき」に書いておき、あとから
 // 食事・買い物・服装へ振り分ける。日記は鍵をかけている人がいるので行き先に入れない。
 // ありがとうは「夜に思い出す時間」そのものなので、ここからは入れない（Yukiさん判断）。
-let memoMove = null; // {i} ＝行き先を選ぶ / {i, dest:"meal"} ＝いつの分かを選ぶ
+let memoMove = null; // {i} ＝行き先を選ぶ / {i, dest:"meal"} ＝いつの分かを選ぶ / {i, dest:"shopping"} ＝どの欄かを選ぶ
 const MEMO_DESTS = [
   { key: "meal", name: "食事", icon: "daily" },
   { key: "shopping", name: "買い物", icon: "shopping" },
@@ -3934,8 +3934,10 @@ function moveMemoTo(i, dest, slot) {
     entries[ds].meal = meal;
     saveEntries();
   } else if (dest === "shopping") {
+    // 欄は2問目で選ぶ（2026-10-12 Yukiさん指摘：前は全部「まとめて」に入っていた）
     const sh = loadShopping();
-    sh.other = joinText(sh.other, text);
+    const key = SHOP_CATS.some(c => c.key === slot) ? slot : "other";
+    sh[key] = joinText(sh[key], text);
     saveShopping(sh);
   } else if (dest === "outfit") {
     setOutfit(ds, { note: joinText((outfitOf(ds) || {}).note, text) });
@@ -3968,10 +3970,24 @@ function renderMemoMove() {
       </div>
       <button type="button" class="btn btn-soft btn-xl" id="memo-move-cancel" style="margin-top:14px;">${t("このまま置いておく")}</button>`;
     wrap.querySelectorAll(".memo-dest").forEach(b => b.addEventListener("click", () => {
-      if (b.dataset.dest === "meal") { memoMove = { i: memoMove.i, dest: "meal" }; renderMemoScreen(); }
+      if (b.dataset.dest === "meal" || b.dataset.dest === "shopping") { memoMove = { i: memoMove.i, dest: b.dataset.dest }; renderMemoScreen(); }
       else moveMemoTo(memoMove.i, b.dataset.dest);
     }));
     document.getElementById("memo-move-cancel").addEventListener("click", () => { memoMove = null; renderMemoScreen(); });
+    return;
+  }
+  if (memoMove.dest === "shopping") {
+    // 買い物：どの欄に入れるか（食事の「いつの分」と同じ形。自動の振り分けはしない＝外れると不安にさせる）
+    wrap.innerHTML = `
+      <p class="memo-lead">${t("どの欄に入れますか？")}</p>
+      <p class="memo-move-text">${esc(m.text)}</p>
+      <div class="memo-dests">
+        ${SHOP_CATS.map(c => `<button type="button" class="btn btn-secondary btn-xl memo-shopcat" data-cat="${c.key}"><span class="btn-ico">${balloonIconSvg(c.icon)}</span>${t(c.short || c.name)}</button>`).join("")}
+      </div>
+      <button type="button" class="btn btn-soft btn-xl" id="memo-move-back" style="margin-top:14px;">${t("← 戻る")}</button>`;
+    wrap.querySelectorAll(".memo-shopcat").forEach(b =>
+      b.addEventListener("click", () => moveMemoTo(memoMove.i, "shopping", b.dataset.cat)));
+    document.getElementById("memo-move-back").addEventListener("click", () => { memoMove = { i: memoMove.i }; renderMemoScreen(); });
     return;
   }
   const now = mealSlotNow();
