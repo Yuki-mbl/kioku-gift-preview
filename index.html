@@ -6954,9 +6954,9 @@ function renderShoppingRecall() {
         <span class="shop-check">${t("答え合わせ")}</span>
       </div>
     </button>`).join("");
+  // 「先に思い出してから、タップで答え合わせ。」の一言は削除（2026-10-12 Yukiさん指示）
   document.getElementById("shopping-wrap").innerHTML = `
     <p class="shop-lead"><span class="lead-ico">${balloonIconSvg("shopping")}</span>${t("思い出しながら、お買い物")}</p>
-    <p class="shop-note"><span class="nowrap">${t("先に思い出してから")}</span><span class="nowrap">${t("タップで答え合わせ。")}</span></p>
     ${shopDoneBarHtml()}
     <button type="button" class="btn btn-green btn-xl" id="shop-openall">${t("ぜんぶ答え合わせ")}</button>
     ${cards}
