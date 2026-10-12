@@ -5375,7 +5375,13 @@ function goBackTo(ret) {
   if (!ret) { goHome(); return; }
   // 「うつす」で来たときは、ひらめきの一覧へ戻す。
   // 下の画面はホームに戻しておく（一覧を閉じたときに、さっきの記録画面が残っていると迷うため）
-  if (ret.screen === "memo") { goHome(); openMemo(); return; }
+  // 「うつす」は開いた一覧にしかないので、帰りも一覧を開いた状態に戻す（2026-10-12 Yukiさん指摘：
+  // openMemo() が一覧を閉じるため、入力欄だけの画面に戻ってしまっていた）
+  if (ret.screen === "memo") {
+    goHome(); openMemo();
+    if (loadMemos().length) { memoListOpen = true; renderMemoScreen(); }
+    return;
+  }
   if (ret.screen === "sleep") { openSleep(); return; } // おやすみの「日記へ →」から来た（2026-10-03）
   if (ret.screen === "outfitday") { renderOutfitDay(ret.ds); showScreen("screen-outfit"); return; }
   openDayDetail(ret.ds);
