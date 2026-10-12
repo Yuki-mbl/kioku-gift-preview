@@ -2628,7 +2628,7 @@ html[data-theme="dark"] .brand-line { font-weight: 700; }
 .memo-toast {
   /* 長い知らせは折り返す（横にはみ出さない。2026-09-24 iPhone実機） */
   position: fixed; left: 50%; bottom: 96px; transform: translateX(-50%) translateY(8px);
-  z-index: 200; width: max-content; max-width: min(86vw, 420px); text-align: center; line-height: 1.5;
+  z-index: 450; /* ひらめきのシート（300）の上にも見えるように（2026-10-12） */ width: max-content; max-width: min(86vw, 420px); text-align: center; line-height: 1.5;
   background: var(--card); color: var(--text);
   border: 1.5px solid var(--accent); border-radius: 999px;
   padding: 12px 20px; font-size: 1.05rem; font-weight: 700;
@@ -2637,6 +2637,20 @@ html[data-theme="dark"] .brand-line { font-weight: 700; }
 }
 .memo-toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
 @media (prefers-reduced-motion: reduce) { .memo-toast { transition: none; } }
+/* マイクの「保存」の案内（2026-10-12）。聞いているあいだだけ上に出す（下の知らせ・浮きボタンと重ならない） */
+.mic-hint {
+  position: fixed; left: 50%; top: calc(14px + env(safe-area-inset-top)); transform: translateX(-50%) translateY(-8px);
+  z-index: 460; width: max-content; max-width: min(90vw, 440px); text-align: center; line-height: 1.5;
+  background: var(--card); color: var(--accent-strong);
+  border: 1.5px solid var(--accent); border-radius: 18px;
+  padding: 10px 18px; font-size: 1.05rem; font-weight: 800;
+  box-shadow: var(--shadow-lg);
+  opacity: 0; pointer-events: none; transition: opacity .2s ease, transform .2s ease;
+}
+.mic-hint.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+@media (prefers-reduced-motion: reduce) { .mic-hint { transition: none; } }
+/* ひらめきのシートが開いているときは、知らせも上に出す（下だと、マイクで書いている欄に重なる） */
+body:has(#memo-pop:not([hidden])) .memo-toast { top: calc(14px + env(safe-area-inset-top)); bottom: auto; }
 
 /* Siriの手順（iPhoneの設定にだけ出る） */
 .siri-steps { margin: 12px 0 0 1.2em; }
@@ -3422,9 +3436,11 @@ function toastMemo(msg) {
 (() => {
   const A = appPlugin();
   if (!A) return;
-  try { A.addListener("appUrlOpen", d => takeMemoFromUrl(d && d.url)); } catch (e) {}
+  // Siri のメモ（kiokugift://memo）か、引き継ぎファイル（LINE・メールの添付を「記憶のギフトで開く」）
+  const onOpen = url => { if (!takeTransferUrl(url)) takeMemoFromUrl(url); };
+  try { A.addListener("appUrlOpen", d => onOpen(d && d.url)); } catch (e) {}
   // アプリが閉じているときに呼ばれた場合は、立ち上がったあとに受け取る
-  try { A.getLaunchUrl().then(r => { if (r && r.url) takeMemoFromUrl(r.url); }).catch(() => {}); } catch (e) {}
+  try { A.getLaunchUrl().then(r => { if (r && r.url) onOpen(r.url); }).catch(() => {}); } catch (e) {}
 })();
 
 function buzzSave() {
@@ -3752,6 +3768,8 @@ function goHome() {
 // 起動時にどこを開くか。いつでもホーム（2026-09-14 設定「最初に開く画面」は廃止）。
 // 帰る場所がいつも同じほうが迷わないため。旧設定 settings.startScreen は見ない
 function applyStart() {
+  appStarted = true;
+  setTimeout(tryOpenPendingTransfer, 0); // 引き継ぎファイルを押して開いたとき（ロック解除のあとも）
   // 15分以内に閉じていたら、直前の画面へ戻す（買い物の途中で消灯しても続きから）
   const rez = store.get("mn_resume", null);
   if (rez && rez.id && Date.now() - rez.at < 15 * 60 * 1000) {
@@ -5877,12 +5895,40 @@ function readFileText(file) {
     r.readAsText(file);
   });
 }
-async function onTransferFilePicked(file) {
-  if (!file) return;
+function onTransferFilePicked(file) {
+  if (file) onTransferLoaded(() => readFileText(file));
+}
+// ② LINE・メールの添付を押して「記憶のギフトで開く」で来たとき（2026-10-12）
+//   Android＝content://…（intent-filter）、iPhone＝file://…/Inbox/…（CFBundleDocumentTypes）。
+//   起動の途中・ロック中に届いたら預かっておき、使える状態になってから開く
+let pendingTransferUrl = "", lastTransferUrl = "", lastTransferUrlAt = 0, appStarted = false;
+function takeTransferUrl(url) {
+  if (!url || !/^(file|content):/i.test(url)) return false;
+  if (url === lastTransferUrl && Date.now() - lastTransferUrlAt < 5000) return true; // 起動時に2回届く分
+  lastTransferUrl = url; lastTransferUrlAt = Date.now();
+  pendingTransferUrl = url;
+  tryOpenPendingTransfer();
+  return true;
+}
+function tryOpenPendingTransfer() {
+  if (!pendingTransferUrl || !appStarted) return;
+  if (document.getElementById("screen-lock")?.classList.contains("active")) return; // 解除のあと applyStart から呼ばれる
+  const url = pendingTransferUrl; pendingTransferUrl = "";
+  openTransferIn(profile ? "settings" : "onboarding");
+  onTransferLoaded(async () => {
+    const r = await fsPlugin().readFile({ path: url, encoding: "utf8" });
+    return String((r && r.data) || "");
+  }, url);
+}
+// iPhone は受け取ったファイルを Inbox に写してから渡すので、済んだら片づける
+function cleanupTransferUrl(url) {
+  if (url && /^file:/i.test(url) && /\/Inbox\//.test(url)) fsPlugin()?.deleteFile({ path: url }).catch(() => {});
+}
+async function onTransferLoaded(getText, srcUrl) {
   const wrap = document.getElementById("transfer-in");
   wrap.innerHTML = `<p class="transfer-lead" style="margin-top:40px;">${t("読んでいます…")}</p>`;
   let obj;
-  try { obj = JSON.parse(await readFileText(file)); } catch (e) { obj = null; }
+  try { obj = JSON.parse(await getText()); } catch (e) { obj = null; }
   if (!obj || obj.app !== TRANSFER_APP || !obj.data) {
     renderTransferIn(t("このファイルは、記憶のギフトの引き継ぎファイルではないようです。"));
     return;
@@ -5906,13 +5952,14 @@ async function onTransferFilePicked(file) {
     <p class="transfer-safe"><span class="nowrap">${t("このスマホに足しますか？")}</span><span class="nowrap">${t("（今ある記録は消えません）")}</span></p>
     <button type="button" class="btn btn-primary btn-xl" id="ti-go">${t("受け取る")}</button>
     <button type="button" class="btn btn-secondary btn-xl" id="ti-cancel">${t("やめる")}</button>`;
-  document.getElementById("ti-cancel").addEventListener("click", () => renderTransferIn());
+  document.getElementById("ti-cancel").addEventListener("click", () => { cleanupTransferUrl(srcUrl); renderTransferIn(); });
   document.getElementById("ti-go").addEventListener("click", async () => {
     wrap.innerHTML = `<p class="transfer-lead" style="margin-top:40px;">${t("受け取っています…")}</p>`;
     let res;
     try { res = await applyTransfer(obj); }
     catch (e) { renderTransferIn(`${t("うまくいきませんでした。")}<br>${t("このスマホの記録はそのままです。")}`); return; }
     buzzSave();
+    cleanupTransferUrl(srcUrl);
     wrap.innerHTML = `
       <p class="transfer-step">${t("受け取りました")}</p>
       <p class="transfer-lead">${t("{d}日分の記録", { d: res.days })}${res.photos ? t("・写真{p}枚", { p: res.photos }) : ""}<br>${t("を足しました。")}</p>
@@ -7397,6 +7444,7 @@ function micMini(targetId, saveBtnId, mode) {
 document.addEventListener("visibilitychange", () => { if (document.hidden) stopMic(); });
 window.addEventListener("pagehide", () => stopMic());
 function stopMic() {
+  hideMicHint();
   if (!micActive) return;
   const m = micActive;
   micActive = null;
@@ -7405,6 +7453,30 @@ function stopMic() {
   m.btn.classList.remove("listening");
   m.btn.innerHTML = m.btn.dataset.idle ? micIconSvg() : `${micIconSvg()}<span class="mic-label">${t("話して書く")}</span>`;
 }
+// マイクの「保存」の案内（2026-10-12 Yukiさん）。
+// 聞いているあいだだけ画面の上に小さく出す（押さなくてよい。止まると消える）。
+// ポップアップにしないのは、話している途中に「OK」を押させないため。
+// 最初の10回まで。ただし「保存」と言って保存できたのが3回になったら、覚えたとみなして出さない
+// （1回では高齢の方には早すぎる、とYukiさん）。「保存」で保存できる欄（data-voice-save）だけ
+const MIC_HINT_MAX_STARTS = 10, MIC_HINT_MAX_SAVES = 3;
+let micHintSkipOnce = false;
+function micHintState() { return store.get("mn_mic_hint", { starts: 0, saves: 0 }); }
+function showMicHint(btn) {
+  if (micHintSkipOnce) { micHintSkipOnce = false; return; }
+  if (!btn || !btn.dataset.voiceSave) return;
+  const s = micHintState();
+  if (s.starts >= MIC_HINT_MAX_STARTS || s.saves >= MIC_HINT_MAX_SAVES) return;
+  s.starts++; store.set("mn_mic_hint", s);
+  let el = document.getElementById("mic-hint");
+  if (!el) {
+    el = document.createElement("div");
+    el.id = "mic-hint"; el.className = "mic-hint"; el.setAttribute("role", "status");
+    (document.getElementById("app") || document.body).appendChild(el);
+  }
+  el.innerHTML = `<span class="nowrap">${t("話し終わりに「保存」と言うと、")}</span><span class="nowrap">${t("そのまま保存されます")}</span>`;
+  el.classList.add("show");
+}
+function hideMicHint() { document.getElementById("mic-hint")?.classList.remove("show"); }
 // 語尾の「保存」：その欄の保存ボタンを押す。
 // 一瞬のひらめきだけは、保存したあと**続けて次の1件を聞く**（2026-10-12 Yukiさん要望：
 // 何件か続けて残したいのに、保存のたびにマイクが消えて押し直すのが手間）。
@@ -7413,6 +7485,7 @@ function stopMic() {
 function voiceSave(btn) {
   const saveBtnId = btn.dataset.voiceSave;
   if (!saveBtnId) return;
+  const hs = micHintState(); hs.saves++; store.set("mn_mic_hint", hs); // 「保存」と言えた回数（案内を出すかどうかに使う）
   const cont = saveBtnId === "memo-save";
   const before = cont ? loadMemos().length : 0;
   document.getElementById(saveBtnId)?.click();
@@ -7421,6 +7494,7 @@ function voiceSave(btn) {
   setTimeout(() => {
     const nb = document.querySelector('#memo-wrap .mic-btn[data-mic="memo-input"]');
     if (!nb || micActive || memoMove || document.getElementById("memo-pop").hidden || document.hidden) return;
+    micHintSkipOnce = true; // 続けて聞くときは「続けてどうぞ」だけ出す（案内は重ねない・数えない）
     nb.click();
     toastMemo(t("続けてどうぞ"));
   }, 1000);
@@ -7672,6 +7746,7 @@ function wireMics(root) {
         };
         btn.classList.add("listening");
         btn.innerHTML = btn.dataset.idle ? micIconSvg() : `${micIconSvg()}<span class="mic-label">${t("聞いています…（押すと止まる）")}</span>`;
+        showMicHint(btn);
         startListen();
         return;
       }
@@ -7716,6 +7791,7 @@ function wireMics(root) {
       rec.onerror = () => stopMic();
       try { rec.start(); } catch (e) { target.removeEventListener("input", onUserEdit); return; }
       micActive = { rec, btn, target, cleanup: () => target.removeEventListener("input", onUserEdit) };
+      showMicHint(btn);
       btn.classList.add("listening");
       btn.innerHTML = btn.dataset.idle ? micIconSvg() : `${micIconSvg()}<span class="mic-label">${t("聞いています…（押すと止まる）")}</span>`;
     });
@@ -8096,6 +8172,8 @@ function init() {
   syncQuickMemoNotify(); // すぐ書けるメモ通知（アプリ版のみ。通知から書かれた分も取り込む）
   if (!profile) {
     showScreen("screen-onboarding");
+    appStarted = true;
+    setTimeout(tryOpenPendingTransfer, 0); // 新しいスマホで、初めて開くのが引き継ぎファイルから
   } else if (settings.passcode) {
     showLock();
   } else {
