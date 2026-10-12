@@ -1496,6 +1496,12 @@ mark {
 }
 .transfer-count { text-align: center; font-size: 1.05rem; color: var(--muted); margin: -6px 0 0; }
 .transfer-hint { text-align: center; margin: -10px 0 4px; }
+.transfer-again {
+  display: block; margin: 0 auto; min-height: 44px; padding: 8px 12px;
+  background: none; border: none; font: inherit; font-size: 1rem; color: var(--muted);
+  text-decoration: underline; text-underline-offset: 3px; cursor: pointer;
+}
+.transfer-again .nowrap { text-decoration: underline; text-underline-offset: 3px; } /* 折り返し用の塊には下線が引き継がれないため */
 .transfer-err { text-align: center; font-weight: 700; color: var(--danger, #c85a4b); line-height: 1.7; margin: 0; }
 .transfer-code {
   font-size: 2.6rem; font-weight: 800; letter-spacing: .25em;
@@ -5855,15 +5861,23 @@ function renderTransferShare(doShare) {
     <p class="transfer-step">${t("前のスマホでやること")}</p>
     <p class="transfer-lead"><span class="nowrap">${t("次に出る一覧から、")}</span><span class="nowrap">${t("ご自分あてに送れるものを")}</span><span class="nowrap">${t("選んでください")}</span></p>
     <p class="transfer-count">${t("（LINE、メールなど）")}</p>
-    <button type="button" class="btn btn-primary btn-xl" id="tr-share">${t("送る先をえらぶ")}</button>
-    <div id="tr-after" hidden>
-      <p class="transfer-lead" style="margin-top:8px;"><span class="nowrap">${t("送れたら、新しいスマホで")}</span><span class="nowrap">${t("「前のスマホから受け取る」を")}</span><span class="nowrap">${t("開いてください")}</span></p>
-    </div>`;
+    <button type="button" class="btn btn-primary btn-xl" id="tr-share">${t("送る先をえらぶ")}</button>`;
   document.getElementById("tr-share").addEventListener("click", async () => {
-    try { await doShare(); } catch (e) {} // やめた（共有画面を閉じた）ときも、そのまま
-    document.getElementById("tr-after").hidden = false;
-    document.getElementById("tr-share").textContent = t("もう一度送る");
+    try { await doShare(); } catch (e) { return; } // 一覧を閉じた（送らなかった）ときは、この画面のまま
+    renderTransferSent(doShare);
   });
+}
+// 送ったあと。「もう一度送る」を大きく出すと「もう一回送るの？」と迷わせたので（2026-10-12 Yukiさん）、
+// 終わったことをはっきり伝え、送り直しは小さな文字のボタンにする
+function renderTransferSent(doShare) {
+  const wrap = document.getElementById("transfer-out");
+  wrap.innerHTML = `
+    <p class="transfer-step"><span class="nowrap">${t("前のスマホでやることは、")}</span><span class="nowrap">${t("これで終わりです")}</span></p>
+    <p class="transfer-lead"><span class="nowrap">${t("新しいスマホで、")}</span><span class="nowrap">${t("届いたファイルを押して、")}</span><span class="nowrap">${t("「記憶のギフト」で開いてください")}</span></p>
+    <button type="button" class="btn btn-primary btn-xl" id="tr-done">${t("終わる")}</button>
+    <button type="button" class="transfer-again" id="tr-again"><span class="nowrap">${t("うまく送れなかったときは、")}</span><span class="nowrap">${t("もう一度送る")}</span></button>`;
+  document.getElementById("tr-done").addEventListener("click", () => showScreen("screen-settings"));
+  document.getElementById("tr-again").addEventListener("click", async () => { try { await doShare(); } catch (e) {} });
 }
 
 // ---------- 新しいスマホ：受け取る ----------
