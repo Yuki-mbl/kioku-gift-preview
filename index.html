@@ -1102,7 +1102,7 @@ mark {
 /* ===== 日の詳細 ===== */
 .detail-wrap { padding: 12px 20px 40px; display: flex; flex-direction: column; gap: 14px; }
 .detail-date { font-size: 1.5rem; font-weight: 900; margin: 6px 0 4px; }
-.detail-card { margin: 0; }
+.detail-card { margin: 0; display: flow-root; } /* 右に浮かせた服の写真が、文が短くてもカードからはみ出さない（2026-10-12） */
 /* カードはタップでその項目の置き場所が開く */
 .detail-card.tappable {
   position: relative;
@@ -7026,6 +7026,26 @@ function stopMic() {
   m.btn.classList.remove("listening");
   m.btn.innerHTML = m.btn.dataset.idle ? micIconSvg() : `${micIconSvg()}<span class="mic-label">${t("話して書く")}</span>`;
 }
+// 語尾の「保存」：その欄の保存ボタンを押す。
+// 一瞬のひらめきだけは、保存したあと**続けて次の1件を聞く**（2026-10-12 Yukiさん要望：
+// 何件か続けて残したいのに、保存のたびにマイクが消えて押し直すのが手間）。
+// 黙っていれば、いつもの10秒（MIC_IDLE_STOP_MS）で止まる。指で保存ボタンを押したときは続けない。
+// 「黙ったら自動で次の件にする」はしない（考えながら話すと1つの文が2件に割れる）
+function voiceSave(btn) {
+  const saveBtnId = btn.dataset.voiceSave;
+  if (!saveBtnId) return;
+  const cont = saveBtnId === "memo-save";
+  const before = cont ? loadMemos().length : 0;
+  document.getElementById(saveBtnId)?.click();
+  if (!cont || loadMemos().length <= before) return; // 空・満杯で入らなかったら続けない
+  // 前のマイクが手放されるのを待ってから聞き直す（すぐ始めると失敗する端末がある）
+  setTimeout(() => {
+    const nb = document.querySelector('#memo-wrap .mic-btn[data-mic="memo-input"]');
+    if (!nb || micActive || memoMove || document.getElementById("memo-pop").hidden || document.hidden) return;
+    nb.click();
+    toastMemo(t("続けてどうぞ"));
+  }, 1000);
+}
 function wireMics(root) {
   (root || document).querySelectorAll(".mic-btn[data-mic]").forEach(btn => {
     if (btn.dataset.wired) return;
@@ -7085,8 +7105,7 @@ function wireMics(root) {
           programmatic = false;
           if (wantSave) {
             stopMic();
-            const saveBtnId = btn.dataset.voiceSave;
-            if (saveBtnId) document.getElementById(saveBtnId)?.click();
+            voiceSave(btn);
             return true; // 止めた
           }
           return false;
@@ -7311,9 +7330,7 @@ function wireMics(root) {
         programmatic = false;
         if (wantSave) {
           stopMic();
-          // 保存ボタンがある欄はそれを押す。自動保存の欄は止めるだけでよい
-          const saveBtnId = btn.dataset.voiceSave;
-          if (saveBtnId) document.getElementById(saveBtnId)?.click();
+          voiceSave(btn); // 保存ボタンがある欄はそれを押す。自動保存の欄は止めるだけでよい
         }
       };
       rec.onend = () => { if (micActive && micActive.btn === btn) stopMic(); };
