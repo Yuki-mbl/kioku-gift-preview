@@ -1488,6 +1488,15 @@ mark {
 /* ===== 引き継ぎコード ===== */
 .transfer-wrap { padding: 24px 22px 40px; display: flex; flex-direction: column; gap: 18px; }
 .transfer-lead { font-size: 1.15rem; font-weight: 700; text-align: center; line-height: 1.8; }
+/* スマホの引き継ぎ（ファイル方式・2026-10-12） */
+.transfer-step { text-align: center; font-size: 1rem; font-weight: 800; color: var(--accent-strong); margin: 0; }
+.transfer-safe {
+  text-align: center; font-size: 1.1rem; font-weight: 800; line-height: 1.7; margin: 0;
+  background: var(--accent-soft); color: var(--accent-strong); border-radius: 18px; padding: 14px 12px;
+}
+.transfer-count { text-align: center; font-size: 1.05rem; color: var(--muted); margin: -6px 0 0; }
+.transfer-hint { text-align: center; margin: -10px 0 4px; }
+.transfer-err { text-align: center; font-weight: 700; color: var(--danger, #c85a4b); line-height: 1.7; margin: 0; }
 .transfer-code {
   font-size: 2.6rem; font-weight: 800; letter-spacing: .25em;
   text-align: center; color: var(--accent-strong);
@@ -2710,24 +2719,16 @@ html[data-theme="dark"] .brand-line { font-weight: 700; }
       <button class="back-fab" id="pc-back" data-t data-t-aria aria-label="戻る">← 戻る</button>
     </section>
 
-    <!-- ===== 引き継ぎコード（作る） ===== -->
+    <!-- ===== スマホの引き継ぎ：前のスマホで送る（2026-10-12 ファイル方式） ===== -->
     <section id="screen-transfer-code" class="screen">
-      <div class="transfer-wrap">
-        <p class="transfer-lead"><span data-t>新しいスマホの最初の画面で、</span><br><span data-t>この番号を入れてください。</span></p>
-        <div class="transfer-code" id="transfer-code"></div>
-        <p class="settings-hint" style="text-align:center;" data-t>（この画面は見本です。本番アプリで実際に引き継げます）</p>
-      </div>
+      <div class="transfer-wrap" id="transfer-out"></div>
       <button class="back-fab" id="tc-back" data-t data-t-aria aria-label="戻る">← 戻る</button>
     </section>
 
-    <!-- ===== 引き継ぎコード（入れる） ===== -->
+    <!-- ===== スマホの引き継ぎ：新しいスマホで受け取る ===== -->
     <section id="screen-code-entry" class="screen">
-      <div class="transfer-wrap">
-        <p class="transfer-lead"><span data-t>前のスマホで作った</span><br><span data-t>引き継ぎコードを入れてください。</span></p>
-        <input type="text" inputmode="numeric" maxlength="6" id="ce-input" class="code-input" data-t-ph placeholder="６けた">
-        <button type="button" class="btn btn-primary btn-xl" id="ce-submit" data-t>引き継ぐ</button>
-        <p class="settings-hint" id="ce-msg" style="text-align:center;" data-t>（この画面は見本です。本番アプリで実際に引き継げます）</p>
-      </div>
+      <div class="transfer-wrap" id="transfer-in"></div>
+      <input type="file" id="transfer-file" hidden>
       <button class="back-fab" id="ce-back" data-t data-t-aria aria-label="戻る">← 戻る</button>
     </section>
 
@@ -2785,7 +2786,7 @@ html[data-theme="dark"] .brand-line { font-weight: 700; }
           </div>
         </div>
         <button class="btn btn-primary btn-xl" id="ob-start" data-t>はじめる</button>
-        <button type="button" class="onboard-code-link" id="ob-code-link" data-t>引き継ぎコードをお持ちの方はこちら</button>
+        <button type="button" class="onboard-code-link" id="ob-code-link" data-t>前のスマホから引き継ぐ方はこちら</button>
       </div>
     </section>
 
@@ -2978,7 +2979,8 @@ html[data-theme="dark"] .brand-line { font-weight: 700; }
           <p class="about-one" style="font-size:1.05rem;" data-t>🔒 記録は自動で守られます</p>
           <p class="settings-hint" style="margin-top:8px;" data-t>機種変更しても、新しいスマホを同じ設定（iPhoneはApple ID、AndroidはGoogleアカウント）で引き継げば、記録もそのまま戻ります。ふだんは何もしなくて大丈夫です。</p>
           <p class="settings-hint" style="margin-top:16px;"><span class="nowrap" data-t>別のスマホや、</span><span class="nowrap" data-t>別のアカウントに</span><span class="nowrap" data-t>移すときはこちら↓</span></p>
-          <button type="button" class="btn btn-secondary btn-xl" id="transfer-make" style="margin-top:8px;" data-t>引き継ぎコードを作る</button>
+          <button type="button" class="btn btn-secondary btn-xl" id="transfer-make" style="margin-top:8px;" data-t>新しいスマホへ送る</button>
+          <button type="button" class="btn btn-secondary btn-xl" id="transfer-take" style="margin-top:10px;" data-t>前のスマホから受け取る</button>
         </div>
         <div class="card">
           <div class="settings-label" data-t>このアプリについて</div>
@@ -5676,19 +5678,388 @@ function savePasscode(target) {
 }
 
 // =========================================================
-// データの引き継ぎ（自動バックアップ＋引き継ぎコード）と全消去
-// 本番アプリでは iCloud / Google の自動バックアップが主役。
-// 引き継ぎコードは自動が効かない場合の補助（下は画面デザインの見本）。
+// スマホの引き継ぎ（ファイル方式・2026-10-12）
+// 同じOS・同じアカウントなら iCloud / Google の自動バックアップで戻る。
+// 違うアカウントや Android⇄iPhone のときは、記録を1つのファイルにまとめて
+// ご自分あてに送り（LINE・メールなど。送り方はOSの共有画面に任せる）、新しいスマホで開く。
+// サーバーは使わない。ファイルは当社を通らない。
+//  ・書き出しても、このスマホの記録は消えない
+//  ・受け取りは「合わせる」＝今ある記録は残して足す（2026-10-12 Yukiさん決定）。何も消さない
+//  ・失敗したら何も変えない。終わったら件数で知らせる
+//  ・ファイルの形が新しすぎる（受け取る側のアプリが古い）ときは、何も変えずに更新をお願いする
 // =========================================================
-function showTransferCode() {
-  // 見本用の6桁（本番はサーバー発行のコードに差し替え）
-  const code = String(Math.floor(100000 + Math.random() * 900000));
-  document.getElementById("transfer-code").textContent = code.split("").join(" ");
-  showScreen("screen-transfer-code");
+const TRANSFER_APP = "kioku-gift";
+const TRANSFER_FORMAT = 1; // ファイルの形の版。形を変えたら上げる（古い版のファイルは読み続ける）
+const TRANSFER_EXT = ".kioku";
+let transferInFrom = "settings"; // 受け取り画面の戻り先（settings | onboarding）
+
+function sharePlugin() {
+  return (window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.Share) || null;
 }
-function openCodeEntry() {
-  document.getElementById("ce-input").value = "";
+// 記録の中の写真（file:名前）を全部数える
+function transferPhotoNames(d) {
+  const names = new Set();
+  const add = v => { if (isFilePhoto(v)) names.add(String(v).slice(5)); };
+  for (const k in d.outfits || {}) add((d.outfits[k] || {}).photo);
+  for (const k in d.mealPhotos || {}) {
+    const v = d.mealPhotos[k];
+    if (typeof v === "string") add(v); else for (const sl in v || {}) add(v[sl]);
+  }
+  (d.album || []).forEach(a => add(a && a.photo));
+  return names;
+}
+// 写真を記録から外す（「文字だけ」のとき・写真のファイルが無いとき）
+function stripTransferPhotos(d, keep) {
+  const drop = v => hasPhoto(v) && !(keep && keep(v));
+  for (const k in d.outfits || {}) {
+    const o = d.outfits[k];
+    if (o && drop(o.photo)) { delete o.photo; if (!Object.keys(o).length) delete d.outfits[k]; }
+  }
+  for (const k in d.mealPhotos || {}) {
+    const v = d.mealPhotos[k];
+    if (typeof v === "string") { if (drop(v)) delete d.mealPhotos[k]; continue; }
+    for (const sl in v || {}) if (drop(v[sl])) delete v[sl];
+    if (!v || !Object.keys(v).length) delete d.mealPhotos[k];
+  }
+  (d.album || []).forEach(a => { if (a && drop(a.photo)) a.photo = ""; });
+}
+// 送る中身（写真の本体は別に足す）。設定は見た目とロックだけ（買い切りの購入は運ばない＝ストアで復元）
+function buildTransferData() {
+  const s = settings || {};
+  return JSON.parse(JSON.stringify({
+    entries, outfits: loadOutfits(), mealPhotos: loadMealPhotos(),
+    album: loadAlbumMemos(), albumLast: store.get("mn_album_last", ""),
+    memos: loadMemos(), shopping: loadShopping(), moon: store.get("mn_moon", null), profile,
+    settings: { theme: s.theme, fontBoost: s.fontBoost, homeStyle: s.homeStyle,
+      passcode: s.passcode, diaryPass: s.diaryPass, recoveryQ: s.recoveryQ, recoveryA: s.recoveryA },
+  }));
+}
+function transferDayCount(d) {
+  const days = new Set([...Object.keys(d.entries || {}), ...Object.keys(d.outfits || {}), ...Object.keys(d.mealPhotos || {})]);
+  return days.size;
+}
+async function appVersionText() {
+  try {
+    const A = window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.App;
+    if (A && A.getInfo) { const i = await A.getInfo(); return (i && i.version) || ""; }
+  } catch (e) {}
+  return "";
+}
+function transferFileName() { return "kioku-gift-" + todayStr().replace(/-/g, "") + TRANSFER_EXT; }
+
+// ---------- 前のスマホ：送る ----------
+async function openTransferOut() {
+  showScreen("screen-transfer-code");
+  const wrap = document.getElementById("transfer-out");
+  const d = buildTransferData();
+  const names = transferPhotoNames(d);
+  // 写真の大きさ（ファイル）＋ブラウザ版の埋め込み写真
+  let bytes = 0, count = names.size;
+  const fs = fsPlugin();
+  if (fs && names.size) {
+    for (const n of names) {
+      try { const st = await fs.stat({ path: PHOTO_DIR + "/" + n, directory: "DATA" }); bytes += Number(st.size) || 0; } catch (e) {}
+    }
+  }
+  const inline = [];
+  const addInline = v => { if (isInlinePhoto(v)) inline.push(v); };
+  for (const k in d.outfits) addInline((d.outfits[k] || {}).photo);
+  for (const k in d.mealPhotos) { const v = d.mealPhotos[k]; if (typeof v === "string") addInline(v); else for (const sl in v || {}) addInline(v[sl]); }
+  d.album.forEach(a => addInline(a && a.photo));
+  inline.forEach(v => { bytes += Math.round(v.length * 0.75); });
+  count += inline.length;
+  const mb = Math.max(1, Math.round(bytes / 1048576 * 1.37)); // 文字にすると約1.37倍
+  const days = transferDayCount(d);
+  wrap.innerHTML = `
+    <p class="transfer-step">${t("前のスマホでやること")}</p>
+    <p class="transfer-safe"><span class="nowrap">${t("書き出しても、")}</span><span class="nowrap">${t("このスマホの記録は")}</span><span class="nowrap">${t("消えません")}</span></p>
+    <p class="transfer-lead"><span class="nowrap">${t("記録を1つのファイルにまとめて、")}</span><span class="nowrap">${t("ご自分あてに送ります。")}</span></p>
+    <p class="transfer-count">${t("{d}日分の記録", { d: days })}${count ? t("・写真{p}枚", { p: count }) : ""}</p>
+    ${count ? `
+      <button type="button" class="btn btn-primary btn-xl" id="tr-photos">${t("写真も入れて送る")}</button>
+      <p class="settings-hint transfer-hint"><span class="nowrap">${t("約{mb}MB。", { mb })}</span><span class="nowrap">${t("大きいとLINEで")}</span><span class="nowrap">${t("送れないことがあります")}</span></p>
+      <button type="button" class="btn btn-secondary btn-xl" id="tr-text">${t("文字だけ送る")}</button>
+      <p class="settings-hint transfer-hint"><span class="nowrap">${t("写真は入りません。")}</span><span class="nowrap">${t("軽くて確実です")}</span></p>`
+    : `<button type="button" class="btn btn-primary btn-xl" id="tr-text">${t("送る")}</button>`}`;
+  document.getElementById("tr-photos")?.addEventListener("click", () => makeTransferFile(true));
+  document.getElementById("tr-text").addEventListener("click", () => makeTransferFile(false));
+}
+async function makeTransferFile(withPhotos) {
+  const wrap = document.getElementById("transfer-out");
+  wrap.innerHTML = `<p class="transfer-lead" style="margin-top:40px;">${t("まとめています…")}</p>`;
+  try {
+    const d = buildTransferData();
+    const fs = fsPlugin();
+    const photos = {}; // 名前 → base64（ネイティブのファイル写真）
+    if (withPhotos && fs) {
+      for (const n of transferPhotoNames(d)) {
+        try { const r = await fs.readFile({ path: PHOTO_DIR + "/" + n, directory: "DATA" }); if (r && r.data) photos[n] = r.data; } catch (e) {}
+      }
+    }
+    // 文字だけ → 写真を全部外す。写真こみ → 読めなかった写真だけ外す（ブラウザ版の埋め込み写真はそのまま運ぶ）
+    stripTransferPhotos(d, withPhotos ? (v => isInlinePhoto(v) || photos[String(v).slice(5)] != null) : null);
+    const head = { app: TRANSFER_APP, format: TRANSFER_FORMAT, appVersion: await appVersionText(),
+      exportedAt: new Date().toISOString(), withPhotos: !!withPhotos, data: d };
+    const name = transferFileName();
+    if (fs && sharePlugin()) {
+      // 写真は1枚ずつ書き足す（全部を1本の文字にすると、写真が多い人でメモリが足りなくなる）
+      const headStr = JSON.stringify(head);
+      await fs.writeFile({ path: name, directory: "CACHE", encoding: "utf8", data: headStr.slice(0, -1) + ',"photos":{' });
+      let first = true;
+      for (const n in photos) {
+        await fs.appendFile({ path: name, directory: "CACHE", encoding: "utf8", data: (first ? "" : ",") + JSON.stringify(n) + ":" + JSON.stringify(photos[n]) });
+        first = false;
+      }
+      await fs.appendFile({ path: name, directory: "CACHE", encoding: "utf8", data: "}}" });
+      const uri = (await fs.getUri({ path: name, directory: "CACHE" })).uri;
+      renderTransferShare(() => sharePlugin().share({ title: t("記憶のギフトの引き継ぎ"), files: [uri] }));
+    } else {
+      // ブラウザ（プレビュー）：その場でダウンロード
+      head.photos = photos;
+      const blob = new Blob([JSON.stringify(head)], { type: "application/octet-stream" });
+      renderTransferShare(async () => {
+        const a = document.createElement("a");
+        a.href = URL.createObjectURL(blob); a.download = name;
+        document.body.appendChild(a); a.click(); a.remove();
+        setTimeout(() => URL.revokeObjectURL(a.href), 10000);
+      });
+    }
+  } catch (e) {
+    wrap.innerHTML = `<p class="transfer-lead" style="margin-top:40px;">${t("うまくいきませんでした。")}<br>${t("このスマホの記録はそのままです。")}</p>
+      <button type="button" class="btn btn-secondary btn-xl" id="tr-retry">${t("もう一度")}</button>`;
+    document.getElementById("tr-retry").addEventListener("click", openTransferOut);
+  }
+}
+// 送り先を選ぶ前に、何を選べばいいかを1画面で伝える（一覧の文字はOSが出す）
+function renderTransferShare(doShare) {
+  const wrap = document.getElementById("transfer-out");
+  wrap.innerHTML = `
+    <p class="transfer-step">${t("前のスマホでやること")}</p>
+    <p class="transfer-lead"><span class="nowrap">${t("次に出る一覧から、")}</span><span class="nowrap">${t("ご自分あてに送れるものを")}</span><span class="nowrap">${t("選んでください")}</span></p>
+    <p class="transfer-count">${t("（LINE、メールなど）")}</p>
+    <button type="button" class="btn btn-primary btn-xl" id="tr-share">${t("送る先をえらぶ")}</button>
+    <div id="tr-after" hidden>
+      <p class="transfer-lead" style="margin-top:8px;"><span class="nowrap">${t("送れたら、新しいスマホで")}</span><span class="nowrap">${t("「前のスマホから受け取る」を")}</span><span class="nowrap">${t("開いてください")}</span></p>
+    </div>`;
+  document.getElementById("tr-share").addEventListener("click", async () => {
+    try { await doShare(); } catch (e) {} // やめた（共有画面を閉じた）ときも、そのまま
+    document.getElementById("tr-after").hidden = false;
+    document.getElementById("tr-share").textContent = t("もう一度送る");
+  });
+}
+
+// ---------- 新しいスマホ：受け取る ----------
+function openTransferIn(from) {
+  transferInFrom = from || "settings";
   showScreen("screen-code-entry");
+  renderTransferIn();
+}
+function renderTransferIn(msg) {
+  const wrap = document.getElementById("transfer-in");
+  wrap.innerHTML = `
+    <p class="transfer-step">${t("新しいスマホでやること")}</p>
+    <p class="transfer-lead"><span class="nowrap">${t("前のスマホから送った")}</span><span class="nowrap">${t("ファイルを選んでください")}</span></p>
+    <p class="transfer-safe"><span class="nowrap">${t("今ある記録は消えません。")}</span><span class="nowrap">${t("前のスマホの記録が")}</span><span class="nowrap">${t("足されます")}</span></p>
+    ${msg ? `<p class="transfer-err">${msg}</p>` : ""}
+    <button type="button" class="btn btn-primary btn-xl" id="ti-pick">${t("ファイルを選ぶ")}</button>
+    <p class="settings-hint transfer-hint"><span class="nowrap">${t("LINEやメールで届いたファイルは、")}</span><span class="nowrap">${t("いったんスマホに保存してから")}</span><span class="nowrap">${t("選んでください")}</span></p>`;
+  document.getElementById("ti-pick").addEventListener("click", () => {
+    const inp = document.getElementById("transfer-file");
+    inp.value = "";
+    inp.click();
+  });
+}
+function readFileText(file) {
+  return new Promise((resolve, reject) => {
+    const r = new FileReader();
+    r.onload = () => resolve(String(r.result || ""));
+    r.onerror = () => reject(r.error);
+    r.readAsText(file);
+  });
+}
+async function onTransferFilePicked(file) {
+  if (!file) return;
+  const wrap = document.getElementById("transfer-in");
+  wrap.innerHTML = `<p class="transfer-lead" style="margin-top:40px;">${t("読んでいます…")}</p>`;
+  let obj;
+  try { obj = JSON.parse(await readFileText(file)); } catch (e) { obj = null; }
+  if (!obj || obj.app !== TRANSFER_APP || !obj.data) {
+    renderTransferIn(t("このファイルは、記憶のギフトの引き継ぎファイルではないようです。"));
+    return;
+  }
+  if (Number(obj.format) > TRANSFER_FORMAT) {
+    renderTransferIn(`<span class="nowrap">${t("アプリを最新版にしてから、")}</span><span class="nowrap">${t("もう一度選んでください。")}</span>`);
+    return;
+  }
+  const d = obj.data;
+  const days = transferDayCount(d);
+  const photoCount = Object.keys(obj.photos || {}).length + (() => {
+    let n = 0; const c = v => { if (isInlinePhoto(v)) n++; };
+    for (const k in d.outfits || {}) c((d.outfits[k] || {}).photo);
+    for (const k in d.mealPhotos || {}) { const v = d.mealPhotos[k]; if (typeof v === "string") c(v); else for (const sl in v || {}) c(v[sl]); }
+    (d.album || []).forEach(a => c(a && a.photo));
+    return n;
+  })();
+  wrap.innerHTML = `
+    <p class="transfer-step">${t("新しいスマホでやること")}</p>
+    <p class="transfer-lead">${t("{d}日分の記録", { d: days })}${photoCount ? t("・写真{p}枚", { p: photoCount }) : ""}<br>${t("が入っています。")}</p>
+    <p class="transfer-safe"><span class="nowrap">${t("このスマホに足しますか？")}</span><span class="nowrap">${t("（今ある記録は消えません）")}</span></p>
+    <button type="button" class="btn btn-primary btn-xl" id="ti-go">${t("受け取る")}</button>
+    <button type="button" class="btn btn-secondary btn-xl" id="ti-cancel">${t("やめる")}</button>`;
+  document.getElementById("ti-cancel").addEventListener("click", () => renderTransferIn());
+  document.getElementById("ti-go").addEventListener("click", async () => {
+    wrap.innerHTML = `<p class="transfer-lead" style="margin-top:40px;">${t("受け取っています…")}</p>`;
+    let res;
+    try { res = await applyTransfer(obj); }
+    catch (e) { renderTransferIn(`${t("うまくいきませんでした。")}<br>${t("このスマホの記録はそのままです。")}`); return; }
+    buzzSave();
+    wrap.innerHTML = `
+      <p class="transfer-step">${t("受け取りました")}</p>
+      <p class="transfer-lead">${t("{d}日分の記録", { d: res.days })}${res.photos ? t("・写真{p}枚", { p: res.photos }) : ""}<br>${t("を足しました。")}</p>
+      <button type="button" class="btn btn-primary btn-xl" id="ti-done">${transferInFrom === "onboarding" ? t("はじめる") : t("ホームへ")}</button>`;
+    document.getElementById("ti-done").addEventListener("click", () => {
+      if (!profile) { showScreen("screen-onboarding"); return; }
+      if (settings.passcode) showLock(); else goHome();
+    });
+  });
+}
+
+// 2つの文を合わせる（同じ・片方に含まれる → 1つに。違う → 両方残す）
+function mergeTextKeep(a, b, sep) {
+  a = (a || "").trim(); b = (b || "").trim();
+  if (!b || a === b || a.includes(b)) return a;
+  if (!a || b.includes(a)) return b;
+  return a + sep + b;
+}
+// 1日の記録を合わせる（here＝このスマホ、from＝前のスマホ）
+function mergeEntry(here, from) {
+  const out = { ...here };
+  for (const k in from) {
+    const a = here[k], b = from[k];
+    if (a == null || a === "") { out[k] = b; continue; }
+    if (k === "meal" && typeof a === "object" && typeof b === "object") {
+      const m = { mode: "full" };
+      const slots = ["morning", "noon", "evening", "snack"];
+      // 「いちばん記憶にのこす」の1行は「間食・その他」へ寄せる（朝昼晩のどれかは分からないため）
+      const full = x => x.mode === "best" ? { snack: x.best } : x;
+      const fa = full(a), fb = full(b);
+      slots.forEach(s => { const v = mergeTextKeep(fa[s], fb[s], micJoiner()); if (v) m[s] = v; });
+      if (a.mode === "best" && b.mode === "best") { out[k] = { mode: "best", best: mergeTextKeep(a.best, b.best, micJoiner()) }; continue; }
+      out[k] = m; continue;
+    }
+    if (typeof a === "string" && typeof b === "string") { out[k] = mergeTextKeep(a, b, k === "diary" ? "\n\n" : micJoiner()); continue; }
+    if (typeof a === "object" && typeof b === "object" && !Array.isArray(a)) {
+      const o = { ...a };
+      for (const f in b) {
+        if (typeof b[f] !== "string") { if (o[f] == null) o[f] = b[f]; continue; }
+        o[f] = f === "link" ? (o[f] || b[f]) : mergeTextKeep(o[f], b[f], micJoiner());
+      }
+      out[k] = o;
+    }
+    // それ以外（形の違うもの）は、このスマホのほうを残す
+  }
+  return out;
+}
+
+async function applyTransfer(obj) {
+  const d = obj.data;
+  const fs = fsPlugin();
+  // ① 写真を先に置く（記録を書く前に。途中で止まっても、使われない写真は次の起動で片づく）
+  const remap = {}; // 前のスマホの名前 → このスマホでの持ち方（file:名前 か data URL）
+  let photoCount = 0;
+  for (const n in obj.photos || {}) {
+    if (!/^p\d+\.jpg$/.test(n)) continue;
+    const b64 = obj.photos[n];
+    if (fs && photoBase) {
+      let name = n;
+      try { await fs.stat({ path: PHOTO_DIR + "/" + name, directory: "DATA" }); name = "p" + Date.now() + Math.floor(Math.random() * 1000) + ".jpg"; } catch (e) {} // 同じ名前があれば別名に
+      await fs.writeFile({ path: PHOTO_DIR + "/" + name, directory: "DATA", data: b64, recursive: true });
+      remap[n] = "file:" + name;
+    } else {
+      remap[n] = "data:image/jpeg;base64," + b64; // ブラウザ版はこれまで通り埋め込み
+    }
+    photoCount++;
+  }
+  // 写真の参照を、このスマホの持ち方に直す。運ばれなかった写真は外す
+  const fix = v => {
+    if (isFilePhoto(v)) return remap[String(v).slice(5)] || "";
+    if (isInlinePhoto(v)) { photoCount++; return v; }
+    return v || "";
+  };
+  for (const k in d.outfits || {}) { const o = d.outfits[k]; if (o && o.photo) { o.photo = fix(o.photo); if (!o.photo) delete o.photo; } }
+  for (const k in d.mealPhotos || {}) {
+    const v = d.mealPhotos[k];
+    if (typeof v === "string") { const f = fix(v); if (f) d.mealPhotos[k] = { day: f }; else delete d.mealPhotos[k]; continue; }
+    for (const sl in v || {}) { const f = fix(v[sl]); if (f) v[sl] = f; else delete v[sl]; }
+  }
+  (d.album || []).forEach(a => { if (a && a.photo) a.photo = fix(a.photo); });
+
+  // ② 記録を合わせる（どれも「今ある記録は残して足す」）
+  const wasEmpty = !Object.keys(entries).length && !Object.keys(loadOutfits()).length && !loadMemos().length;
+  const days = new Set();
+  for (const ds in d.entries || {}) {
+    entries[ds] = entries[ds] ? mergeEntry(entries[ds], d.entries[ds]) : d.entries[ds];
+    days.add(ds);
+  }
+  saveEntries();
+  const outs = loadOutfits();
+  for (const ds in d.outfits || {}) {
+    const a = outs[ds], b = d.outfits[ds] || {};
+    // 服の写真は1日1枚。両方にあるときは、このスマホのほうを残す（前のスマホの写真は前のスマホに残っている）
+    outs[ds] = a ? { ...a, photo: a.photo || b.photo, note: mergeTextKeep(a.note, b.note, micJoiner()) } : b;
+    if (!outs[ds].photo) delete outs[ds].photo;
+    if (!outs[ds].note) delete outs[ds].note;
+    days.add(ds);
+  }
+  saveOutfits(outs);
+  const mp = loadMealPhotos();
+  for (const ds in d.mealPhotos || {}) {
+    const cur = typeof mp[ds] === "string" ? { day: mp[ds] } : (mp[ds] || {});
+    const add = d.mealPhotos[ds] || {};
+    for (const sl in add) if (!cur[sl]) cur[sl] = add[sl];
+    if (Object.keys(cur).length) mp[ds] = cur;
+    days.add(ds);
+  }
+  saveMealPhotos(mp);
+  const al = loadAlbumMemos();
+  const akey = a => [a.date, a.photoDate, (a.note || "").trim()].join("|");
+  const have = new Set(al.map(akey));
+  (d.album || []).forEach(a => { if (a && !have.has(akey(a))) { al.push(a); have.add(akey(a)); } });
+  al.sort((x, y) => String(y.date || "").localeCompare(String(x.date || "")));
+  saveAlbumMemos(al);
+  if (String(d.albumLast || "") > String(store.get("mn_album_last", ""))) store.set("mn_album_last", d.albumLast);
+  const ms = loadMemos();
+  const mkey = m => (m.text || "") + "|" + (m.at || "");
+  const mhave = new Set(ms.map(mkey));
+  (d.memos || []).forEach(m => { if (m && m.text && !mhave.has(mkey(m))) { ms.push(m); mhave.add(mkey(m)); } });
+  ms.sort((x, y) => (y.at || 0) - (x.at || 0));
+  saveMemos(ms);
+  const sh = loadShopping();
+  for (const k in d.shopping || {}) { const v = mergeTextKeep(sh[k], d.shopping[k], micJoiner()); if (v) sh[k] = v; }
+  saveShopping(sh);
+  const moon = store.get("mn_moon", null);
+  if (d.moon && moon && d.moon.cycle === moon.cycle) {
+    moon.nights = [...new Set([...(moon.nights || []), ...(d.moon.nights || [])])].sort();
+    store.set("mn_moon", moon);
+  }
+  // ③ プロフィールと設定：このスマホで決めていないものだけ受け取る
+  if (!profile && d.profile) { profile = d.profile; store.set("mn_profile", profile); }
+  const s = d.settings || {};
+  if (wasEmpty) {
+    if (s.theme) settings.theme = s.theme;
+    if (s.fontBoost != null) settings.fontBoost = s.fontBoost;
+    if (s.homeStyle) settings.homeStyle = s.homeStyle;
+  }
+  // ロック：前のスマホで鍵をかけていた日記が、ここで丸見えにならないように
+  if (!settings.passcode && s.passcode) settings.passcode = s.passcode;
+  if (!settings.diaryPass && s.diaryPass) settings.diaryPass = s.diaryPass;
+  if (!settings.recoveryQ && s.recoveryQ) { settings.recoveryQ = s.recoveryQ; settings.recoveryA = s.recoveryA; }
+  store.set("mn_settings", settings);
+  applySettings();
+  updateMemoBadge();
+  // ブラウザ版の埋め込み写真が混じっていたら、ファイルへ移す（ネイティブのみ・裏で）
+  migratePhotosToFiles().catch(() => {});
+  return { days: days.size, photos: photoCount };
 }
 
 // 全消去（本当に消していいか2度たずねる）
@@ -6604,7 +6975,7 @@ function wireIap() {
 // ※残りの【　】2か所（お問い合わせ先メールアドレス・管轄裁判所名）だけ、公開前に埋めること。
 // ※中身を変えたら「最終改定日」も直すこと。内容は実装と一致させること（嘘を書かない）。
 const LEGAL_BLANK_NOTE = `<p class="legal-note">【　】の部分は、公開までに正式な内容を入れます。</p>`;
-const LEGAL_UPDATED = "2026年9月15日";
+const LEGAL_UPDATED = "2026年10月12日";
 const LEGAL_TEXTS = {
   privacy: {
     title: "プライバシーポリシー",
@@ -6628,7 +6999,8 @@ const LEGAL_TEXTS = {
       <p>おやすみのお知らせなどの通知は、端末の中だけで動きます。通知の内容が外部へ送られることはありません。設定でいつでもオフにできます。</p>
 
       <h3>6. バックアップと引き継ぎについて</h3>
-      <p>端末の設定にしたがって、記録が iCloud（iPhone）または Google（Android）へ自動でバックアップされることがあります。これはお客さまご自身のアカウントの中で守られる仕組みで、当社は中身を読めません。<b>「引き継ぎコード」は現在ご利用いただけません（準備中）。</b>提供を始めるときは、本ポリシーを改めてお知らせします。</p>
+      <p>端末の設定にしたがって、記録が iCloud（iPhone）または Google（Android）へ自動でバックアップされることがあります。これはお客さまご自身のアカウントの中で守られる仕組みで、当社は中身を読めません。</p>
+      <p>別のスマホや別のアカウントへ移すときは、設定の「新しいスマホへ送る」で記録を1つのファイルにまとめ、お客さまご自身が選んだ方法（LINE・メールなど）で、ご自分あてに送っていただけます。このファイルは当社のサーバーを通らず、当社は中身を読めません。<b>ファイルには日記・写真・ロックのパスコードなどがそのまま入っているため、ご自分あて以外には送らないでください。</b>受け取ったスマホでは、今ある記録は消さずに、前のスマホの記録を足します。</p>
 
       <h3>7. 集めない情報</h3>
       <p>本アプリは、アカウント登録を必要としません。氏名・住所・電話番号・メールアドレスをご入力いただくことはありません。行動の履歴を集めて分析することもしていません。</p>
@@ -6675,6 +7047,7 @@ const LEGAL_TEXTS = {
         <li>端末の初期化、本アプリの削除、機種変更</li>
         <li>端末の空き容量不足、OSやアプリの更新、端末の設定変更</li>
         <li>バックアップが取られていなかった場合、またはバックアップからの復元が失敗した場合</li>
+        <li>引き継ぎのファイルが送れなかった・届かなかった・読み込めなかった場合、またはお客さまが送り先を間違えた場合</li>
         <li>お客さまご自身の操作（「すべてのデータを消す」の実行、記録の削除など）</li>
         <li>その他、当社の管理の及ばない事由</li>
       </ul>
@@ -7657,14 +8030,15 @@ function wireEvents() {
   document.getElementById("pc-open").addEventListener("click", openPasscodeSetup);
   document.getElementById("pc-back").addEventListener("click", () => showScreen("screen-settings"));
 
-  // データの引き継ぎ（引き継ぎコードの見本画面）
-  document.getElementById("transfer-make").addEventListener("click", showTransferCode);
+  // スマホの引き継ぎ（ファイル方式・2026-10-12）
+  document.getElementById("transfer-make").addEventListener("click", openTransferOut);
+  document.getElementById("transfer-take").addEventListener("click", () => openTransferIn("settings"));
   document.getElementById("tc-back").addEventListener("click", () => showScreen("screen-settings"));
-  document.getElementById("ob-code-link").addEventListener("click", openCodeEntry);
-  document.getElementById("ce-back").addEventListener("click", () => showScreen("screen-onboarding"));
-  document.getElementById("ce-submit").addEventListener("click", () => {
-    document.getElementById("ce-msg").textContent = t("この画面は見本です。本番アプリで、前のスマホの記録を引き継げます。");
-  });
+  document.getElementById("ob-code-link").addEventListener("click", () => openTransferIn("onboarding"));
+  document.getElementById("ce-back").addEventListener("click", () =>
+    showScreen(transferInFrom === "onboarding" && !profile ? "screen-onboarding" : "screen-settings"));
+  document.getElementById("transfer-file").addEventListener("change", e =>
+    onTransferFilePicked(e.target.files && e.target.files[0]));
 
 }
 
