@@ -1496,6 +1496,12 @@ mark {
 }
 .transfer-count { text-align: center; font-size: 1.05rem; color: var(--muted); margin: -6px 0 0; }
 .transfer-hint { text-align: center; margin: -10px 0 4px; }
+/* アルバム：ちがう写真にする（2026-10-15）。目立たせすぎない文字のボタン */
+.album-swap {
+  display: block; margin: -4px auto 4px; min-height: 44px; padding: 8px 12px;
+  background: none; border: none; font: inherit; font-size: 1rem; color: var(--muted);
+  text-decoration: underline; text-underline-offset: 3px; cursor: pointer;
+}
 .transfer-again {
   display: block; margin: 0 auto; min-height: 44px; padding: 8px 12px;
   background: none; border: none; font: inherit; font-size: 1rem; color: var(--muted);
@@ -6494,6 +6500,11 @@ function pickSamplePhoto() {
   lastAlbumIdx = i;
   currentAlbumPhoto = { emoji: ALBUM_SAMPLES[i], photoDate: randomPastYM() }; // 見本は撮影日もランダム
 }
+// 「ちがう写真にする」：型番や書類など、記録のために撮った写真が出たときの取り替え（2026-10-15 Yukiさん）。
+// 見すぎないよう1日2回まで（最初の1枚と合わせて3枚）
+const ALBUM_SWAP_MAX = 2;
+function albumSwapUsed() { const o = store.get("mn_album_swap", null); return o && o.d === todayStr() ? (o.n || 0) : 0; }
+function albumSwapLeft() { return Math.max(0, ALBUM_SWAP_MAX - albumSwapUsed()); }
 function renderAlbumPhotoView() {
   const emoji = currentAlbumPhoto.emoji;
   const photoDate = currentAlbumPhoto.photoDate;
@@ -6503,6 +6514,7 @@ function renderAlbumPhotoView() {
     <div class="album-lead"><span class="lead-ico">${balloonIconSvg("album")}</span><span class="album-lead-text"><span class="nowrap">${t("スマホの")}</span><span class="nowrap">${t("アルバムから")}</span><span class="nowrap">${t("記憶をたどる")}</span></span></div>
     <div class="album-photo${isReal ? " has-img" : ""}"><span class="ph-emoji">${albumPhotoHtml(emoji)}</span></div>
     ${isReal ? "" : `<p class="album-cap"><span class="nowrap">${t("（本番アプリでは、")}</span><span class="nowrap">${t("あなたのアルバムから1枚出ます）")}</span></p>`}
+    ${albumSwapLeft() > 0 ? `<button type="button" class="album-swap" id="album-swap">${t("ちがう写真にする（あと{n}回）", { n: albumSwapLeft() })}</button>` : ""}
     <button type="button" class="btn btn-secondary btn-xl" id="album-skip">${t("思い出せました（ホームへ）")}</button>
     <div class="album-q q-soft"><span class="nowrap">${t("「メモリーアルバム」に")}</span><span class="nowrap">${t("残す")}</span></div>
     <div class="field meal-line"><textarea id="album-text" class="grow-input" rows="2" placeholder="${phEx("album-text", t("例：ゆき撮影"))}"></textarea>${micMini("album-text", "album-keep", "text")}</div>
@@ -6535,6 +6547,10 @@ function renderAlbumPhotoView() {
     else finish(emoji);
   });
   document.getElementById("album-skip").addEventListener("click", () => { markAlbumDone(); goHome(); });
+  document.getElementById("album-swap")?.addEventListener("click", () => {
+    store.set("mn_album_swap", { d: todayStr(), n: albumSwapUsed() + 1 });
+    renderAlbumPhoto(false); // 新しい1枚を選び直す
+  });
   document.getElementById("album-list").addEventListener("click", renderAlbumList);
   fitAlbumPhoto(); // 写真を、下のボタンが隠れない大きさにそろえる
   // 自動でキーボードは出さない（写真を見る時間を守る）
@@ -6577,10 +6593,11 @@ function renderAlbumDone(justSaved, reveal) {
   document.getElementById("album-wrap").innerHTML = `
     <div class="done-wrap" style="min-height:0;">
       <div class="done-emoji">${balloonIconSvg(justSaved ? "sprout" : "smile")}</div>
-      <div class="game-lead">${justSaved ? t("残しました") : t("今日の1枚は、見ました")}</div>
+      <div class="game-lead">${justSaved ? t("残しました") : t("今日の写真は、見ました")}</div>
       ${justSaved && reveal ? `<div class="album-reveal"><span class="row-ico">${balloonIconSvg("cal")}</span>${t("{d}ごろの写真", { d: reveal })}</div>` : ""}
-      <p class="album-note album-note-lg">${t("また明日、あたらしい1枚を思い出そう。")}</p>
+      <p class="album-note album-note-lg"><span class="nowrap">${t("また明日、")}</span><span class="nowrap">${t("あたらしい写真を思い出そう。")}</span></p>
       <button type="button" class="btn btn-primary btn-xl" id="album-list">${t("「メモリーアルバム」を見る（{n}）", { n: memos.length })}</button>
+      ${memos.length ? `<p class="album-note" style="margin-top:14px;"><span class="nowrap">${t("残した写真は、")}</span><span class="nowrap">${t("「思い出す」でも")}</span><span class="nowrap">${t("問題に出てきます")}</span></p>` : ""}
     </div>`;
   document.getElementById("album-list").addEventListener("click", renderAlbumList);
 }
