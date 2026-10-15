@@ -3358,7 +3358,38 @@ async function ensureMicPermission() {
   } catch (e) { return true; }
 }
 
+// iPhone の Siri（App Intents「ひらめきにメモ」）が、アプリを開かずに預けたメモを受け取る（2026-10-15）。
+// 部品（KiokuInbox・Mac で作る）は Android の QuickMemo と同じ形：drain() → { items: [{ text, at }] }、
+// 預かった瞬間に "memoAdded" を知らせる。ロック中でも預けられるので、上限（MEMO_MAX）を超えても失わない
+function kiokuInboxPlugin() {
+  return (window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.KiokuInbox) || null;
+}
+async function syncKiokuInbox() {
+  const plug = kiokuInboxPlugin();
+  if (!plug || !plug.drain) return;
+  try {
+    const r = await plug.drain();
+    const items = (r && r.items) || [];
+    if (!items.length) return;
+    const a = loadMemos();
+    const have = new Set(a.map(m => m.text + "|" + m.at));
+    let added = 0;
+    items.forEach(m => {
+      const v = String((m && m.text) || "").trim();
+      const at = Number(m && m.at) || Date.now();
+      if (v && !have.has(v + "|" + at)) { a.unshift({ text: v, at }); have.add(v + "|" + at); added++; }
+    });
+    if (!added) return;
+    a.sort((x, y) => (y.at || 0) - (x.at || 0));
+    saveMemos(a);
+    updateMemoBadge();
+    const pop = document.getElementById("memo-pop");
+    if (pop && !pop.hidden) renderMemoScreen();
+    toastMemo(added > 1 ? t("Siri からメモを{n}つ受け取りました", { n: added }) : t("メモを1つ受け取りました"));
+  } catch (e) {}
+}
 async function syncQuickMemoNotify() {
+  syncKiokuInbox(); // iPhone の Siri の預かり分も、同じ合図（開いた・戻ってきた）で取り込む
   const plug = quickMemoPlugin();
   if (!plug) return;
   try {
@@ -3389,6 +3420,8 @@ window.addEventListener("focus", () => syncQuickMemoNotify());
 (() => {
   const plug = quickMemoPlugin();
   if (plug && plug.addListener) { try { plug.addListener("memoAdded", () => syncQuickMemoNotify()); } catch (e) {} }
+  const inbox = kiokuInboxPlugin();
+  if (inbox && inbox.addListener) { try { inbox.addListener("memoAdded", () => syncKiokuInbox()); } catch (e) {} }
 })();
 
 // ---------- Siri・ショートカットから届くメモ（iPhone用。2026-09-24） ----------
