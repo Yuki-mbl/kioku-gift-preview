@@ -3781,7 +3781,7 @@ function applyStart() {
   const rez = store.get("mn_resume", null);
   if (rez && rez.id && Date.now() - rez.at < 15 * 60 * 1000) {
     const back = {
-      "screen-shopping": openShopping, "screen-outfit": openOutfit,
+      "screen-shopping": resumeShopping, "screen-outfit": openOutfit,
       "screen-album": openAlbum, "screen-sleep": openSleep, "screen-calendar": openCalendar,
     }[rez.id];
     if (back) { back(); return; }
@@ -7340,16 +7340,28 @@ function closeShopPop() {
   if (shoppingHasAny()) renderShoppingRecall(); else renderShoppingHub();
 }
 
+// 買い物を開いたら、いつも「書く画面」から（2026-10-15 Yukiさん：買い物に行くのは1日1回ほどで、
+// 開くのはほとんど書き足し・修正のため）。答え合わせは「保存して買い物へ」で出す
+let shopHubFromRecall = false; // 書く画面を答え合わせの「書き足す・修正」から開いたか（戻る先）
 function openShopping() {
   shoppingReturnTo = null; // ふつうの入口から来たときは、戻るは従来どおり
-  if (shoppingHasAny()) renderShoppingRecall(); else renderShoppingHub();
+  shopHubFromRecall = false;
+  renderShoppingHub();
+  showScreen("screen-shopping");
+}
+// 15分以内に開き直したときは、閉じたときの画面に戻す（お店で答え合わせの途中に画面が消えても続きから）
+function resumeShopping() {
+  shoppingReturnTo = null;
+  shopHubFromRecall = false;
+  if (store.get("mn_shop_view", "hub") === "recall" && shoppingHasAny()) renderShoppingRecall(); else renderShoppingHub();
   showScreen("screen-shopping");
 }
 
 // 入力ハブ：4カテゴリすべてこの画面で直接書ける（書くほど欄がのびる／欄内スクロールなし）
 function renderShoppingHub() {
   shopView = "hub";
-  setBackLabel("shopping-back", shoppingHasAny());
+  store.set("mn_shop_view", "hub");
+  setBackLabel("shopping-back", shopHubFromRecall); // ホームから開いたときは最上位の画面（戻るは下のタブ）
   if (shoppingReturnTo) setBackLabel("shopping-back", true); // うつして来たときも戻るを出す
   setOneScreen("screen-shopping", false); // ページ全体でスクロール
   const s = loadShopping();
@@ -7390,6 +7402,7 @@ function renderShoppingHub() {
 // 思い出しながら開ける
 function renderShoppingRecall() {
   shopView = "recall";
+  store.set("mn_shop_view", "recall");
   setBackLabel("shopping-back", false);
   setOneScreen("screen-shopping", false); // カードを開くと縦に伸びるためスクロール可にする
   const s = loadShopping();
@@ -7418,7 +7431,7 @@ function renderShoppingRecall() {
     btn.addEventListener("click", () => openShopPop([btn.dataset.key])));
   document.getElementById("shop-openall").addEventListener("click", () =>
     openShopPop(cats.map(c => c.key)));
-  document.getElementById("shop-edit").addEventListener("click", renderShoppingHub);
+  document.getElementById("shop-edit").addEventListener("click", () => { shopHubFromRecall = true; renderShoppingHub(); });
   wireShopDoneBar();
 }
 
@@ -7870,7 +7883,8 @@ function wireEvents() {
     // 「うつす」で来ていたら、ひらめきの一覧へ帰す（2026-09-30）
     if (shoppingReturnTo) { const r = shoppingReturnTo; shoppingReturnTo = null; goBackTo(r); return; }
     if (shopView === "hub") {
-      if (shoppingHasAny()) renderShoppingRecall(); else goHome(); // 入力は書くたび自動保存済み
+      // 答え合わせの「書き足す・修正」から来たときだけ答え合わせへ戻す（入力は書くたび自動保存済み）
+      if (shopHubFromRecall && shoppingHasAny()) renderShoppingRecall(); else goHome();
     } else {
       goHome();
     }
