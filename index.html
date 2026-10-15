@@ -4057,7 +4057,7 @@ function renderMemoScreen() {
     ? `<div class="memo-list">${list}</div>`
     : `<button type="button" class="memo-open memo-reveal" id="memo-reveal">${t("思い出してから開く（{n}）", { n: a.length })}</button>`);
   const writePart = full
-    ? `<p class="memo-note">${t("メモは{n}個まで。", { n: MEMO_MAX })}<br>${t("できたものをチェックで消すと、また書けます")}</p>`
+    ? `<p class="memo-note"><span class="nowrap">${t("{n}個でいっぱいです。", { n: MEMO_MAX })}</span><br><span class="nowrap">${t("済んだものを消すか、")}</span><span class="nowrap">${t("「うつす」と、また書けます")}</span></p>` // 2026-10-15 Yukiさん：うつしても空くことも伝える
     : `<div class="memo-line">
         <textarea id="memo-input" class="grow-input" rows="1" placeholder="${phEx("memo-input", t("例：お風呂掃除　庭に水やり"))}"></textarea>
         ${micMini("memo-input", "memo-save")}
