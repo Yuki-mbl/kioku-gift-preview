@@ -3001,6 +3001,7 @@ body:has(#memo-pop:not([hidden])) .memo-toast { top: calc(14px + env(safe-area-i
           <p class="settings-hint" style="margin-top:16px;"><span class="nowrap" data-t>別のスマホや、</span><span class="nowrap" data-t>別のアカウントに</span><span class="nowrap" data-t>移すときはこちら↓</span></p>
           <button type="button" class="btn btn-secondary btn-xl" id="transfer-make" style="margin-top:8px;" data-t>新しいスマホへ送る</button>
           <button type="button" class="btn btn-secondary btn-xl" id="transfer-take" style="margin-top:10px;" data-t>前のスマホから受け取る</button>
+          <p class="settings-hint" style="margin-top:12px;"><span class="nowrap" data-t>新しいスマホにも記録があるときは、</span><span class="nowrap" data-t>両方の記録が合わさります。</span><span class="nowrap" data-t>どちらの記録も消えません。</span></p>
         </div>
         <div class="card">
           <div class="settings-label" data-t>このアプリについて</div>
@@ -3865,6 +3866,8 @@ function addMemo(text) {
   if (!v) return;
   const a = loadMemos();
   if (a.length >= MEMO_MAX) return;
+  // 同じ文が10秒以内にもう一度来たら、二重に入れない（マイクの遅れて届く答え・Siri の二重など。2026-10-15）
+  if (a[0] && a[0].text === v && Date.now() - (a[0].at || 0) < 10000) return;
   a.unshift({ text: v, at: Date.now() });
   saveMemos(a);
 }
@@ -7496,12 +7499,22 @@ function hideMicHint() { document.getElementById("mic-hint")?.classList.remove("
 // 何件か続けて残したいのに、保存のたびにマイクが消えて押し直すのが手間）。
 // 黙っていれば、いつもの10秒（MIC_IDLE_STOP_MS）で止まる。指で保存ボタンを押したときは続けない。
 // 「黙ったら自動で次の件にする」はしない（考えながら話すと1つの文が2件に割れる）
+// 「保存」のあと続けて聞くとき、前の回の答えが遅れて届くことがある（iPhone・Android とも。2026-10-15 Yukiさん
+// 「マイクで入力したら2つ足された」）。保存したばかりの文と同じ（またはその途中）なら、新しい回では受け取らない
+let voiceSavedRecent = null;
+function isStaleVoiceResult(said) {
+  if (!voiceSavedRecent || Date.now() - voiceSavedRecent.at > 4000) return false;
+  const core = String(said || "").replace(/(?:保存|ほぞん|ホゾン)[。．\s　]*$/, "").replace(/[、。．\s　]/g, "");
+  const prev = voiceSavedRecent.text.replace(/[、。．\s　]/g, "");
+  return !!core && !!prev && prev.startsWith(core);
+}
 function voiceSave(btn) {
   const saveBtnId = btn.dataset.voiceSave;
   if (!saveBtnId) return;
   const hs = micHintState(); hs.saves++; store.set("mn_mic_hint", hs); // 「保存」と言えた回数（案内を出すかどうかに使う）
   const cont = saveBtnId === "memo-save";
   const before = cont ? loadMemos().length : 0;
+  if (cont) voiceSavedRecent = { text: (document.getElementById("memo-input")?.value || "").trim(), at: Date.now() };
   document.getElementById(saveBtnId)?.click();
   if (!cont || loadMemos().length <= before) return; // 空・満杯で入らなかったら続けない
   // 前のマイクが手放されるのを待ってから聞き直す（すぐ始めると失敗する端末がある）
@@ -7559,6 +7572,7 @@ function wireMics(root) {
         target.addEventListener("input", onUserEdit);
         const applySaid = (said, isFinal) => {
           said = collapseDoubledSaid(said);
+          if (target.id === "memo-input" && isStaleVoiceResult(said)) return false; // 前の回の答えの遅れ
           let wantSave = false;
           if (isFinal) {
             const m = said.match(/(?:保存|ほぞん|ホゾン)[。．\s　]*$/);
