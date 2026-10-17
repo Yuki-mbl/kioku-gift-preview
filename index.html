@@ -3598,7 +3598,12 @@ const RESUME_SCREENS = new Set(["screen-shopping", "screen-outfit", "screen-albu
 // ロック画面と記入フロー（中身に同種の動きあり）は除外。同じ画面の再表示では動かさない
 let lastScreenId = null;
 const NO_SLIDE_SCREENS = new Set(["screen-lock", "screen-flow"]);
+// 日記のロックは「見ているあいだだけ」開く（2026-10-17 Yukiさん指摘：一度解除すると、アプリを閉じるまで
+// ずっと開いたままで、保存してホームに戻ったあとも、日記がパスコードなしで見えていた）。
+// 日記を見る流れ（書く・日別・見返す・検索・ロック画面）から出たら、また鍵をかける
+const DIARY_OPEN_SCREENS = new Set(["screen-lock", "screen-flow", "screen-daydetail", "screen-calendar", "screen-search"]);
 function showScreen(id) {
+  if (!DIARY_OPEN_SCREENS.has(id)) diaryUnlocked = false;
   stopMic(); // 画面を移ったらマイクは止める
   applySearchExample();
   document.querySelectorAll(".screen").forEach(s => s.classList.remove("active"));
@@ -5622,7 +5627,9 @@ function openSettings() {
 // =========================================================
 let pcEntry = "";
 let lockMode = "app";      // "app" | "diary"
-let diaryUnlocked = false; // 日記ロックをこの起動中に解除したか
+let diaryUnlocked = false; // 日記ロックを解除して見ているところか（日記を見る流れから出たら false に戻す）
+// アプリから離れたら（ほかのアプリ・画面が消えた）、日記の鍵をかけ直す
+document.addEventListener("visibilitychange", () => { if (document.hidden) diaryUnlocked = false; });
 let pendingUnlock = null; // 解除後の行き先 {type:"diary"|"detail"|"search", ds}
 
 function lockPassOf() { return lockMode === "diary" ? settings.diaryPass : settings.passcode; }
