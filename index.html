@@ -250,8 +250,7 @@ body {
 .back-fab:active { transform: scale(.96); }
 /* 広告が出ているときはその上へ（下タブぶんは 2200行あたりでさらに持ち上げる） */
 #app.has-ad .back-fab { bottom: 76px; }
-/* カレンダー・さがすは1層目。ホームへは下のタブが担うので戻るは出さない（元の作りのまま） */
-#cal-back, #search-back { display: none; }
+/* カレンダー・さがすも「← 戻る」を出す（2026-10-17 Yukiさん：最初の画面だけ戻るが無いと迷う） */
 /* 最後の欄が浮きボタンに隠れないための余白。
    戻るがいつも出ている画面と、2層目でだけ出る画面（.with-back を JS が付ける）に分ける。
    出ていない画面にも付けていたため、1画面に収まるはずの画面が少しスクロールしていた（2026-10-02） */
@@ -2413,6 +2412,7 @@ html[data-fontsize="xlarge"] .tabb-name { font-size: min(.95rem, 4vw); }
 
 /* 服のカレンダー：1画面に収める */
 #screen-outfit.one-screen .outfit-wrap { flex: 1; min-height: 0; justify-content: flex-start; padding-top: clamp(4px,1vh,12px); gap: clamp(6px,1.2vh,12px); overflow-y: auto; }
+#screen-outfit.one-screen.with-back .outfit-wrap { padding-bottom: 72px; } /* 服のカレンダーの下の段が「← 戻る」に隠れないように（2026-10-17：最初の画面にも戻るを出した） */
 /* カードは中身の高さを保つ（ひとこと欄が伸びても切れない） */
 #screen-outfit.one-screen .outfit-today,
 #screen-outfit.one-screen .outfit-cal { flex: 0 0 auto; }
@@ -2977,6 +2977,7 @@ html[data-theme="light"] .balloon-pos:has(.balloon-k-sleep.sleep-due)::before { 
         <button class="btn btn-secondary" id="flow-back" data-t>← 戻る</button>
         <button class="btn btn-skip btn-xl" id="flow-skip" data-t>飛ばす</button>
       </footer>
+      <button class="back-fab" id="quiz-back" style="display:none" data-t data-t-aria aria-label="戻る">← 戻る</button>
     </section>
 
     <!-- ===== 眠りと記憶 ===== -->
@@ -3764,6 +3765,10 @@ function watchPageFixed() {
   // そのあと中身が伸びても下の見張り（ResizeObserver）には届かない＝錠がかかったままだった。
   // 画像の読み込み完了を拾って測り直す
   document.addEventListener("load", schedulePageFixed, true);
+  // 画面が横からスッと入る動き（screen-anim）の最中は、浮いている「← 戻る」が画面に引っぱられて
+  // 下にずれて見えるため、「収まる」と判断して錠をかけてしまうことがあった（服のカレンダーの下の段が
+  // 戻るに隠れてスクロールもできない。2026-10-17）。動きが終わったら測り直す
+  document.addEventListener("animationend", schedulePageFixed, true);
   // 画面の中身を描き直したときも測り直す（2026-10-17 Yukiさん「アルバムを開くとスクロールできない」：
   // スマホの写真を読み込む前の短い画面で「収まる」と判断して錠をかけ、写真が出て長くなっても
   // 錠がかかったままだった。アルバムに限らず、あとから中身を差し替える画面すべての保険）
@@ -3918,10 +3923,13 @@ function setBackLabel(id, inner) {
     // inner は文言ではなく「出すかどうか」だけに使う
     b.textContent = t("← 戻る");
     b.setAttribute("aria-label", t("戻る"));
-    b.style.display = inner ? "" : "none";
+    // 2026-10-17 Yukiさん：最初の画面（ホームから開いた画面）にも「← 戻る」を出す。
+    // 前は「ホームへは下のタブで戻れる」として出していなかったが、ほかの画面にはあるので迷うため。
+    // 行き先は各ボタンの処理のまま（最初の画面ではホーム）
+    b.style.display = "";
     // 戻るが出ているときだけ、その下に隠れないための余白をとる（2026-10-02）。
     // 出ていない画面にも余白を付けていたため、収まるはずの画面が少しスクロールしていた
-    b.closest(".screen")?.classList.toggle("with-back", !!inner);
+    b.closest(".screen")?.classList.add("with-back");
   }
 }
 // ※「一瞬のひらめき」から うつした先の戻るも、ふつうの「← 戻る」にした（2026-10-03 Yukiさん）。
@@ -4715,6 +4723,7 @@ function renderPickView() {
   const content = document.getElementById("flow-content");
   const footer = document.querySelector(".flow-footer");
   footer.style.display = "";
+  document.getElementById("quiz-back").style.display = "none"; // 戻るは下の帯の方
   document.getElementById("flow-skip").style.display = "none"; // 選ぶだけの画面に保存は置かない（戻るだけ）
   document.getElementById("flow-back").style.display = "";      // ここは戻るが命綱なので必ず出す
   content.innerHTML = `
@@ -4839,11 +4848,14 @@ function renderStep() {
   if (stepId === "quiz") {
     // 記憶確認は「飛ばす」を目立たせない（フッターは隠し、画面内でやさしく操作）
     footer.style.display = "none";
+    // 下の帯は隠すが、「← 戻る」はほかの画面と同じ浮きボタンで出す（2026-10-17 Yukiさん）
+    document.getElementById("quiz-back").style.display = "";
     renderQuizStep(content);
     playFlowAnim(content);
     return;
   }
   footer.style.display = "";
+  document.getElementById("quiz-back").style.display = "none";
   if (flow.sub === "input") renderInputView(stepId, content);
   else renderSelectView(stepId, content);
 }
@@ -4944,7 +4956,8 @@ function flowHasBack() {
 }
 function updateFlowBack() {
   const b = document.getElementById("flow-back");
-  b.style.display = flowHasBack() ? "" : "none";
+  // 最初の項目でも出す（押すと書きかけを保存してホームへ。2026-10-17 Yukiさん）
+  b.style.display = "";
   // 「一瞬のひらめき」から うつして来たときは、行き先が分かる言葉に（2026-09-30）
   b.textContent = t("← 戻る");
 }
@@ -5523,8 +5536,9 @@ function openSearch(viaMic) {
   const cur = document.querySelector(".screen.active")?.id;
   searchFrom = cur === "screen-calendar" ? "screen-calendar" : "screen-home";
   // 見返すから来たときは「← 戻る」を出す（ホームから来たときは下のタブで戻れるので出さない）
-  document.getElementById("search-back").style.display = searchFrom === "screen-calendar" ? "inline-flex" : "";
-  document.getElementById("screen-search").classList.toggle("search-with-back", searchFrom === "screen-calendar");
+  // 「← 戻る」はいつも出す（ホームから来たときも。2026-10-17 Yukiさん）
+  document.getElementById("search-back").style.display = "inline-flex";
+  document.getElementById("screen-search").classList.add("search-with-back");
   document.getElementById("search-input").value = "";
   lastSearchQ = null;
   runSearch("");
@@ -8458,7 +8472,11 @@ function wireEvents() {
   }
   calYear.addEventListener("change", () => { calCursor.setFullYear(Number(calYear.value)); renderCalendar(); });
 
-  document.getElementById("flow-back").addEventListener("click", prevStep);
+  const flowBackClick = () => {
+    if (flowHasBack()) prevStep(); else { saveFlowDraftIfAny(); goHome(); } // 最初の項目：書きかけを保存してホームへ
+  };
+  document.getElementById("flow-back").addEventListener("click", flowBackClick);
+  document.getElementById("quiz-back").addEventListener("click", flowBackClick); // 思い出す（問題・答え）の浮きボタン
   document.getElementById("flow-skip").addEventListener("click", flowSkip);
 
   document.getElementById("settings-back").addEventListener("click", goHome);
