@@ -2245,7 +2245,8 @@ html[data-fontsize="xlarge"] .balloon-lg .balloon-name { font-size: min(1.3rem, 
 .tabb-name { font-size: min(.82rem, 3.6vw); font-weight: 800; white-space: nowrap; }
 /* 夜8時までに「思い出す」を開いていない日：＋ボタンと同じ色で知らせる（2026-10-17）。
    淡い配色のピンクはそのままだと文字が薄いので、同じ色みで濃くして読めるようにする */
-#tab-quiz.recall-due { color: #c56a7f; }
+#tab-quiz.recall-due { color: #e68fa5; }
+[data-theme="pastel"] #tab-quiz.recall-due .tabb-name { color: #df8299; } /* ホームのおやすみと同じ淡いピンクにそろえた（2026-10-17） */
 [data-theme="light"] #tab-quiz.recall-due { color: #2f8a5b; } /* ＋の緑だと、ふだんの濃い字と見分けにくいので少し明るく */
 [data-theme="dark"] #tab-quiz.recall-due { color: #D9B876; }
 /* 下タブ中央の「一瞬」ボタン：ここだけテーマ色で、堂々と浮かせる */
@@ -2744,7 +2745,10 @@ body:has(#memo-pop:not([hidden])) .memo-toast { top: calc(14px + env(safe-area-i
 .quick-tip-btns .btn { flex: 1 1 130px; min-height: 48px; font-size: 1.02rem; white-space: nowrap; padding-left: 12px; padding-right: 12px; } /* 入りきらなければ縦に並ぶ（言葉の途中で折り返さない） */
 
 /* おやすみ通知の時刻を過ぎて、今夜まだ「おやすみ」を開いていない（2026-10-17）。＋ボタンと同じ色に */
-[data-theme="pastel"] .balloon-k-sleep.sleep-due { --p1: #f9d4da !important; --p2: #eeadb9 !important; color: #7c4a52; } /* 風船の色は style 属性で入っているので !important で上書き */
+/* 淡い：風船は水色のまま、線画と文字だけ＋のピンクに（2026-10-17 Yukiさん。風船ごとピンクだと変わったのに気づかない）。
+   ＋の淡いピンクのままだと水色の上で読めないので、同じ色みで濃くする */
+[data-theme="pastel"] .balloon-k-sleep.sleep-due { color: #e68fa5; }
+[data-theme="pastel"] .balloon-k-sleep.sleep-due .balloon-name { color: #df8299; }
 html[data-theme="dark"][data-fontsize] #screen-home #home-doors .balloon-k-sleep.sleep-due .balloon-name { color: #D9B876; }
 html[data-theme="dark"][data-fontsize] #screen-home #home-doors .balloon-k-sleep.sleep-due .balloon-ico { color: #EBD49A; }
 /* ライトは＋もホームも緑なので、同じ色では目立たない → 月の金色（シックに・夜らしく） */
