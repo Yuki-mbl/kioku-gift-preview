@@ -3668,6 +3668,10 @@ function watchPageFixed() {
   // そのあと中身が伸びても下の見張り（ResizeObserver）には届かない＝錠がかかったままだった。
   // 画像の読み込み完了を拾って測り直す
   document.addEventListener("load", schedulePageFixed, true);
+  // 画面の中身を描き直したときも測り直す（2026-10-17 Yukiさん「アルバムを開くとスクロールできない」：
+  // スマホの写真を読み込む前の短い画面で「収まる」と判断して錠をかけ、写真が出て長くなっても
+  // 錠がかかったままだった。アルバムに限らず、あとから中身を差し替える画面すべての保険）
+  if (window.MutationObserver) new MutationObserver(schedulePageFixed).observe(document.body, { childList: true, subtree: true });
   if (window.ResizeObserver) new ResizeObserver(schedulePageFixed).observe(document.body);
 }
 
