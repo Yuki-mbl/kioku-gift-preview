@@ -3021,7 +3021,7 @@ html[data-theme="light"] .balloon-pos:has(.balloon-k-sleep.sleep-due)::before { 
             <li data-t>上の名前を「ひらめき」にして完了。以降は「ヘイ Siri、ひらめき」で使えます</li>
           </ol>
         </div>
-        <div class="card" id="iap-card">
+        <div class="card" id="iap-card" hidden><!-- 広告なしの間は出さない。ADS_ENABLED のときだけ renderIapCard() が出す（2026-10-17：設定を開く関数を通らない道で出てしまっていた） -->
           <div class="settings-label" data-t>広告を消す</div>
           <div class="iap-row">
             <div class="iap-left">
