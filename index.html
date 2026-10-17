@@ -1217,6 +1217,11 @@ mark {
 }
 .opt-card small { display: block; font-size: .98rem; font-weight: 600; color: var(--muted); margin-top: 2px; }
 .opt-card.selected small { color: var(--accent-strong); opacity: .85; }
+/* 選択画面のカード：どれも同じテーマ色の枠で、背景に溶け込まないように（2026-10-17。前は書いてある1つにだけ色） */
+.opt-list .opt-card { border-color: color-mix(in srgb, var(--accent) 55%, var(--border)); }
+/* 書いてある項目：カードの中に「✓ 書いてあります」 */
+.opt-rec { display: inline-block; margin-top: 8px; padding: 3px 10px; border-radius: 999px; font-size: .9rem; font-weight: 800;
+  background: var(--accent-soft); color: var(--accent-strong); }
 
 .input-area { margin-top: 20px; display: flex; flex-direction: column; gap: 14px; }
 
@@ -2353,8 +2358,10 @@ html[data-fontsize="xlarge"] .tabb-name { font-size: min(.95rem, 4vw); }
 /* 「← 戻る」が浮いている画面は、いちばん下までスクロールしたとき最後のボタンが「← 戻る」に隠れないよう、
    下に余白を取る（2026-10-17。アルバムの編集の「やめる」、引き継ぎの「送る」などが隠れていた）。
    余白が増えても、中身が1画面に収まる画面は固定されるので、むだに動くことはない */
-#app.has-tabs .screen.active:has(> .back-fab) { padding-bottom: calc(180px + env(safe-area-inset-bottom)); } /* 大きい字だと浮きボタンも高くなるので広め */
-#app:not(.has-tabs) .screen.active:has(> .back-fab) { padding-bottom: calc(100px + env(safe-area-inset-bottom)); }
+/* 「← 戻る」が見えているときだけ（隠しているときは style="display: none"）。1画面に収める作りの画面
+   （服装の最初など。中で動く欄を持つ）は除く（2026-10-17：服装のカレンダーの下が切れていた） */
+#app.has-tabs .screen.active:not(.one-screen):has(> .back-fab:not([style*="none"])) { padding-bottom: calc(180px + env(safe-area-inset-bottom)); } /* 大きい字だと浮きボタンも高くなるので広め */
+#app:not(.has-tabs) .screen.active:not(.one-screen):has(> .back-fab:not([style*="none"])) { padding-bottom: calc(100px + env(safe-area-inset-bottom)); }
 #app.has-tabs.has-ad .shop-fab-spacer { height: 175px; }
 /* アルバム：タブの分だけ写真を低くして、「写真とメモを残したい」までを1画面に */
 #app.has-tabs .album-photo { aspect-ratio: auto; height: clamp(130px, 23vh, 250px); }
@@ -4060,6 +4067,15 @@ function balloonIconSvg(key) {
   return `<svg class="balloon-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">${BALLOON_ICONS[key]}</svg>`;
 }
 // 記入画面の見出しの絵：ホームと同じ線画があればそれを使う
+// 選択画面：その項目がもう書いてあるか（2026-10-17 Yukiさん：前は「書いてある1つ」に色を付けていたが、
+// 何の印か分からず「最初から選ばれている」と見えた。両方書いてあっても片方にしか付かなかった）
+function optRecorded(value, e) {
+  e = e || {};
+  if (value === "full" || value === "best") return !!e.meal;
+  if (value === "eatout") return !!e.eatout;
+  if (value === "write") return !!e.diary;
+  return false;
+}
 function stepIconHtml(def) {
   // ページの見出しの線画は「食事」だけ残す（2026-10-17 Yukiさん：ほかは小さくて要らない、すっきりさせる）
   if (def !== STEP_DEFS.meal) return "";
@@ -4847,7 +4863,7 @@ function renderSelectView(stepId, content) {
     <div class="step-note">${t(def.note)}</div>
     <div class="opt-list">
       ${def.options.map(o =>
-        `<button class="opt-card ${o.value === cur ? "selected" : ""}" data-value="${o.value}" data-action="${o.action}">${t(o.label)}${o.sub ? `<small>${t(o.sub)}</small>` : ""}</button>`
+        `<button class="opt-card${optRecorded(o.value, e) ? " has-record" : ""}" data-value="${o.value}" data-action="${o.action}">${t(o.label)}${o.sub ? `<small>${t(o.sub)}</small>` : ""}${optRecorded(o.value, e) ? `<span class="opt-rec">${t("✓ 書いてあります")}</span>` : ""}</button>`
       ).join("")}
     </div>`;
   content.querySelectorAll(".opt-card").forEach(card => {
