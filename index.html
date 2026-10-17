@@ -2350,6 +2350,11 @@ html[data-fontsize="xlarge"] .tabb-name { font-size: min(.95rem, 4vw); }
 #app.has-tabs .memo-toast { bottom: calc(156px + env(safe-area-inset-bottom)); }
 #app.has-tabs.has-ad .memo-toast { bottom: 212px; }
 #app.has-tabs .shop-fab-spacer { height: 120px; } /* 最後の欄が浮きボタンに隠れないように */
+/* 「← 戻る」が浮いている画面は、いちばん下までスクロールしたとき最後のボタンが「← 戻る」に隠れないよう、
+   下に余白を取る（2026-10-17。アルバムの編集の「やめる」、引き継ぎの「送る」などが隠れていた）。
+   余白が増えても、中身が1画面に収まる画面は固定されるので、むだに動くことはない */
+#app.has-tabs .screen.active:has(> .back-fab) { padding-bottom: calc(180px + env(safe-area-inset-bottom)); } /* 大きい字だと浮きボタンも高くなるので広め */
+#app:not(.has-tabs) .screen.active:has(> .back-fab) { padding-bottom: calc(100px + env(safe-area-inset-bottom)); }
 #app.has-tabs.has-ad .shop-fab-spacer { height: 175px; }
 /* アルバム：タブの分だけ写真を低くして、「写真とメモを残したい」までを1画面に */
 #app.has-tabs .album-photo { aspect-ratio: auto; height: clamp(130px, 23vh, 250px); }
@@ -2760,6 +2765,10 @@ html[data-theme="dark"][data-fontsize] #screen-home #home-doors .balloon-k-sleep
 html[data-theme="light"][data-fontsize] #screen-home #home-doors .balloon-k-sleep.sleep-due .balloon-name { color: #94712f; }
 html[data-theme="light"][data-fontsize] #screen-home #home-doors .balloon-k-sleep.sleep-due .balloon-ico { color: #a8843d; opacity: 1; }
 html[data-theme="light"] .balloon-pos:has(.balloon-k-sleep.sleep-due)::before { background: #b8934a; }
+
+/* 横にはみ出したもの（思い出すの紙ふぶき・画面が横から入る動き など）で、ページ全体が横に広がって
+   縮んで見えないように（2026-10-17。幅320のスマホで、思い出すの下のタブが横にはみ出していた） */
+@supports (overflow-x: clip) { html, body { overflow-x: clip; } }
 </style>
 <div id="app">
 
@@ -3642,11 +3651,67 @@ function showScreen(id) {
 // 収まらないとき（長い日記・設定・規約、キーボードが出ているとき）は、これまでどおりスクロールできる。
 // 2026-09-24 Yukiさん要望「大きいサイズの画面ではスクロール要らない」
 let pageFixedTimer = null;
+// 「収まっているか」は、ページ全体の高さではなく、文字やボタン（中身）の下端で決める（2026-10-17）。
+// 前はページの高さで決めていたので、①浮いているボタン用に取ってある下の余白のせいで、収まっているのに
+// 少し動く画面があり、②逆に、中身がタブの裏に入っているのに「収まる」として固定し、届かない画面があった
+// （大きい字・小さいスマホのアルバム・見返す）。スマホ5種類×字の大きさ3種類×配色3種類で測って確認。
+//  ・中身＝子を持たない要素と、ボタン・入力欄・絵。中で動く欄（日記などの入力欄の箱）は、その箱の下端
+//  ・下の邪魔もの＝下のタブと、画面の下半分に浮いているボタン（← 戻る・保存 など）。その上端より上に収まれば固定
+//  ・キーボードが出ているときは固定しない（書いている欄まで動かせるように）
+function pageContentFits() {
+  const scr = document.querySelector(".screen.active");
+  if (!scr) return true;
+  const ih = window.innerHeight;
+  let limit = ih;
+  const tab = document.getElementById("tab-bar");
+  if (tab && !tab.hidden && document.getElementById("app").classList.contains("has-tabs")) {
+    const tr = tab.getBoundingClientRect();
+    if (tr.height > 0) limit = Math.min(limit, tr.top);
+  }
+  let maxB = 0;
+  const walk = el => {
+    for (const c of el.children) {
+      const cs = getComputedStyle(c);
+      if (cs.display === "none" || cs.visibility === "hidden") continue;
+      if (cs.position === "fixed") { // 浮いているボタンや帯：下半分にあれば、その上端までを使える場所とする
+        const r = c.getBoundingClientRect();
+        if (r.height > 0 && r.top > ih * 0.5) limit = Math.min(limit, r.top);
+        continue;
+      }
+      if (/(auto|scroll)/.test(cs.overflowY) && c.scrollHeight > c.clientHeight + 2) { // 中で動く欄は、その箱で測る
+        const r = c.getBoundingClientRect();
+        if (r.height > 0) maxB = Math.max(maxB, r.bottom);
+        continue;
+      }
+      // 中身＝文字のある末端と、ボタン・入力欄・絵（空の「余白用の箱」は数えない）
+      const leaf = /^(BUTTON|INPUT|TEXTAREA|SELECT|IMG|svg|A)$/.test(c.tagName) || (c.children.length === 0 && (c.textContent || "").trim() !== "");
+      if (leaf) {
+        const r = c.getBoundingClientRect();
+        if (r.height > 0 && r.width > 0) maxB = Math.max(maxB, r.bottom);
+      } else {
+        // 子の要素のほかに、じかに文章を持っている箱（日別ページのカードなど）は、その箱の下端も数える
+        if ([...c.childNodes].some(n => n.nodeType === 3 && n.textContent.trim())) {
+          const r = c.getBoundingClientRect();
+          if (r.height > 0) maxB = Math.max(maxB, r.bottom);
+        }
+        walk(c);
+      }
+    }
+  };
+  walk(scr);
+  return maxB + window.scrollY <= limit - 2;
+}
 function updatePageFixed() {
   const html = document.documentElement;
   const was = html.classList.contains("fixed-page");
   if (was) html.classList.remove("fixed-page"); // 素の高さで測る
-  const fits = document.body.scrollHeight <= window.innerHeight + 2;
+  const kb = document.getElementById("app")?.classList.contains("kb-open");
+  let fits = !kb && pageContentFits();
+  if (fits) {
+    // 固定すると並び方が変わる画面がある（真ん中に寄せている画面など）。固定した並びでも収まるか確かめる
+    html.classList.add("fixed-page");
+    if (!pageContentFits()) fits = false;
+  }
   html.classList.toggle("fixed-page", fits);
 }
 function schedulePageFixed() {
@@ -4461,7 +4526,7 @@ const STEP_DEFS = {
         </div>
       </div>
       <p class="photo-hint hint-strong" id="diary-limit" hidden style="margin-top:10px;"></p>
-      ${flow.returnTo ? "" : `<p class="photo-hint hint-strong" style="margin-top:14px;"><span class="nowrap">${t("前日までの日記は")}</span> <span class="nowrap">${t("「見返す」タブから追記できます")}</span></p>`}
+      ${flow.returnTo ? "" : `<p class="photo-hint hint-strong" style="margin-top:14px;"><span class="nowrap">${t("前日までの日記は")}</span> <span class="nowrap">${t("「見返す」タブから")}</span><span class="nowrap">${t("追記できます")}</span></p>`}
       ${settings.diaryPass ? "" : `<p class="photo-hint" style="margin-top:6px;">${t("設定から日記のみをロックできます")}</p>`}`,
     collect: (mode, e) => {
       const v = document.getElementById("diary-text")?.value.trim();
@@ -4549,7 +4614,7 @@ function attachMealPhotoUI(content) {
   // 1行に入らないスマホでは「ずっと」の前で折り返す（半端な位置で切らない）
   hint.innerHTML = flow.mode === "eatout"
     ? t("写真はなくてもOK。残した写真は消えません")
-    : `<span class="nowrap">${t("写真はなくてもOK・3日だけ保存。")}</span> <span class="nowrap">${t("ずっと残すなら「外食」のカメラへ")}</span>`;
+    : `<span class="nowrap">${t("写真はなくてもOK・")}</span><span class="nowrap">${t("3日だけ保存。")}</span> <span class="nowrap">${t("ずっと残すなら")}</span><span class="nowrap">${t("「外食」のカメラへ")}</span>`;
   area.appendChild(hint);
 }
 function renderMealSlot(slotEl) {
@@ -6133,7 +6198,7 @@ async function renderTransferOut() {
   wrap.innerHTML = `
     <p class="transfer-step">${t("前のスマホでやること")}</p>
     <p class="transfer-safe"><span class="nowrap">${t("書き出しても、")}</span><span class="nowrap">${t("このスマホの記録は")}</span><span class="nowrap">${t("消えません")}</span></p>
-    <p class="transfer-lead"><span class="nowrap">${t("記録を1つのファイルにまとめて、")}</span><span class="nowrap">${t("ご自分あてに送ります。")}</span></p>
+    <p class="transfer-lead"><span class="nowrap">${t("記録を1つの")}</span><span class="nowrap">${t("ファイルにまとめて、")}</span><span class="nowrap">${t("ご自分あてに送ります。")}</span></p>
     <p class="transfer-count">${t("{d}日分の記録", { d: days })}${count ? t("・写真{p}枚", { p: count }) : ""}</p>
     ${count ? `
       <button type="button" class="btn btn-primary btn-xl" id="tr-photos">${t("写真も入れて送る")}</button>
@@ -6226,11 +6291,11 @@ function renderTransferIn(msg) {
   const wrap = document.getElementById("transfer-in");
   wrap.innerHTML = `
     <p class="transfer-step">${t("新しいスマホでやること")}</p>
-    <p class="transfer-lead"><span class="nowrap">${t("前のスマホから送った")}</span><span class="nowrap">${t("ファイルを選んでください")}</span></p>
-    <p class="transfer-safe"><span class="nowrap">${t("今ある記録は消えません。")}</span><span class="nowrap">${t("前のスマホの記録が")}</span><span class="nowrap">${t("足されます")}</span></p>
+    <p class="transfer-lead"><span class="nowrap">${t("前のスマホから送った")}</span><span class="nowrap">${t("ファイルを")}</span><span class="nowrap">${t("選んでください")}</span></p>
+    <p class="transfer-safe"><span class="nowrap">${t("今ある記録は")}</span><span class="nowrap">${t("消えません。")}</span><span class="nowrap">${t("前のスマホの記録が")}</span><span class="nowrap">${t("足されます")}</span></p>
     ${msg ? `<p class="transfer-err">${msg}</p>` : ""}
     <button type="button" class="btn btn-primary btn-xl" id="ti-pick">${t("ファイルを選ぶ")}</button>
-    <p class="settings-hint transfer-hint"><span class="nowrap">${t("LINEやメールで届いたファイルは、")}</span><span class="nowrap">${t("いったんスマホに保存してから")}</span><span class="nowrap">${t("選んでください")}</span></p>`;
+    <p class="settings-hint transfer-hint"><span class="nowrap">${t("LINEやメールで")}</span><span class="nowrap">${t("届いたファイルは、")}</span><span class="nowrap">${t("いったんスマホに")}</span><span class="nowrap">${t("保存してから")}</span><span class="nowrap">${t("選んでください")}</span></p>`;
   document.getElementById("ti-pick").addEventListener("click", () => {
     const inp = document.getElementById("transfer-file");
     inp.value = "";
@@ -6844,7 +6909,7 @@ function renderAlbumPhotoView() {
   document.getElementById("album-wrap").innerHTML = `
     <div class="album-lead"><span class="lead-ico">${balloonIconSvg("album")}</span><span class="album-lead-text"><span class="nowrap">${t("スマホの")}</span><span class="nowrap">${t("アルバムから")}</span><span class="nowrap">${t("記憶をたどる")}</span></span></div>
     <div class="album-photo${isReal ? " has-img" : ""}"><span class="ph-emoji">${albumPhotoHtml(emoji)}</span></div>
-    ${isReal ? "" : `<p class="album-cap"><span class="nowrap">${t("（本番アプリでは、")}</span><span class="nowrap">${t("あなたのアルバムから1枚出ます）")}</span></p>`}
+    ${isReal ? "" : `<p class="album-cap"><span class="nowrap">${t("（本番アプリでは、")}</span><span class="nowrap">${t("あなたのアルバムから")}</span><span class="nowrap">${t("1枚出ます）")}</span></p>`}
     ${albumSwapLeft() > 0 ? `<button type="button" class="album-swap" id="album-swap">${t("ちがう写真にする（あと{n}回）", { n: albumSwapLeft() })}</button>` : ""}
     <button type="button" class="btn btn-secondary btn-xl" id="album-skip">${t("思い出せました（ホームへ）")}</button>
     <div class="album-q q-soft"><span class="nowrap">${t("「メモリーアルバム」に")}</span><span class="nowrap">${t("残す")}</span></div>
@@ -6927,7 +6992,7 @@ function renderAlbumDone(justSaved, reveal) {
       <div class="done-emoji">${balloonIconSvg(justSaved ? "sprout" : "smile")}</div>
       <div class="game-lead">${justSaved ? t("残しました") : t("今日の写真は、見ました")}</div>
       ${justSaved && reveal ? `<div class="album-reveal"><span class="row-ico">${balloonIconSvg("cal")}</span>${t("{d}ごろの写真", { d: reveal })}</div>` : ""}
-      <p class="album-note album-note-lg"><span class="nowrap">${t("また明日、")}</span><span class="nowrap">${t("あたらしい写真を思い出そう。")}</span></p>
+      <p class="album-note album-note-lg"><span class="nowrap">${t("また明日、")}</span><span class="nowrap">${t("あたらしい写真を")}</span><span class="nowrap">${t("思い出そう。")}</span></p>
       <button type="button" class="btn btn-primary btn-xl" id="album-list">${t("「メモリーアルバム」を見る（{n}）", { n: memos.length })}</button>
       ${memos.length ? `<p class="album-note" style="margin-top:14px;"><span class="nowrap">${t("残した写真は、")}</span><span class="nowrap">${t("「思い出す」でも")}</span><span class="nowrap">${t("問題に出てきます")}</span></p>` : ""}
     </div>`;
