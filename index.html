@@ -3039,6 +3039,7 @@ html[data-theme="light"] .balloon-pos:has(.balloon-k-sleep.sleep-due)::before { 
           <div class="settings-label" data-t>データの引き継ぎ</div>
           <p class="about-one" style="font-size:1.05rem;" data-t>🔒 記録は自動で守られます</p>
           <p class="settings-hint" style="margin-top:8px;" data-t>機種変更しても、新しいスマホを同じ設定（iPhoneはApple ID、AndroidはGoogleアカウント）で引き継げば、記録もそのまま戻ります。ふだんは何もしなくて大丈夫です。</p>
+          <p class="settings-hint" id="backup-photo-note" hidden style="margin-top:8px;"><span class="nowrap" data-t>写真は、新しいものから</span><span class="nowrap" data-t>約300枚まで戻ります。</span><span class="nowrap" data-t>全部の写真を移したいときは、</span><span class="nowrap" data-t>下の「新しいスマホへ送る」でも</span><span class="nowrap" data-t>移せます。</span></p>
           <p class="settings-hint" style="margin-top:16px;"><span class="nowrap" data-t>別のスマホや、</span><span class="nowrap" data-t>別のアカウントに</span><span class="nowrap" data-t>移すときはこちら↓</span></p>
           <button type="button" class="btn btn-secondary btn-xl" id="transfer-make" style="margin-top:8px;" data-t>新しいスマホへ送る</button>
           <button type="button" class="btn btn-secondary btn-xl" id="transfer-take" style="margin-top:10px;" data-t>前のスマホから受け取る</button>
@@ -5636,6 +5637,11 @@ function openDayField(ds, label, from) {
 // =========================================================
 // 「声でメモ（Siri）」のカード。出来合いのリンクがあるときは受け取りボタン、
 // 無いときは今まで通りの「自分で作る手順」を出す（iPhoneのときだけ）。
+// 設定の「データの引き継ぎ」：Android だけ、Google のバックアップで戻る写真の量を書き添える（2026-10-17）
+function renderBackupPhotoNote() {
+  const el = document.getElementById("backup-photo-note");
+  if (el) el.hidden = !isAndroidApp();
+}
 function renderSiriCard() {
   const siri = document.getElementById("siri-card");
   if (!siri) return;
@@ -5653,6 +5659,7 @@ function openSettings() {
   renderIapCard();
   // 「声でメモ（Siri）」の手順は iPhone のときだけ（Androidは常駐通知があるので不要）
   renderSiriCard();
+  renderBackupPhotoNote();
   document.querySelectorAll(".theme-opt").forEach(btn => {
     btn.classList.toggle("selected", btn.dataset.themeOpt === (settings.theme || "pastel"));
   });
@@ -6445,7 +6452,7 @@ async function applyTransfer(obj) {
   applySettings();
   updateMemoBadge();
   // ブラウザ版の埋め込み写真が混じっていたら、ファイルへ移す（ネイティブのみ・裏で）
-  migratePhotosToFiles().catch(() => {});
+  migratePhotosToFiles().catch(() => {}).then(() => syncBackupPhotos()).catch(() => {}); // 受け取った写真もバックアップの置き場へ
   return { days: days.size, photos: photoCount };
 }
 
@@ -8684,12 +8691,85 @@ async function sweepUnusedPhotos() {
   }
 }
 
+// =========================================================
+// Android：写真の順番つきバックアップ（2026-10-17 Yukiさん）
+// Google の自動バックアップは1アプリ25MBまでで、超えるとアプリまるごと取られなくなる。
+// そのため写真の置き場（photos/）はバックアップから外してある（文字の記録は必ず戻る）。
+// そのうえで、決まった量（BACKUP_PHOTO_BUDGET）に収まる分だけ、写真を別の置き場（bkphotos/）に写しておく。
+// 順番：アルバム → 外食 → 服装、それぞれ新しいものから（日記は文字なので、もとから全部入る）。
+// 食事の写真は3日で消える決まりなので入れない。
+// 新しいスマホで写真が見つからないときは、bkphotos/ から戻す（片づけ sweepUnusedPhotos より先に）。
+// iPhone は iCloud バックアップに小さな上限がないので、何もしない
+// =========================================================
+const BKPHOTO_DIR = "bkphotos";
+const BACKUP_PHOTO_BUDGET = 15 * 1024 * 1024; // 15MB（残りの10MBは文字の記録とアプリの中身のぶん）
+function isAndroidApp() {
+  try { return !!(window.Capacitor && window.Capacitor.getPlatform && window.Capacitor.getPlatform() === "android"); }
+  catch (e) { return false; }
+}
+// 写真の名前を、バックアップに入れる順番に並べる
+function backupPhotoOrder() {
+  const out = [], seen = new Set();
+  const add = v => { if (isFilePhoto(v)) { const n = String(v).slice(5); if (!seen.has(n)) { seen.add(n); out.push(n); } } };
+  const byDateDesc = (a, b) => String(b).localeCompare(String(a));
+  loadAlbumMemos().slice().sort((a, b) => byDateDesc(a && a.date, b && b.date)).forEach(a => add(a && a.photo));
+  const mp = loadMealPhotos();
+  Object.keys(mp).sort(byDateDesc).forEach(ds => { const v = mp[ds]; if (v && typeof v === "object") add(v.eatout); });
+  const o = loadOutfits();
+  Object.keys(o).sort(byDateDesc).forEach(ds => add((o[ds] || {}).photo));
+  return out;
+}
+async function listDir(fs, dir) {
+  const r = await fs.readdir({ path: dir, directory: "DATA" });
+  return new Set((r.files || []).map(f => (typeof f === "string" ? f : (f && f.name))).filter(Boolean));
+}
+// 新しいスマホ：見つからない写真を、バックアップの置き場から戻す
+async function restoreBackupPhotos() {
+  const fs = fsPlugin();
+  if (!fs || !photoBase || !isAndroidApp()) return;
+  let inBk, inPhotos;
+  try { inBk = await listDir(fs, BKPHOTO_DIR); } catch (e) { return; } // 置き場が無い＝戻すものはない
+  try { inPhotos = await listDir(fs, PHOTO_DIR); } catch (e) { inPhotos = new Set(); }
+  for (const n of backupPhotoOrder()) {
+    if (inPhotos.has(n) || !inBk.has(n)) continue;
+    try { await fs.copy({ from: BKPHOTO_DIR + "/" + n, to: PHOTO_DIR + "/" + n, directory: "DATA", toDirectory: "DATA" }); } catch (e) {}
+  }
+}
+// ふだん：順番どおり、量に収まる分だけバックアップの置き場にそろえる（足りない分は写し、外れた分は消す）
+async function syncBackupPhotos() {
+  const fs = fsPlugin();
+  if (!fs || !photoBase || !isAndroidApp()) return;
+  await fs.mkdir({ path: BKPHOTO_DIR, directory: "DATA", recursive: true }).catch(() => {});
+  let inBk;
+  try { inBk = await listDir(fs, BKPHOTO_DIR); } catch (e) { return; }
+  const want = new Set();
+  let total = 0;
+  for (const n of backupPhotoOrder()) {
+    let size = 0;
+    try { size = Number((await fs.stat({ path: PHOTO_DIR + "/" + n, directory: "DATA" })).size) || 0; } catch (e) { continue; } // 写真が無い
+    if (total + size > BACKUP_PHOTO_BUDGET) break; // ここから先は入りきらない（順番を守るため、後ろの小さい写真で埋めない）
+    total += size;
+    want.add(n);
+  }
+  for (const n of want) {
+    if (inBk.has(n)) continue;
+    try { await fs.copy({ from: PHOTO_DIR + "/" + n, to: BKPHOTO_DIR + "/" + n, directory: "DATA", toDirectory: "DATA" }); } catch (e) {}
+  }
+  for (const n of inBk) {
+    if (want.has(n)) continue;
+    await fs.deleteFile({ path: BKPHOTO_DIR + "/" + n, directory: "DATA" }).catch(() => {});
+  }
+}
+
 (async function boot() {
   await resolvePhotoBase();   // 写真置き場の場所を先に調べる（表示に要る）
   init();
-  // 画面が出てから、古い写真をファイルへ移し、使われていない写真を片づける
+  // 画面が出てから、古い写真をファイルへ移し、（新しいスマホなら）バックアップから写真を戻し、
+  // 使われていない写真を片づけ、バックアップの置き場をそろえる
   try { await migratePhotosToFiles(); } catch (e) {}
+  try { await restoreBackupPhotos(); } catch (e) {} // 片づけより先に（戻す前に片づけると、記録から写真が外れてしまう）
   try { await sweepUnusedPhotos(); } catch (e) {}
+  try { await syncBackupPhotos(); } catch (e) {}
 })();
 </script>
 
