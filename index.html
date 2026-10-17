@@ -894,7 +894,7 @@ html[data-fontsize="xlarge"] #album-skip { font-size: min(1.4rem, 5.2vw); }
   font-size: 1.18rem; font-weight: 800; letter-spacing: .02em;
 }
 .album-lead .lead-ico { margin-right: 0; }
-.album-lead-text { min-width: 0; } /* 入りきらないときは「スマホの／アルバムから／記憶をたどる」で折り返す */
+.album-lead-text { min-width: 0; text-align: center; } /* 1行で真ん中に。入りきらないときは「スマホの／アルバムから／記憶をたどる」で折り返し、折り返しても真ん中にそろえる（2026-10-17：線画を外した） */
 /* ひかえめな問いかけ（思い出すだけで大丈夫） */
 .album-q.q-soft { font-size: 1.02rem; font-weight: 700; color: var(--muted); }
 .album-encourage { color: var(--accent); font-size: 1.05rem; font-weight: 700; text-align: center; line-height: 1.75; margin: 6px 0 8px; }
@@ -4037,6 +4037,8 @@ function balloonIconSvg(key) {
 }
 // 記入画面の見出しの絵：ホームと同じ線画があればそれを使う
 function stepIconHtml(def) {
+  // ページの見出しの線画は「食事」だけ残す（2026-10-17 Yukiさん：ほかは小さくて要らない、すっきりさせる）
+  if (def !== STEP_DEFS.meal) return "";
   return def.icon
     ? `<span class="step-emoji step-ico">${balloonIconSvg(def.icon)}</span>`
     : `<span class="step-emoji">${def.emoji}</span>`;
@@ -4667,7 +4669,7 @@ function renderPickView() {
   document.getElementById("flow-skip").style.display = "none"; // 選ぶだけの画面に保存は置かない（戻るだけ）
   document.getElementById("flow-back").style.display = "";      // ここは戻るが命綱なので必ず出す
   content.innerHTML = `
-    <div class="step-title"><span class="step-emoji step-ico">${balloonIconSvg("pencil")}</span>${t("この日を書き足す")}</div>
+    <div class="step-title">${t("この日を書き足す")}</div>
     <div class="opt-list">
       <button class="opt-card" id="pick-meal">${t("食事")}</button>
       <button class="opt-card" id="pick-outfit">${t("服装")}</button>
@@ -5232,8 +5234,8 @@ function renderQuizStep(content) {
   document.getElementById("flow-skip").textContent = t("飛ばす");
 
   const quizTitle = flow.recallOnly
-    ? `<span class="step-emoji step-ico">${balloonIconSvg("recall")}</span>${t("昨日を思い出す")}`
-    : `<span class="step-emoji step-ico">${balloonIconSvg("recall")}</span>${t("記憶確認")}`;
+    ? t("昨日を思い出す")
+    : t("記憶確認");
 
   // 昨日の記録が無い人には、先にそのことを伝える（→直近の問題へ or 今日の食事の記録へ）
   if (flow.recallOnly && !flow.noticeShown && !yesterdayHasRecord() && questions.length > 0) {
@@ -5276,7 +5278,7 @@ function renderQuizStep(content) {
     const isLast = qIndex === questions.length - 1;
     // 見出しは「昨日の問題のときだけ」昨日を思い出す。それ以外（2問目など）は思い出す
     const qTitle = flow.recallOnly
-      ? `<span class="step-emoji step-ico">${balloonIconSvg("recall")}</span>${q.dateStr === daysAgoStr(1) ? t("昨日を思い出す") : t("思い出す")}`
+      ? (q.dateStr === daysAgoStr(1) ? t("昨日を思い出す") : t("思い出す"))
       : quizTitle;
     content.scrollTop = 0; // いちばん上から見せる
     content.innerHTML = `
@@ -5346,7 +5348,7 @@ function renderQuizStep(content) {
   function renderAdGate(next, title, note) {
     content.scrollTop = 0; // いちばん上から見せる
     content.innerHTML = `
-      <div class="step-title"><span class="step-emoji step-ico">${balloonIconSvg("recall")}</span>${title || t("もっと思い出す")}</div>
+      <div class="step-title">${title || t("もっと思い出す")}</div>
       <div class="ad-gate">
         <span class="ad-gate-tag">${t("広告")}</span>
         <div class="ad-gate-body">${t("ここに短い広告が流れます（見本）")}</div>
@@ -5365,7 +5367,7 @@ function renderQuizStep(content) {
       noteMoreRecall(); // 1日10問の数に入れる
       content.scrollTop = 0; // いちばん上から見せる
       content.innerHTML = `
-        <div class="step-title"><span class="step-emoji step-ico">${balloonIconSvg("recall")}</span>思い出す</div>
+        <div class="step-title">${t("思い出す")}</div>
         <div class="quiz-count">${t("{i}問目 / 全{n}問", { i: di + 1, n: pool.length })}</div>
         ${q.cue ? `<img class="quiz-photo quiz-cue" src="${photoSrc(q.cue)}" alt="${t("手がかりの写真")}">` : ""}
         <div class="quiz-q">${q.q}</div>
@@ -5395,7 +5397,7 @@ function renderQuizStep(content) {
     function renderDeepEnd() {
       content.scrollTop = 0; // いちばん上から見せる
       content.innerHTML = `
-        <div class="step-title"><span class="step-emoji step-ico">${balloonIconSvg("recall")}</span>思い出す</div>
+        <div class="step-title">${t("思い出す")}</div>
         <div class="quiz-empty">
           <div class="big big-ico">${balloonIconSvg("sprout")}</div>
           ${pool.capped
@@ -5639,7 +5641,7 @@ function openDayDetail(ds) {
           <div class="detail-label">${t(f.label)}</div>${f.thumb ? `<img class="detail-thumb" src="${photoSrc(f.thumb)}" alt="">` : ""}${linkify(f.text)}<span class="detail-chev">›</span>
         </div>`).join("")
     : `<p class="search-hint">${t("この日の記録はまだありません。")}</p>
-      <div class="detail-add-lead"><span class="step-emoji step-ico">${balloonIconSvg("pencil")}</span>${t("この日を書き足す")}</div>
+      <div class="detail-add-lead">${t("この日を書き足す")}</div>
       <div class="opt-list">
         <button class="opt-card" id="detail-pick-meal">${t("食事")}</button>
         <button class="opt-card" id="detail-pick-outfit">${t("服装")}</button>
@@ -6864,7 +6866,15 @@ function shrinkDataUrl(url, maxSide, quality) {
 }
 
 // 今日の1枚を出して「残す／残さない」を選ぶ（1日1枚）
-let albumNoteDraft = ""; // 今日の写真に書きかけたひと言（一覧を見て戻っても消えないように。2026-10-17）
+let albumNoteDraft = "";
+let albumLoadError = ""; // アプリでスマホの写真を出せなかった理由（perm＝許可なし／none＝写真が無い／other）
+// 見本の絵を出しているときの一言。ブラウザ（プレビュー）は見本である旨、アプリは出せなかった理由
+function albumSampleCaption() {
+  if (!nativePhotoPlugin()) return `<span class="nowrap">${t("（本番アプリでは、")}</span><span class="nowrap">${t("あなたのアルバムから")}</span><span class="nowrap">${t("1枚出ます）")}</span>`;
+  if (albumLoadError === "perm") return `<span class="nowrap">${t("スマホの写真を出すには、")}</span><span class="nowrap">${t("スマホの設定で")}</span><span class="nowrap">${t("「記憶のギフト」に")}</span><span class="nowrap">${t("写真を許可してください")}</span>`;
+  if (albumLoadError === "none") return `<span class="nowrap">${t("スマホに写真が見つからないので、")}</span><span class="nowrap">${t("見本の絵を出しています")}</span>`;
+  return `<span class="nowrap">${t("スマホの写真を読み込めなかったので、")}</span><span class="nowrap">${t("見本の絵を出しています")}</span>`;
+} // 今日の写真に書きかけたひと言（一覧を見て戻っても消えないように。2026-10-17）
 function renderAlbumPhoto(reuse) {
   albumView = "photo";
   setBackLabel("album-back", false);
@@ -6874,14 +6884,18 @@ function renderAlbumPhoto(reuse) {
     if (plug) {
       // アプリ版：本物のアルバムから1枚（初回は写真の許可を求める）
       document.getElementById("album-wrap").innerHTML = `
-        <div class="album-lead"><span class="lead-ico">${balloonIconSvg("album")}</span><span class="album-lead-text"><span class="nowrap">${t("スマホの")}</span><span class="nowrap">${t("アルバムから")}</span><span class="nowrap">${t("記憶をたどる")}</span></span></div>
+        <div class="album-lead"><span class="album-lead-text"><span class="nowrap">${t("スマホの")}</span><span class="nowrap">${t("アルバムから")}</span><span class="nowrap">${t("記憶をたどる")}</span></span></div>
         <div class="album-photo"><span class="ph-emoji"></span></div>
         <p class="album-cap">${t("アルバムから1枚えらんでいます…")}</p>`;
       plug.getRandomPhoto().then(r => {
+        albumLoadError = "";
         currentAlbumPhoto = { emoji: r.dataUrl, photoDate: r.takenYM || "" };
         renderAlbumPhotoView();
-      }).catch(() => {
-        pickSamplePhoto(); // 許可されなかった・写真が無いときは見本で続ける
+      }).catch(err => {
+        // 許可されなかった・写真が無いときは見本で続ける。アプリなのに見本になった理由を、下の一言で伝える（2026-10-17）
+        const m = String((err && (err.message || err.code || err)) || "");
+        albumLoadError = /permission/.test(m) ? "perm" : /no_photos/.test(m) ? "none" : "other";
+        pickSamplePhoto();
         renderAlbumPhotoView();
       });
       return;
@@ -6907,9 +6921,9 @@ function renderAlbumPhotoView() {
   const isReal = String(emoji).startsWith("data:");
   const memos = loadAlbumMemos();
   document.getElementById("album-wrap").innerHTML = `
-    <div class="album-lead"><span class="lead-ico">${balloonIconSvg("album")}</span><span class="album-lead-text"><span class="nowrap">${t("スマホの")}</span><span class="nowrap">${t("アルバムから")}</span><span class="nowrap">${t("記憶をたどる")}</span></span></div>
+    <div class="album-lead"><span class="album-lead-text"><span class="nowrap">${t("スマホの")}</span><span class="nowrap">${t("アルバムから")}</span><span class="nowrap">${t("記憶をたどる")}</span></span></div>
     <div class="album-photo${isReal ? " has-img" : ""}"><span class="ph-emoji">${albumPhotoHtml(emoji)}</span></div>
-    ${isReal ? "" : `<p class="album-cap"><span class="nowrap">${t("（本番アプリでは、")}</span><span class="nowrap">${t("あなたのアルバムから")}</span><span class="nowrap">${t("1枚出ます）")}</span></p>`}
+    ${isReal ? "" : `<p class="album-cap">${albumSampleCaption()}</p>`}
     ${albumSwapLeft() > 0 ? `<button type="button" class="album-swap" id="album-swap">${t("ちがう写真にする（あと{n}回）", { n: albumSwapLeft() })}</button>` : ""}
     <button type="button" class="btn btn-secondary btn-xl" id="album-skip">${t("思い出せました（ホームへ）")}</button>
     <div class="album-q q-soft"><span class="nowrap">${t("「メモリーアルバム」に")}</span><span class="nowrap">${t("残す")}</span></div>
@@ -7705,7 +7719,6 @@ function shopDoneBarHtml() {
   const n = loadShopDone().length;
   // 押せる帯だと分かるように、カゴの線画と右端の「›」を添える（2026-09-14 Yukiさん指摘「ボタンに見えない」）
   return `<button type="button" class="memo-open shop-done-bar" id="shop-done-open">`
-    + `<span class="shop-emoji shop-ico">${balloonIconSvg("shopping")}</span>`
     + `<span class="shop-done-label">${t("今日買ったもの（{n}）", { n: n ? n : t("まだなし") })}</span>`
     + `<span class="shop-done-chev">›</span></button>`;
 }
@@ -7854,7 +7867,7 @@ function renderShoppingRecall() {
     </button>`).join("");
   // 「先に思い出してから、タップで答え合わせ。」の一言は削除（2026-10-12 Yukiさん指示）
   document.getElementById("shopping-wrap").innerHTML = `
-    <p class="shop-lead"><span class="lead-ico">${balloonIconSvg("shopping")}</span>${t("思い出しながら、お買い物")}</p>
+    <p class="shop-lead">${t("思い出しながら、お買い物")}</p>
     ${shopDoneBarHtml()}
     <button type="button" class="btn btn-green btn-xl" id="shop-openall">${t("ぜんぶ答え合わせ")}</button>
     ${cards}
