@@ -4069,12 +4069,21 @@ function balloonIconSvg(key) {
 // 記入画面の見出しの絵：ホームと同じ線画があればそれを使う
 // 選択画面：その項目がもう書いてあるか（2026-10-17 Yukiさん：前は「書いてある1つ」に色を付けていたが、
 // 何の印か分からず「最初から選ばれている」と見えた。両方書いてあっても片方にしか付かなかった）
+// 「書いてあります」だと全部書いたように読めるので、書いた欄の名前を出す（2026-10-17 Yukiさん）
 function optRecorded(value, e) {
   e = e || {};
-  if (value === "full" || value === "best") return !!e.meal;
-  if (value === "eatout") return !!e.eatout;
-  if (value === "write") return !!e.diary;
-  return false;
+  const has = v => !!String(v || "").trim();
+  if (value === "full" || value === "best") {
+    const m = e.meal; if (!m) return "";
+    if (m.mode === "best") return has(m.best) ? t("いちばんの1つ") : "";
+    return [["morning", "朝"], ["noon", "昼"], ["evening", "晩"], ["snack", "間食"]].filter(([k]) => has(m[k])).map(([, n]) => t(n)).join("・");
+  }
+  if (value === "eatout") {
+    const o = e.eatout; if (!o) return "";
+    return [["place", "場所"], ["food", "食べたもの"], ["with", "誰と"], ["link", "お店のリンク"]].filter(([k]) => has(o[k])).map(([, n]) => t(n)).join("・");
+  }
+  if (value === "write") return has(e.diary) ? t("日記") : "";
+  return "";
 }
 function stepIconHtml(def) {
   // ページの見出しの線画は「食事」だけ残す（2026-10-17 Yukiさん：ほかは小さくて要らない、すっきりさせる）
@@ -4863,7 +4872,7 @@ function renderSelectView(stepId, content) {
     <div class="step-note">${t(def.note)}</div>
     <div class="opt-list">
       ${def.options.map(o =>
-        `<button class="opt-card${optRecorded(o.value, e) ? " has-record" : ""}" data-value="${o.value}" data-action="${o.action}">${t(o.label)}${o.sub ? `<small>${t(o.sub)}</small>` : ""}${optRecorded(o.value, e) ? `<span class="opt-rec">${t("✓ 書いてあります")}</span>` : ""}</button>`
+        `<button class="opt-card${optRecorded(o.value, e) ? " has-record" : ""}" data-value="${o.value}" data-action="${o.action}">${t(o.label)}${o.sub ? `<small>${t(o.sub)}</small>` : ""}${optRecorded(o.value, e) ? `<span class="opt-rec">${t("✓ 書いたもの：{v}", { v: optRecorded(o.value, e) })}</span>` : ""}</button>`
       ).join("")}
     </div>`;
   content.querySelectorAll(".opt-card").forEach(card => {
