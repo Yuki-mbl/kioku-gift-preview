@@ -2243,6 +2243,11 @@ html[data-fontsize="xlarge"] .balloon-lg .balloon-name { font-size: min(1.3rem, 
 .tabb-ico { font-size: 1.35rem; line-height: 1.15; display: flex; align-items: center; justify-content: center; }
 .tabb-ico svg { width: 27px; height: 27px; display: block; }
 .tabb-name { font-size: min(.82rem, 3.6vw); font-weight: 800; white-space: nowrap; }
+/* 夜8時までに「思い出す」を開いていない日：＋ボタンと同じ色で知らせる（2026-10-17）。
+   淡い配色のピンクはそのままだと文字が薄いので、同じ色みで濃くして読めるようにする */
+#tab-quiz.recall-due { color: #c56a7f; }
+[data-theme="light"] #tab-quiz.recall-due { color: #2f8a5b; } /* ＋の緑だと、ふだんの濃い字と見分けにくいので少し明るく */
+[data-theme="dark"] #tab-quiz.recall-due { color: #D9B876; }
 /* 下タブ中央の「一瞬」ボタン：ここだけテーマ色で、堂々と浮かせる */
 .tab-quick {
   flex: 0 0 auto; width: 76px;
@@ -4515,7 +4520,21 @@ function startMeal(dateStr, ret) { startFlow(dateStr, ["meal"], ret); }   // �
 function startDiary(dateStr, ret) { startFlow(dateStr, ["diary"], ret); } // 📖日々の出来事だけ
 
 // 「昨日を思い出す」：問題だけを出す（昨日の記録が無ければ、先にそのことを伝える）
+// 夜8時までに「思い出す」を開いていない日は、下のタブの「思い出す」を＋ボタンと同じ色にして、
+// そっと気づかせる（2026-10-17 Yukiさん）。開いたら元の色に戻る。夜中0〜3時は前の日の続き（todayStr と同じ）
+const RECALL_NUDGE_HOUR = 20;
+function updateRecallNudge() {
+  const tab = document.getElementById("tab-quiz");
+  if (!tab) return;
+  const h = new Date().getHours();
+  const due = (h >= RECALL_NUDGE_HOUR || h < 4) && store.get("mn_recall_seen", "") !== todayStr();
+  tab.classList.toggle("recall-due", due);
+}
+setInterval(updateRecallNudge, 60 * 1000);
+document.addEventListener("visibilitychange", () => { if (!document.hidden) updateRecallNudge(); });
 function startRecall() {
+  store.set("mn_recall_seen", todayStr());
+  updateRecallNudge();
   flow = { date: todayStr(), step: 0, sub: "select", mode: null, steps: [{ id: "quiz" }], recallOnly: true };
   if (!entries[flow.date]) entries[flow.date] = {};
   renderStep();
@@ -8262,6 +8281,7 @@ function init() {
   watchPageFixed();  // 収まる画面ではページを動かさない（見張り）
   wireKeyboardInset();
   syncQuickMemoNotify(); // すぐ書けるメモ通知（アプリ版のみ。通知から書かれた分も取り込む）
+  updateRecallNudge();   // 夜8時を過ぎて「思い出す」をまだ開いていなければ、タブに色をつける
   if (!profile) {
     showScreen("screen-onboarding");
     appStarted = true;
