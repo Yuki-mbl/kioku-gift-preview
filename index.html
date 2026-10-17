@@ -3686,6 +3686,7 @@ const BACK_BTN_BY_SCREEN = {
   "screen-legal": "legal-back",
   "screen-transfer-code": "tc-back",
   "screen-code-entry": "ce-back",
+  "screen-shopping": "shopping-back", // うつして来た・答え合わせから来たときの戻り先を守る（2026-10-17）
 };
 function swipeAnim(dir) {
   const scr = document.querySelector(".screen.active");
@@ -3694,15 +3695,52 @@ function swipeAnim(dir) {
   void scr.offsetWidth;
   scr.classList.add(dir === "back" ? "swipe-in-back" : "swipe-in-fwd");
 }
-// なぞりは「右へ払う＝ホームへ戻る」だけ（タブ間の移動は下のタブで。2026-09-01にタブ巡回を廃止）
-function swipeBack() {
+// 「ひとつ戻る」：画面の「← 戻る」と同じ行き先へ（来た道を戻る）。なぞりと Android の戻るボタンの両方で使う。
+// 戻れた／何かを閉じたら true。ホームなど、これ以上戻れないときは false（2026-10-17：前はなぞりが日記・
+// 書き足し・買い物などでいつもホームへ行き、Android の戻るボタンはどの画面でもアプリを閉じていた）
+function goBackOneStep() {
+  // 上に開いているものを先に閉じる
+  const alertPop = document.getElementById("alert-pop");
+  if (alertPop && !alertPop.hidden) { alertPop.hidden = true; return true; }
+  const photoPop = document.getElementById("photo-pop");
+  if (photoPop && !photoPop.hidden) { photoPop.hidden = true; return true; }
+  const shopPop = document.getElementById("shop-pop");
+  if (shopPop && !shopPop.hidden) { closeShopPop(); return true; }
+  const memoPop = document.getElementById("memo-pop");
+  if (memoPop && !memoPop.hidden) {
+    if (memoMove) { memoMove = memoMove.dest ? { i: memoMove.i } : null; renderMemoScreen(); } // 行き先えらびの途中は1つ前へ
+    else closeMemo();
+    return true;
+  }
   const id = document.querySelector(".screen.active")?.id;
-  if (!id || id === "screen-home") return; // ホームでは何もしない
-  if (id === "screen-flow" || id === "screen-lock") { saveFlowDraftIfAny(); goHome(); swipeAnim("back"); return; } // 日記・思い出す・日記ロック：書きかけを保存してホームへ
+  if (!id || id === "screen-home" || id === "screen-onboarding") return false;
+  if (id === "screen-lock") {
+    if (lockMode !== "diary") return false; // アプリのロックは戻れない（中に入らせない）
+    lockBack(); return true;
+  }
+  if (id === "screen-flow") {
+    if (flowHasBack()) prevStep(); else { saveFlowDraftIfAny(); goHome(); } // 書きかけは保存
+    return true;
+  }
   const btn = document.getElementById(BACK_BTN_BY_SCREEN[id] || "");
   if (btn) btn.click(); else goHome();
-  swipeAnim("back"); // 指の動きに合わせて左からスッと入る
+  return true;
 }
+// なぞりは「右へ払う＝ひとつ戻る」だけ（タブ間の移動は下のタブで。2026-09-01にタブ巡回を廃止）
+function swipeBack() {
+  if (goBackOneStep()) swipeAnim("back"); // 指の動きに合わせて左からスッと入る
+}
+// Android の戻るボタン（画面の端からなぞる「戻る」も同じ）：ひとつ戻る。ホームでは、アプリを閉じずに裏へ下げる
+(() => {
+  const A = appPlugin();
+  if (!A || !A.addListener) return;
+  try {
+    A.addListener("backButton", () => {
+      if (goBackOneStep()) return;
+      try { A.minimizeApp(); } catch (e) {}
+    });
+  } catch (e) {}
+})();
 function wireSwipeNav() {
   const app = document.getElementById("app");
   let sx = 0, sy = 0, ok = false, lockedH = false;
@@ -3714,7 +3752,7 @@ function wireSwipeNav() {
     const scr = document.querySelector(".screen.active")?.id;
     // 入力欄・下タブから始めた指は対象外
     const from = e.target;
-    const inExcluded = from.closest("input, textarea, #tab-bar"); // どのカレンダーも月めくりは矢印のみ。なぞりはどこでもページ移動
+    const inExcluded = from.closest("input, textarea, #tab-bar, #memo-pop, #shop-pop, #photo-pop, #alert-pop"); // どのカレンダーも月めくりは矢印のみ。なぞりはどこでもページ移動
     const diaryLock = scr === "screen-lock" && lockMode === "diary"; // 日記のパスコード画面はなぞりで先へ進めてよい（アプリ全体ロックは不可）
     ok = !!scr && (!SWIPE_OFF_SCREENS.has(scr) || diaryLock) && !inExcluded;
   }, { passive: true });
@@ -3855,6 +3893,7 @@ function goHome() {
 // 帰る場所がいつも同じほうが迷わないため。旧設定 settings.startScreen は見ない
 function applyStart() {
   appStarted = true;
+  if (pendingSleep) { pendingSleep = false; openSleep(); return; } // おやすみ通知から開いた（ロック解除のあと）
   setTimeout(tryOpenPendingTransfer, 0); // 引き継ぎファイルを押して開いたとき（ロック解除のあとも）
   // 15分以内に閉じていたら、直前の画面へ戻す（買い物の途中で消灯しても続きから）
   const rez = store.get("mn_resume", null);
@@ -4037,6 +4076,7 @@ function joinText(oldText, add) {
 }
 // 実際にうつす。記録にその場で書き込んでから、その画面を開く（書き忘れで消えないように）
 function moveMemoTo(i, dest, slot) {
+  saveFlowDraftIfAny(); // 日記などを書きかけのまま「＋」から うつすと、書きかけが消えていた（2026-10-17）
   const a = loadMemos();
   const m = a[i];
   if (!m) { memoMove = null; renderMemoScreen(); return; }
@@ -4574,7 +4614,7 @@ function renderPickView() {
   document.getElementById("pick-diary").addEventListener("click", () => {
     const ds = flow.date;
     if (settings.diaryPass && !diaryUnlocked && ((entries[ds] || {}).diary || "").trim()) {
-      pendingUnlock = { type: "detail", ds };
+      pendingUnlock = { type: "diary", ds, ret, fromPicker: true }; // 解除後は日記へ、戻るは書き足しの選択へ
       showLock("diary");
       return;
     }
@@ -4668,7 +4708,7 @@ function renderStep() {
   const stepId = flow.steps[flow.step].id;
   // 日記ロック中：既に日記が書いてある日は、開く前に解除が必要（書き足しの2ページ目など）
   if (stepId === "diary" && settings.diaryPass && !diaryUnlocked && (entries[flow.date]?.diary || "").trim()) {
-    pendingUnlock = { type: "diary", ds: flow.date };
+    pendingUnlock = { type: "flow" }; // 書き足しの途中：解除したらこのページの続きから
     showLock("diary");
     return;
   }
@@ -5357,7 +5397,12 @@ function dayFields(ds) {
           ...diaryFields, ...albumFieldsFor(ds), ...pick("行った場所")];
 }
 
+let searchFrom = "screen-home"; // 検索を開いた画面（ホーム／見返す）
 function openSearch(viaMic) {
+  const cur = document.querySelector(".screen.active")?.id;
+  searchFrom = cur === "screen-calendar" ? "screen-calendar" : "screen-home";
+  // 見返すから来たときは「← 戻る」を出す（ホームから来たときは下のタブで戻れるので出さない）
+  document.getElementById("search-back").style.display = searchFrom === "screen-calendar" ? "inline-flex" : "";
   document.getElementById("search-input").value = "";
   lastSearchQ = null;
   runSearch("");
@@ -5580,7 +5625,7 @@ function openDayField(ds, label, from) {
   if (label.startsWith("メモリーアルバム")) { albumReturnTo = ret; renderAlbumList(); showScreen("screen-album"); return; }
   if (label.startsWith("食事") || label.startsWith("外食")) { startMeal(ds, ret); return; }
   if (label.startsWith("日記")) {
-    if (settings.diaryPass && !diaryUnlocked) { pendingUnlock = { type: "detail", ds }; showLock("diary"); return; }
+    if (settings.diaryPass && !diaryUnlocked) { pendingUnlock = { type: "diary", ds, ret }; showLock("diary"); return; }
     startDiary(ds, ret); return;
   }
   openAddPicker(ds, ret); // 旧データ（行った場所など）→ 書き足すもの（食事か日記）を選んでから
@@ -5633,29 +5678,60 @@ function openSettings() {
 let pcEntry = "";
 let lockMode = "app";      // "app" | "diary"
 let diaryUnlocked = false; // 日記ロックを解除して見ているところか（日記を見る流れから出たら false に戻す）
-// アプリから離れたら（ほかのアプリ・画面が消えた）、日記の鍵をかけ直す
-document.addEventListener("visibilitychange", () => { if (document.hidden) diaryUnlocked = false; });
+// アプリから離れたら（ほかのアプリ・画面が消えた）、日記の鍵をかけ直す。
+// 日記が画面に出たままだと、戻ってきた人に読めてしまうので、書きかけを保存してホームへ（2026-10-17）
+document.addEventListener("visibilitychange", () => {
+  if (!document.hidden || !diaryUnlocked) return;
+  diaryUnlocked = false;
+  const id = document.querySelector(".screen.active")?.id;
+  if (settings.diaryPass && DIARY_OPEN_SCREENS.has(id) && id !== "screen-lock") { saveFlowDraftIfAny(); goHome(); }
+});
+// アプリのロック：起動したときだけでなく、ほかのアプリから戻ってきたときにもかける（2026-10-17。
+// 前は一度開けば、何時間たってもパスコードなしで開けた）。カメラや写真選びで少し離れただけで
+// 毎回聞かないよう、1分までは聞かない。かけ直したときは、解除したらさっきの画面にそのまま戻す
+const RELOCK_AFTER_MS = 60 * 1000;
+let hiddenAt = 0, relockReturn = null;
+function noteAppHidden() { if (!hiddenAt) hiddenAt = Date.now(); }
+function checkRelock() {
+  const away = hiddenAt ? Date.now() - hiddenAt : 0;
+  hiddenAt = 0;
+  if (!settings.passcode || !appStarted || away < RELOCK_AFTER_MS) return;
+  const id = document.querySelector(".screen.active")?.id;
+  if (!id || id === "screen-lock" || id === "screen-onboarding") return;
+  // 上に開いているシート（ひらめき・答え合わせ・写真）は閉じる。ロック画面の上に残ると中が見えるため
+  try { closeMemo(); } catch (e) {}
+  ["shop-pop", "photo-pop"].forEach(pid => { const el = document.getElementById(pid); if (el) el.hidden = true; });
+  relockReturn = id;
+  showLock("app");
+}
+document.addEventListener("visibilitychange", () => { if (document.hidden) noteAppHidden(); else checkRelock(); });
+document.addEventListener("pause", noteAppHidden);
+document.addEventListener("resume", checkRelock);
 let pendingUnlock = null; // 解除後の行き先 {type:"diary"|"detail"|"search", ds}
 
 function lockPassOf() { return lockMode === "diary" ? settings.diaryPass : settings.passcode; }
-function lockOutUntil() { return (settings.lockUntil || {})[lockMode] || 0; }
-function isLockedOut() { return Date.now() < lockOutUntil(); }
-function noteLockFail() {
+// 5回まちがえたら5時間待つ。key＝"app"／"diary"（キーパッド・設定の確認）／"rec"（合言葉）
+// （2026-10-17：設定の確認と合言葉は何度でも試せたので、同じ決まりに入れた）
+function lockOutUntil(key) { return (settings.lockUntil || {})[key || lockMode] || 0; }
+function isLockedOut(key) { return Date.now() < lockOutUntil(key); }
+function noteLockFail(key) {
+  key = key || lockMode;
   settings.lockFails = settings.lockFails || {};
   settings.lockUntil = settings.lockUntil || {};
-  const n = (settings.lockFails[lockMode] || 0) + 1;
+  const n = (settings.lockFails[key] || 0) + 1;
   if (n >= 5) {
-    settings.lockFails[lockMode] = 0;
-    settings.lockUntil[lockMode] = Date.now() + 5 * 60 * 60 * 1000; // 5時間
+    settings.lockFails[key] = 0;
+    settings.lockUntil[key] = Date.now() + 5 * 60 * 60 * 1000; // 5時間
   } else {
-    settings.lockFails[lockMode] = n;
+    settings.lockFails[key] = n;
   }
   store.set("mn_settings", settings);
   return n >= 5;
 }
-function clearLockFails() {
+function clearLockFails(key) {
+  key = key || lockMode;
   settings.lockFails = settings.lockFails || {};
-  settings.lockFails[lockMode] = 0;
+  settings.lockFails[key] = 0;
   store.set("mn_settings", settings);
 }
 
@@ -5710,7 +5786,15 @@ function onKeypad(k) {
           lastSearchQ = null; // 同じ言葉でも作り直す
           runSearch(document.getElementById("search-input").value);
         }
-        else startDiary((act && act.ds) || todayStr(), act && act.ret);
+        else if (act && act.type === "flow") { renderStep(); showScreen("screen-flow"); } // 書き足しの途中の日記ページ
+        else {
+          startDiary((act && act.ds) || todayStr(), act && act.ret);
+          if (act && act.fromPicker) { flow.fromPicker = true; updateFlowBack(); } // 戻るで「この日を書き足す」へ
+        }
+      } else if (relockReturn) {
+        // アプリに戻ってきて鍵をかけ直したとき：さっきの画面にそのまま戻す（書きかけも残る）
+        const id = relockReturn; relockReturn = null;
+        showScreen(id);
       } else {
         applyStart();
       }
@@ -5742,8 +5826,23 @@ function showLock(mode) {
   if (isLockedOut()) document.getElementById("lock-msg").textContent = t("5時間後にお試しください");
   document.getElementById("lock-forgot").addEventListener("click", showRecovery);
   const backHome = document.getElementById("lock-back-home");
-  if (backHome) backHome.addEventListener("click", goHome);
+  if (backHome) backHome.addEventListener("click", lockBack);
   showScreen("screen-lock");
+}
+// 日記のロック画面の「← 戻る」：開こうとした元の画面へ（2026-10-17。前はいつもホームだった）
+function lockBack() {
+  const act = pendingUnlock; pendingUnlock = null;
+  if (!act) { goHome(); return; }
+  if (act.type === "search") { showScreen("screen-search"); return; }
+  if (act.type === "flow") { // 書き足しの2ページ目（食事→日記）：前のページへ
+    if (flow.step > 0) { flow.step--; flow.sub = "select"; flow.mode = null; renderStep(); showScreen("screen-flow"); return; }
+    if (flow.returnTo) { const r = flow.returnTo; flow.returnTo = null; goBackTo(r); return; }
+    goHome(); return;
+  }
+  if (act.fromPicker) { openAddPicker(act.ds, act.ret); return; }
+  if (act.ret) { goBackTo(act.ret); return; }
+  if (act.type === "detail") { openDayDetail(act.ds); return; }
+  goHome();
 }
 function showRecovery() {
   const wrap = document.getElementById("lock-wrap");
@@ -5757,8 +5856,10 @@ function showRecovery() {
     <button type="button" class="lock-forgot" id="rec-cancel">${t("パスコード入力にもどる")}</button>`;
   document.getElementById("rec-answer").focus();
   document.getElementById("rec-submit").addEventListener("click", () => {
+    if (isLockedOut("rec")) { document.getElementById("rec-msg").textContent = t("5時間後にお試しください"); return; }
     const ans = normalizeKana(document.getElementById("rec-answer").value.trim());
     if (ans && ans === settings.recoveryA) {
+      clearLockFails("rec");
       // 忘れた方のロックだけ解除する（合言葉は2つのロックで共通）
       if (lockMode === "diary") delete settings.diaryPass;
       else delete settings.passcode;
@@ -5769,7 +5870,7 @@ function showRecovery() {
       document.getElementById("rec-msg").textContent = t("解除しました。ホームにもどります…");
       setTimeout(goHome, 1200);
     } else {
-      document.getElementById("rec-msg").textContent = t("合言葉がちがうようです。");
+      document.getElementById("rec-msg").textContent = noteLockFail("rec") ? t("5回まちがえました。5時間後にお試しください") : t("合言葉がちがうようです。");
     }
   });
   document.getElementById("rec-cancel").addEventListener("click", () => showLock(lockMode));
@@ -5822,13 +5923,17 @@ function verifyPasscodeThen(target, next, opt) {
     <button type="button" class="btn btn-secondary btn-xl" id="pcv-cancel" style="margin-top:6px;">${t("やめる")}</button>`;
   const err = document.getElementById("pcv-err");
   document.getElementById("pcv-cancel").addEventListener("click", back);
+  // ロック画面と同じ決まり：5回まちがえたら5時間待つ（何度でも試せないように）
+  if (isLockedOut(which)) err.textContent = t("5時間後にお試しください");
   document.getElementById("pcv-ok").addEventListener("click", () => {
+    if (isLockedOut(which)) { err.textContent = t("5時間後にお試しください"); return; }
     const v = document.getElementById("pcv-code").value.trim();
-    if (v === code) { next(); return; }
+    if (v === code) { clearLockFails(which); next(); return; }
     fails++;
-    err.textContent = fails >= 5 ? t("何度もちがうので、いったんもどります") : t("4桁がちがいます。");
+    const out = noteLockFail(which);
+    err.textContent = out ? t("5回まちがえました。5時間後にお試しください") : t("4桁がちがいます。");
     document.getElementById("pcv-code").value = "";
-    if (fails >= 5) setTimeout(back, 1500);
+    if (out) setTimeout(back, 1500);
   });
   document.getElementById("pcv-forgot")?.addEventListener("click", () => {
     body.querySelector(".card").innerHTML = `
@@ -5839,9 +5944,11 @@ function verifyPasscodeThen(target, next, opt) {
       <div class="lock-msg" id="pcv-err2" style="min-height:0; text-align:center;"></div>
       <button type="button" class="btn btn-primary btn-xl" id="pcv-ok2">${t("確かめる")}</button>`;
     document.getElementById("pcv-ok2").addEventListener("click", () => {
+      const e2 = document.getElementById("pcv-err2");
+      if (isLockedOut("rec")) { e2.textContent = t("5時間後にお試しください"); return; }
       const ans = normalizeKana(document.getElementById("pcv-ans").value.trim());
-      if (ans && ans === settings.recoveryA) { next(); return; }
-      document.getElementById("pcv-err2").textContent = t("合言葉がちがうようです。");
+      if (ans && ans === settings.recoveryA) { clearLockFails("rec"); next(); return; }
+      e2.textContent = noteLockFail("rec") ? t("5回まちがえました。5時間後にお試しください") : t("合言葉がちがうようです。");
     });
   });
 }
@@ -6133,7 +6240,7 @@ function onTransferFilePicked(file) {
 // ② LINE・メールの添付を押して「記憶のギフトで開く」で来たとき（2026-10-12）
 //   Android＝content://…（intent-filter）、iPhone＝file://…/Inbox/…（CFBundleDocumentTypes）。
 //   起動の途中・ロック中に届いたら預かっておき、使える状態になってから開く
-let pendingTransferUrl = "", lastTransferUrl = "", lastTransferUrlAt = 0, appStarted = false;
+let pendingTransferUrl = "", lastTransferUrl = "", lastTransferUrlAt = 0, appStarted = false, transferPrevScreen = "";
 function takeTransferUrl(url) {
   if (!url || !/^(file|content):/i.test(url)) return false;
   if (url === lastTransferUrl && Date.now() - lastTransferUrlAt < 5000) return true; // 起動時に2回届く分
@@ -6146,7 +6253,8 @@ function tryOpenPendingTransfer() {
   if (!pendingTransferUrl || !appStarted) return;
   if (document.getElementById("screen-lock")?.classList.contains("active")) return; // 解除のあと applyStart から呼ばれる
   const url = pendingTransferUrl; pendingTransferUrl = "";
-  openTransferIn(profile ? "settings" : "onboarding");
+  transferPrevScreen = document.querySelector(".screen.active")?.id || "";
+  openTransferIn(profile ? "file" : "onboarding");
   onTransferLoaded(async () => {
     const r = await fsPlugin().readFile({ path: url, encoding: "utf8" });
     return String((r && r.data) || "");
@@ -6614,7 +6722,8 @@ function renderOutfitDay(ds) {
       <button type="button" class="confirm-no">${t("やめる")}</button>`;
     btn.replaceWith(wrap);
     wrap.querySelector(".confirm-no").addEventListener("click", () => renderOutfitDay(ds));
-    wrap.querySelector(".confirm-yes").addEventListener("click", () => { deleteOutfit(ds); renderOutfitMain(); });
+    // 消したあとも来た道へ（日別ページ・書き足し・うつすから来ていたらそこへ。2026-10-17）
+    wrap.querySelector(".confirm-yes").addEventListener("click", () => { deleteOutfit(ds); document.getElementById("outfit-back").click(); });
   });
 }
 
@@ -6679,10 +6788,12 @@ function shrinkDataUrl(url, maxSide, quality) {
 }
 
 // 今日の1枚を出して「残す／残さない」を選ぶ（1日1枚）
+let albumNoteDraft = ""; // 今日の写真に書きかけたひと言（一覧を見て戻っても消えないように。2026-10-17）
 function renderAlbumPhoto(reuse) {
   albumView = "photo";
   setBackLabel("album-back", false);
   if (!(reuse && currentAlbumPhoto)) {
+    albumNoteDraft = ""; // 新しい写真になったら、書きかけは持ち越さない
     const plug = nativePhotoPlugin();
     if (plug) {
       // アプリ版：本物のアルバムから1枚（初回は写真の許可を求める）
@@ -6735,7 +6846,8 @@ function renderAlbumPhotoView() {
   const albumText = document.getElementById("album-text");
   const keepBtn = document.getElementById("album-keep");
   const syncKeep = () => keepBtn.classList.toggle("is-waiting", !albumText.value.trim());
-  albumText.addEventListener("input", () => { syncKeep(); document.getElementById("album-need").hidden = true; });
+  albumText.value = albumNoteDraft;
+  albumText.addEventListener("input", () => { albumNoteDraft = albumText.value; syncKeep(); document.getElementById("album-need").hidden = true; });
   syncKeep();
   keepBtn.addEventListener("click", () => {
     const note = albumText.value.trim();
@@ -6885,7 +6997,14 @@ function renderAlbumView(idx) {
 }
 
 // メモリーアルバムに追記する（メモ・撮影日）
+let albumEditFrom = "list", albumEditIdx = 0; // 編集を開いた画面（list／view）と、どの思い出か
+// 編集から出るとき：開いた画面へ（2026-10-17。前はいつも一覧へ戻り、「さらに見る」でひろげた分も閉じていた）
+function leaveAlbumEdit() {
+  if (albumEditFrom === "view" && loadAlbumMemos()[albumEditIdx]) renderAlbumView(albumEditIdx); else renderAlbumList(true);
+}
 function renderAlbumEdit(idx) {
+  albumEditFrom = albumView === "view" ? "view" : "list";
+  albumEditIdx = idx;
   albumView = "edit";
   setBackLabel("album-back", true);
   const m = loadAlbumMemos()[idx];
@@ -6908,9 +7027,9 @@ function renderAlbumEdit(idx) {
     if (d) list[idx].photoDate = d;
     saveAlbumMemos(list);
     buzzSave();
-    renderAlbumList();
+    leaveAlbumEdit();
   });
-  document.getElementById("edit-cancel").addEventListener("click", renderAlbumList);
+  document.getElementById("edit-cancel").addEventListener("click", leaveAlbumEdit);
 }
 
 // =========================================================
@@ -6921,6 +7040,13 @@ function renderAlbumEdit(idx) {
 let notify = store.get("mn_notify", { on: true, time: "21:30" });
 
 function openSleep() { store.set("mn_sleep_seen", todayStr()); updateSleepNudge(); renderGratitude(); showScreen("screen-sleep"); }
+// おやすみ通知を押したとき：アプリのロックがかかっていれば、解除してから開く（2026-10-17。前はロックを飛ばして入れた）
+let pendingSleep = false;
+function openSleepFromNotice() {
+  const locked = settings.passcode && (!appStarted || document.querySelector(".screen.active")?.id === "screen-lock");
+  if (locked) { pendingSleep = true; relockReturn = null; return; }
+  openSleep();
+}
 
 // ---------- 今夜の月（実際の月の周期 約29.5日に同期して満ち欠け） ----------
 const MOON_SYNODIC = 29.530588853; // 朔望月（日）
@@ -7441,7 +7567,7 @@ function scheduleGratNotify() {
         if (Notification.permission === "granted") {
           const n = new Notification(t("おやすみの記憶"), { body: nightNotifyBody() });
           // タップしたら、おやすみの記憶画面へ（本番アプリでも同じ動きにする）
-          n.onclick = () => { try { window.focus(); openSleep(); n.close(); } catch (e) {} };
+          n.onclick = () => { try { window.focus(); openSleepFromNotice(); n.close(); } catch (e) {} };
         }
       } catch (e) {}
       scheduleGratNotify();
@@ -7507,7 +7633,9 @@ function shopDoneBarHtml() {
     + `<span class="shop-done-label">${t("今日買ったもの（{n}）", { n: n ? n : t("まだなし") })}</span>`
     + `<span class="shop-done-chev">›</span></button>`;
 }
+let shopPopFrom = "recall"; // 答え合わせ・今日買ったもののシートを開いた画面（閉じたらそこへ。2026-10-17）
 function openShopDonePop() {
+  shopPopFrom = shopView;
   renderShopDonePop();
   document.getElementById("shop-pop").hidden = false;
 }
@@ -7532,6 +7660,7 @@ function wireShopDoneBar() {
 // 答え合わせのシート（メモと同じ、上から降りる形。買えたらチェックで消す）
 let shopPopKeys = [];
 function openShopPop(keys) {
+  shopPopFrom = shopView;
   shopPopKeys = keys;
   renderShopPop();
   document.getElementById("shop-pop").hidden = false;
@@ -7562,6 +7691,8 @@ function renderShopPop() {
 }
 function closeShopPop() {
   document.getElementById("shop-pop").hidden = true;
+  // 書く画面から「今日買ったもの」を開いたときは、書く画面に戻す（前は答え合わせに切り替わっていた）
+  if (shopPopFrom === "hub") { renderShoppingHub(); return; }
   // 買い終わったカテゴリはカードごと消える。ぜんぶ買えたら書く画面に戻る
   if (shoppingHasAny()) renderShoppingRecall(); else renderShoppingHub();
 }
@@ -8096,7 +8227,8 @@ function wireEvents() {
     } else goHome();
   });
   document.getElementById("album-back").addEventListener("click", () => {
-    if (albumView === "edit" || albumView === "view") { renderAlbumList(); return; }
+    if (albumView === "edit") { leaveAlbumEdit(); return; }
+    if (albumView === "view") { renderAlbumList(true); return; }
     if (albumView === "list") {
       // 日別ページから来ていたら、そこへ帰る（来た道を戻る）
       if (albumReturnTo) { const r = albumReturnTo; albumReturnTo = null; goBackTo(r); return; }
@@ -8119,7 +8251,7 @@ function wireEvents() {
   scheduleGratNotify(); // 起動時に通知を予約（設定オンなら。アプリ版は30日ぶんOSに予約し直す）
   // アプリ版：おやすみ通知をタップしたら、おやすみの記憶画面を開く
   const SLN0 = nativeLocalNotify();
-  if (SLN0) { try { SLN0.addListener("localNotificationActionPerformed", () => { try { openSleep(); } catch (e) {} }); } catch (e) {} }
+  if (SLN0) { try { SLN0.addListener("localNotificationActionPerformed", () => { try { openSleepFromNotice(); } catch (e) {} }); } catch (e) {} }
   document.getElementById("btn-settings").addEventListener("click", openSettings);
   wireIap(); // 設定「広告を消す」（買い切り）
 
@@ -8258,7 +8390,9 @@ function wireEvents() {
     b.innerHTML = micIconSvg();
     b.addEventListener("click", () => openSearch(true));
   });
-  document.getElementById("search-back").addEventListener("click", goHome);
+  document.getElementById("search-back").addEventListener("click", () => {
+    if (searchFrom === "screen-calendar") { renderCalendar(); showScreen("screen-calendar"); } else goHome();
+  });
   // メモのポップアップ：✕・背景タップで閉じる
   document.getElementById("memo-close").addEventListener("click", closeMemo);
   // 下から出るシートは、下へすっとなぞっても閉じられる（✕と同じ）
@@ -8366,21 +8500,29 @@ function wireEvents() {
   });
   document.getElementById("detail-back").addEventListener("click", () => {
     if (detailFrom === "calendar") { renderCalendar(); showScreen("screen-calendar"); }
-    else showScreen("screen-search");
+    else { lastSearchQ = null; runSearch(document.getElementById("search-input").value); showScreen("screen-search"); }
   });
   document.getElementById("detail-add").addEventListener("click", () => { if (detailDate) openAddPicker(detailDate); });
 
   // パスコード設定
   document.getElementById("pc-open").addEventListener("click", openPasscodeSetup);
-  document.getElementById("pc-back").addEventListener("click", () => showScreen("screen-settings"));
+  document.getElementById("pc-back").addEventListener("click", () => {
+    // 4桁の確認・入力の画面にいるときは、まずパスコードの一覧へ（来た道）
+    if (document.querySelector("#pc-body #pc-1, #pc-body #pcv-code, #pc-body #pcv-ans")) { renderPasscodeSetup(); return; }
+    showScreen("screen-settings");
+  });
 
   // スマホの引き継ぎ（ファイル方式・2026-10-12）
   document.getElementById("transfer-make").addEventListener("click", openTransferOut);
   document.getElementById("transfer-take").addEventListener("click", () => openTransferIn("settings"));
   document.getElementById("tc-back").addEventListener("click", () => showScreen("screen-settings"));
   document.getElementById("ob-code-link").addEventListener("click", () => openTransferIn("onboarding"));
-  document.getElementById("ce-back").addEventListener("click", () =>
-    showScreen(transferInFrom === "onboarding" && !profile ? "screen-onboarding" : "screen-settings"));
+  document.getElementById("ce-back").addEventListener("click", () => {
+    if (transferInFrom === "onboarding" && !profile) { showScreen("screen-onboarding"); return; }
+    // ファイルを押して開いたときは、そのとき見ていた画面へ（なければホーム）
+    if (transferInFrom === "file") { if (transferPrevScreen && transferPrevScreen !== "screen-code-entry" && transferPrevScreen !== "screen-lock") showScreen(transferPrevScreen); else goHome(); return; }
+    showScreen("screen-settings");
+  });
   document.getElementById("transfer-file").addEventListener("change", e =>
     onTransferFilePicked(e.target.files && e.target.files[0]));
 
