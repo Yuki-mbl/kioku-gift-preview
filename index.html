@@ -2729,6 +2729,19 @@ body:has(#memo-pop:not([hidden])) .memo-toast { top: calc(14px + env(safe-area-i
   line-height: 1.5;
 }
 [data-theme="dark"] .late-night-note { color: var(--brass-ed); }
+
+/* ひらめきの「ほかの入り口」のお知らせ（2026-10-17）。書く欄の上に、はっきり見える枠で */
+.quick-tip {
+  background: var(--accent-soft); border: 2px solid var(--accent); border-radius: 18px;
+  padding: 14px 16px 12px; margin: 4px 0 14px; text-align: left;
+}
+.quick-tip-head { display: flex; align-items: center; gap: 10px; font-size: 1.12rem; color: var(--accent-strong); }
+.quick-tip-ico { flex: 0 0 auto; width: 36px; height: 36px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center;
+  background: var(--card); color: var(--accent-strong); border: 1.5px solid var(--accent); }
+.quick-tip-ico svg { width: 22px; height: 22px; }
+.quick-tip-body { margin: 8px 0 10px; line-height: 1.7; font-size: 1rem; color: var(--text); }
+.quick-tip-btns { display: flex; gap: 10px; flex-wrap: wrap; }
+.quick-tip-btns .btn { flex: 1 1 130px; min-height: 48px; font-size: 1.02rem; white-space: nowrap; padding-left: 12px; padding-right: 12px; } /* 入りきらなければ縦に並ぶ（言葉の途中で折り返さない） */
 </style>
 <div id="app">
 
@@ -3933,6 +3946,8 @@ function updateMemoBadge() {
 let memoListOpen = false; // 一覧は「思い出してから開く」を押すまで隠す
 function openMemo() {
   memoListOpen = false;
+  const qt = (store.get("mn_quick_tip", null) || { seen: 0, done: false });
+  if (!qt.done && qt.seen <= QUICK_TIP_MAX) store.set("mn_quick_tip", { ...qt, seen: (qt.seen || 0) + 1 }); // 開いた回数（3回まで知らせる）
   renderMemoScreen();
   document.getElementById("memo-pop").hidden = false;
   syncQuickMemoNotify(); // 通知から書いた分があれば、開いたその場で一覧に反映される
@@ -4082,6 +4097,46 @@ function renderMemoMove() {
   document.getElementById("memo-move-back").addEventListener("click", () => { memoMove = { i: memoMove.i }; renderMemoScreen(); });
 }
 
+// ひらめきの「ほかの入り口」を、使い始めた人に一度だけ知らせる（2026-10-17 Yukiさん）。
+// Android＝通知欄の「一瞬のひらめき」／iPhone＝Siri。書く欄の上に、はっきり見える枠で出す。
+// 「わかりました」を押すか、ひらめきを3回開いたら出なくなる（mn_quick_tip {seen, done}）
+const QUICK_TIP_MAX = 3;
+function quickTipKind() {
+  if (isIOSApp()) return SIRI_SHORTCUT_URL ? "siri" : "";
+  if (quickMemoPlugin()) return settings.quickMemoNotify === false ? "" : "notify";
+  return "notify"; // ブラウザ（プレビュー）では Android の形で見せる
+}
+function quickTipHtml() {
+  const kind = quickTipKind();
+  const st = (store.get("mn_quick_tip", null) || { seen: 0, done: false });
+  if (!kind || st.done || st.seen > QUICK_TIP_MAX) return "";
+  const bell = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 16V11a6 6 0 0 1 12 0v5l1.6 2H4.4Z"/><path d="M10 20.5a2.2 2.2 0 0 0 4 0"/></svg>';
+  if (kind === "siri") return `
+    <div class="quick-tip" id="quick-tip">
+      <div class="quick-tip-head"><span class="quick-tip-ico">${micIconSvg()}</span><b><span class="nowrap">${t("Siri に話しかけても")}</span><span class="nowrap">${t("残せます")}</span></b></div>
+      <p class="quick-tip-body"><span class="nowrap">${t("「ヘイ Siri、ひらめき」と言うだけで、")}</span><span class="nowrap">${t("ここに入ります。")}</span><span class="nowrap">${t("はじめに一度だけ、")}</span><span class="nowrap">${t("用意が要ります")}</span></p>
+      <div class="quick-tip-btns">
+        <button type="button" class="btn btn-primary" id="quick-tip-go">${t("用意する")}</button>
+        <button type="button" class="btn btn-secondary" id="quick-tip-ok">${t("わかりました")}</button>
+      </div>
+    </div>`;
+  return `
+    <div class="quick-tip" id="quick-tip">
+      <div class="quick-tip-head"><span class="quick-tip-ico">${bell}</span><b>${t("通知欄からも書けます")}</b></div>
+      <p class="quick-tip-body"><span class="nowrap">${t("画面の上から下へなぞると、")}</span><span class="nowrap">${t("「一瞬のひらめき」があります。")}</span><span class="nowrap">${t("アプリを開かなくても、")}</span><span class="nowrap">${t("手でも声でも書けます")}</span></p>
+      <div class="quick-tip-btns">
+        <button type="button" class="btn btn-secondary" id="quick-tip-ok">${t("わかりました")}</button>
+      </div>
+    </div>`;
+}
+function wireQuickTip() {
+  const done = () => { store.set("mn_quick_tip", { ...(store.get("mn_quick_tip", null) || { seen: 0 }), done: true }); };
+  document.getElementById("quick-tip-ok")?.addEventListener("click", () => { done(); document.getElementById("quick-tip")?.remove(); });
+  document.getElementById("quick-tip-go")?.addEventListener("click", () => {
+    done(); closeMemo(); openSettings();
+    setTimeout(() => document.getElementById("siri-card")?.scrollIntoView({ block: "start", behavior: "smooth" }), 250);
+  });
+}
 function renderMemoScreen() {
   if (memoMove) { renderMemoMove(); return; }
   const a = loadMemos();
@@ -4109,10 +4164,12 @@ function renderMemoScreen() {
       <button type="button" class="btn btn-primary btn-xl memo-add" id="memo-save">${t("保存")}</button>`;
   document.getElementById("memo-wrap").innerHTML = `
     <p class="memo-lead"><span class="nowrap">${t("一瞬のひらめき・")}</span><span class="nowrap">${t("あとでやること")}</span></p>
+    ${quickTipHtml()}
     ${writePart}
     ${listPart}`;
   wireMics(document.getElementById("memo-wrap"));
   wireGrowInputs(document.getElementById("memo-wrap"));
+  wireQuickTip();
   const save = document.getElementById("memo-save");
   if (save) save.addEventListener("click", () => {
     const v = document.getElementById("memo-input").value;
