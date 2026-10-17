@@ -261,7 +261,7 @@ body {
 #screen-album.with-back .album-wrap,
 #screen-outfit.with-back:not(.one-screen) .outfit-wrap { padding-bottom: 96px; }
 
-input[type="text"], input[type="url"], textarea, select {
+input[type="text"], input[type="url"], input[type="password"], textarea, select { /* password は 2026-10-17 追加（パスコードの欄が素のままで小さかった） */
   font-family: inherit;
   font-size: 1.1rem;
   width: 100%;
@@ -5751,6 +5751,58 @@ function refreshPasscodeStatus() {
   }
 }
 function openPasscodeSetup() { renderPasscodeSetup(); showScreen("screen-passcode"); }
+// ロックを変える・外す前の本人確認（2026-10-17）。
+//  ・そのロックがかかっていれば、その4桁
+//  ・かかっていなくても、もう片方のロックがあれば、そちらの4桁
+//    （新しくかけるときに合言葉が書き換わる＝合言葉で、もう片方のロックまで外せてしまうため）
+//  ・4桁を忘れたときは合言葉でもよい（ロック画面の「忘れた方はこちら」と同じ）
+//  ・どちらのロックもなければ、そのまま進む
+function verifyPasscodeThen(target, next, opt) {
+  opt = opt || {};
+  const own = target === "diary" ? settings.diaryPass : settings.passcode;
+  const other = target === "diary" ? settings.passcode : settings.diaryPass;
+  const code = own || other;
+  if (!code) { next(); return; }
+  const which = own ? target : (target === "diary" ? "app" : "diary");
+  const name = which === "diary" ? t("日記のロック") : t("アプリのロック");
+  const body = document.getElementById(opt.container || "pc-body");
+  const back = opt.onCancel || (() => renderPasscodeSetup());
+  let fails = 0;
+  body.innerHTML = `
+    <div class="card">
+      <div class="settings-label">${t("確認のため、{n}の4桁を入れてください", { n: name })}</div>
+      <label class="field"><span class="field-label">${t("今の4桁")}</span>
+      <input type="password" inputmode="numeric" maxlength="4" id="pcv-code" placeholder="＊＊＊＊" autocomplete="off"></label>
+      <div class="lock-msg" id="pcv-err" style="min-height:0; text-align:center;"></div>
+      <button type="button" class="btn btn-primary btn-xl" id="pcv-ok">${t("確かめる")}</button>
+      ${settings.recoveryQ ? `<button type="button" class="lock-forgot" id="pcv-forgot" style="margin-top:10px;">${t("4桁を忘れたときは、合言葉で")}</button>` : ""}
+    </div>
+    <button type="button" class="btn btn-secondary btn-xl" id="pcv-cancel" style="margin-top:6px;">${t("やめる")}</button>`;
+  const err = document.getElementById("pcv-err");
+  document.getElementById("pcv-cancel").addEventListener("click", back);
+  document.getElementById("pcv-ok").addEventListener("click", () => {
+    const v = document.getElementById("pcv-code").value.trim();
+    if (v === code) { next(); return; }
+    fails++;
+    err.textContent = fails >= 5 ? t("何度もちがうので、いったんもどります") : t("4桁がちがいます。");
+    document.getElementById("pcv-code").value = "";
+    if (fails >= 5) setTimeout(back, 1500);
+  });
+  document.getElementById("pcv-forgot")?.addEventListener("click", () => {
+    body.querySelector(".card").innerHTML = `
+      <div class="settings-label">${t("合言葉で確認")}</div>
+      <p class="pc-note" style="margin-top:0;">${esc(settings.recoveryQ)}</p>
+      <label class="field"><span class="field-label">${t("こたえ")}</span>
+      <input type="text" id="pcv-ans" autocomplete="off"></label>
+      <div class="lock-msg" id="pcv-err2" style="min-height:0; text-align:center;"></div>
+      <button type="button" class="btn btn-primary btn-xl" id="pcv-ok2">${t("確かめる")}</button>`;
+    document.getElementById("pcv-ok2").addEventListener("click", () => {
+      const ans = normalizeKana(document.getElementById("pcv-ans").value.trim());
+      if (ans && ans === settings.recoveryA) { next(); return; }
+      document.getElementById("pcv-err2").textContent = t("合言葉がちがうようです。");
+    });
+  });
+}
 function renderPasscodeSetup(editTarget) {
   const body = document.getElementById("pc-body");
   if (!editTarget) {
@@ -5765,17 +5817,19 @@ function renderPasscodeSetup(editTarget) {
       row("アプリのロック", "アプリを開くときに4桁が必要になります。", !!settings.passcode, "app")
       + row("日記のロック", "日記を開くときだけ4桁が必要になります。", !!settings.diaryPass, "diary")
       + `<p class="pc-note" style="text-align:center;">${t("2つは別々の4桁で設定できます（同じ数字でも大丈夫）")}</p>`;
+    // 変える・解除する・もう片方を新しくかける前に、今の4桁を確かめる（2026-10-17 Yukiさん指摘：
+    // 日記だけロックしていると、設定の「解除する」で誰でも外せてしまい、日記が読めた）
     body.querySelectorAll("[data-pc-edit]").forEach(b =>
-      b.addEventListener("click", () => renderPasscodeSetup(b.dataset.pcEdit)));
+      b.addEventListener("click", () => verifyPasscodeThen(b.dataset.pcEdit, () => renderPasscodeSetup(b.dataset.pcEdit))));
     body.querySelectorAll("[data-pc-remove]").forEach(b =>
-      b.addEventListener("click", () => {
+      b.addEventListener("click", () => verifyPasscodeThen(b.dataset.pcRemove, () => {
         if (b.dataset.pcRemove === "diary") delete settings.diaryPass;
         else delete settings.passcode;
         if (!settings.passcode && !settings.diaryPass) { delete settings.recoveryQ; delete settings.recoveryA; }
         store.set("mn_settings", settings);
         refreshPasscodeStatus();
         renderPasscodeSetup();
-      }));
+      })));
     return;
   }
   const name = editTarget === "diary" ? t("日記のロック") : t("アプリのロック");
@@ -5889,8 +5943,13 @@ async function appVersionText() {
 function transferFileName() { return "kioku-gift-" + todayStr().replace(/-/g, "") + TRANSFER_EXT; }
 
 // ---------- 前のスマホ：送る ----------
-async function openTransferOut() {
+// ロックをかけている人は、送る前に4桁を確かめる（2026-10-17）。
+// ファイルには日記がそのまま入るので、確かめないと、ロックをかけた日記がファイル越しに読めてしまう
+function openTransferOut() {
   showScreen("screen-transfer-code");
+  verifyPasscodeThen("diary", renderTransferOut, { container: "transfer-out", onCancel: () => showScreen("screen-settings") });
+}
+async function renderTransferOut() {
   const wrap = document.getElementById("transfer-out");
   const d = buildTransferData();
   const names = transferPhotoNames(d);
@@ -5968,7 +6027,7 @@ async function makeTransferFile(withPhotos) {
   } catch (e) {
     wrap.innerHTML = `<p class="transfer-lead" style="margin-top:40px;">${t("うまくいきませんでした。")}<br>${t("このスマホの記録はそのままです。")}</p>
       <button type="button" class="btn btn-secondary btn-xl" id="tr-retry">${t("もう一度")}</button>`;
-    document.getElementById("tr-retry").addEventListener("click", openTransferOut);
+    document.getElementById("tr-retry").addEventListener("click", renderTransferOut);
   }
 }
 // 送り先を選ぶ前に、何を選べばいいかを1画面で伝える（一覧の文字はOSが出す）
