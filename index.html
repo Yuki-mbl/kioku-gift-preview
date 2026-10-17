@@ -2742,6 +2742,15 @@ body:has(#memo-pop:not([hidden])) .memo-toast { top: calc(14px + env(safe-area-i
 .quick-tip-body { margin: 8px 0 10px; line-height: 1.7; font-size: 1rem; color: var(--text); }
 .quick-tip-btns { display: flex; gap: 10px; flex-wrap: wrap; }
 .quick-tip-btns .btn { flex: 1 1 130px; min-height: 48px; font-size: 1.02rem; white-space: nowrap; padding-left: 12px; padding-right: 12px; } /* 入りきらなければ縦に並ぶ（言葉の途中で折り返さない） */
+
+/* おやすみ通知の時刻を過ぎて、今夜まだ「おやすみ」を開いていない（2026-10-17）。＋ボタンと同じ色に */
+[data-theme="pastel"] .balloon-k-sleep.sleep-due { --p1: #f9d4da !important; --p2: #eeadb9 !important; color: #7c4a52; } /* 風船の色は style 属性で入っているので !important で上書き */
+html[data-theme="dark"][data-fontsize] #screen-home #home-doors .balloon-k-sleep.sleep-due .balloon-name { color: #D9B876; }
+html[data-theme="dark"][data-fontsize] #screen-home #home-doors .balloon-k-sleep.sleep-due .balloon-ico { color: #EBD49A; }
+/* ライトは＋もホームも緑なので、同じ色では目立たない → 月の金色（シックに・夜らしく） */
+html[data-theme="light"][data-fontsize] #screen-home #home-doors .balloon-k-sleep.sleep-due .balloon-name { color: #94712f; }
+html[data-theme="light"][data-fontsize] #screen-home #home-doors .balloon-k-sleep.sleep-due .balloon-ico { color: #a8843d; opacity: 1; }
+html[data-theme="light"] .balloon-pos:has(.balloon-k-sleep.sleep-due)::before { background: #b8934a; }
 </style>
 <div id="app">
 
@@ -4231,6 +4240,7 @@ function renderHome() {
       </button></div>`;
   };
   box.innerHTML = mk("daily", centerCls, true) + sats.map((k, i) => mk(k, slots[i], false)).join("");
+  updateSleepNudge();
   box.querySelectorAll("[data-fav-open]").forEach(b =>
     b.addEventListener("click", () => FAV_DEFS[b.dataset.favOpen].open()));
 }
@@ -4586,8 +4596,23 @@ function updateRecallNudge() {
   const due = (h >= RECALL_NUDGE_HOUR || h < 4) && store.get("mn_recall_seen", "") !== todayStr();
   tab.classList.toggle("recall-due", due);
 }
-setInterval(updateRecallNudge, 60 * 1000);
-document.addEventListener("visibilitychange", () => { if (!document.hidden) updateRecallNudge(); });
+// おやすみ通知の時刻（各自の設定）を過ぎて、今夜まだ「おやすみ」を開いていなければ、
+// ホームの「おやすみ」を＋ボタンの色にする（2026-10-17 Yukiさん）。通知をオフにしている人には出さない。
+// 夜中0〜3時は前の日の続き。ライトは＋もホームも緑なので、月の金色で目立たせる（CSS）
+function updateSleepNudge() {
+  const b = document.querySelector("#home-doors .balloon-k-sleep");
+  if (!b) return;
+  let due = false, nt = null;
+  try { nt = notify; } catch (e) { return; } // 起動の途中（通知の設定をまだ読んでいない）
+  if (nt && nt.on !== false && store.get("mn_sleep_seen", "") !== todayStr()) {
+    const [hh, mm] = String(nt.time || "21:30").split(":").map(Number);
+    const now = new Date(), mins = now.getHours() * 60 + now.getMinutes();
+    due = now.getHours() < 4 || mins >= (hh || 0) * 60 + (mm || 0);
+  }
+  b.classList.toggle("sleep-due", due);
+}
+setInterval(() => { updateRecallNudge(); updateSleepNudge(); }, 60 * 1000);
+document.addEventListener("visibilitychange", () => { if (!document.hidden) { updateRecallNudge(); updateSleepNudge(); } });
 function startRecall() {
   store.set("mn_recall_seen", todayStr());
   updateRecallNudge();
@@ -6878,7 +6903,7 @@ function renderAlbumEdit(idx) {
 // =========================================================
 let notify = store.get("mn_notify", { on: true, time: "21:30" });
 
-function openSleep() { renderGratitude(); showScreen("screen-sleep"); }
+function openSleep() { store.set("mn_sleep_seen", todayStr()); updateSleepNudge(); renderGratitude(); showScreen("screen-sleep"); }
 
 // ---------- 今夜の月（実際の月の周期 約29.5日に同期して満ち欠け） ----------
 const MOON_SYNODIC = 29.530588853; // 朔望月（日）
