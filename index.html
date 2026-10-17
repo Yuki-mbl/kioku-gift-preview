@@ -4591,13 +4591,14 @@ function startDiary(dateStr, ret) { startFlow(dateStr, ["diary"], ret); } // �
 
 // 「昨日を思い出す」：問題だけを出す（昨日の記録が無ければ、先にそのことを伝える）
 // 夜8時までに「思い出す」を開いていない日は、下のタブの「思い出す」を＋ボタンと同じ色にして、
-// そっと気づかせる（2026-10-17 Yukiさん）。開いたら元の色に戻る。夜中0〜3時は前の日の続き（todayStr と同じ）
+// そっと気づかせる（2026-10-17 Yukiさん）。その日（朝3時から）に一度でも開いた人は変わらない。夜中0〜3時は前の日の続き
 const RECALL_NUDGE_HOUR = 20;
 function updateRecallNudge() {
   const tab = document.getElementById("tab-quiz");
   if (!tab) return;
   const h = new Date().getHours();
-  const due = (h >= RECALL_NUDGE_HOUR || h < 4) && store.get("mn_recall_seen", "") !== todayStr();
+  // 「その日」は朝3時から（DAY_START_HOUR。todayStr と同じ区切り）。夜中0〜3時は前の日の続き
+  const due = (h >= RECALL_NUDGE_HOUR || isLateNight()) && store.get("mn_recall_seen", "") !== todayStr();
   tab.classList.toggle("recall-due", due);
 }
 // おやすみ通知の時刻（各自の設定）を過ぎて、今夜まだ「おやすみ」を開いていなければ、
@@ -4611,7 +4612,7 @@ function updateSleepNudge() {
   if (nt && nt.on !== false && store.get("mn_sleep_seen", "") !== todayStr()) {
     const [hh, mm] = String(nt.time || "21:30").split(":").map(Number);
     const now = new Date(), mins = now.getHours() * 60 + now.getMinutes();
-    due = now.getHours() < 4 || mins >= (hh || 0) * 60 + (mm || 0);
+    due = isLateNight() || mins >= (hh || 0) * 60 + (mm || 0); // 朝3時で新しい日（DAY_START_HOUR）
   }
   b.classList.toggle("sleep-due", due);
 }
