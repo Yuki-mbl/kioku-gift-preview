@@ -2769,6 +2769,9 @@ html[data-theme="light"] .balloon-pos:has(.balloon-k-sleep.sleep-due)::before { 
 /* 横にはみ出したもの（思い出すの紙ふぶき・画面が横から入る動き など）で、ページ全体が横に広がって
    縮んで見えないように（2026-10-17。幅320のスマホで、思い出すの下のタブが横にはみ出していた） */
 @supports (overflow-x: clip) { html, body { overflow-x: clip; } }
+
+/* 検索の「さがす」ボタン（2026-10-17） */
+.search-go { margin: 12px 0 4px; }
 </style>
 <div id="app">
 
@@ -2915,9 +2918,11 @@ html[data-theme="light"] .balloon-pos:has(.balloon-k-sleep.sleep-due)::before { 
     <section id="screen-search" class="screen">
       <div class="search-wrap">
         <div class="search-line">
-          <input type="text" id="search-input" data-t-ph placeholder="記憶をさがす（パン、太郎）">
+          <input type="text" id="search-input" enterkeyhint="search" data-t-ph placeholder="記憶をさがす（パン、太郎）">
           <button type="button" class="mic-btn search-mic" id="search-mic" data-t-aria aria-label="話して検索" hidden>🎤</button>
         </div>
+        <!-- 打つと少し待って結果が出る作りだが、ボタンが無いと「どうすれば探せるの？」と迷う（2026-10-17 Yukiさん） -->
+        <button type="button" class="btn btn-primary btn-xl search-go" id="search-go" data-t>さがす</button>
         <div id="search-results"></div>
       </div>
       <button class="back-fab" id="search-back" data-t data-t-aria aria-label="戻る">← 戻る</button>
@@ -8500,6 +8505,19 @@ function wireEvents() {
   document.getElementById("search-input").addEventListener("input", e => {
     clearTimeout(searchDebounce);
     searchDebounce = setTimeout(() => runSearch(e.target.value), 250);
+  });
+  // 「さがす」ボタンとキーボードの検索キー：すぐ探して、キーボードを閉じて結果を見せる
+  const goSearch = () => {
+    clearTimeout(searchDebounce);
+    const inp = document.getElementById("search-input");
+    lastSearchQ = null; // 同じ言葉でも探し直す
+    runSearch(inp.value);
+    inp.blur();
+    document.getElementById("search-results")?.scrollIntoView({ block: "start", behavior: "smooth" });
+  };
+  document.getElementById("search-go").addEventListener("click", goSearch);
+  document.getElementById("search-input").addEventListener("keydown", e => {
+    if (e.key === "Enter" && !e.isComposing && e.keyCode !== 229) { e.preventDefault(); goSearch(); } // 変換を決める Enter では探さない
   });
   // 🎤で話して検索（対応ブラウザのみボタンが出る）。ひと言で止まり、そのまま検索
   const searchMic = document.getElementById("search-mic");
