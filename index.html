@@ -2772,6 +2772,23 @@ html[data-theme="light"] .balloon-pos:has(.balloon-k-sleep.sleep-due)::before { 
 
 /* 検索の「さがす」ボタン（2026-10-17） */
 .search-go { margin: 12px 0 4px; }
+/* 検索はチャットの画面のように：検索欄と「さがす」はいつも下（キーボードがあればその上、なければ下のタブの上）。
+   案内や結果はその上に並び、結果が長いときはページが動いても検索欄は下に残る（2026-10-17 Yukiさん。
+   ホームで押すと欄が上に飛んで見失うため。結果が出ても上には移さない） */
+#screen-search .search-wrap { flex: 1; display: flex; flex-direction: column; justify-content: flex-end; padding-bottom: 0; }
+#screen-search #search-results { order: 0; margin-bottom: 14px; }
+#screen-search .search-bar-box {
+  order: 1; position: sticky; bottom: calc(80px + env(safe-area-inset-bottom)); z-index: 5;
+  background: var(--bg); padding: 8px 0 4px; margin: 0 -4px; padding-left: 4px; padding-right: 4px;
+}
+/* 検索欄の下から下のタブまでのすき間に、後ろの結果が透けて見えないよう、同じ地の色でふさぐ */
+#screen-search .search-bar-box::after { content: ""; position: absolute; left: 0; right: 0; top: 100%; height: 180px; background: var(--bg); pointer-events: none; }
+#app.has-tabs #screen-search.screen.active { padding-bottom: calc(88px + env(safe-area-inset-bottom)); }
+#app.has-tabs #screen-search.screen.active.search-with-back { padding-bottom: calc(164px + env(safe-area-inset-bottom)); }
+#screen-search.search-with-back .search-bar-box { bottom: calc(156px + env(safe-area-inset-bottom)); } /* 見返すから来たとき：← 戻るの上に */
+/* キーボードが出ているとき（下のタブは隠れる）：キーボードのすぐ上に */
+#app.kb-open #screen-search.screen.active { padding-bottom: 8px; }
+#app.kb-open #screen-search .search-bar-box { bottom: calc(var(--kb-hidden, 0px) + 8px); }
 </style>
 <div id="app">
 
@@ -2917,12 +2934,14 @@ html[data-theme="light"] .balloon-pos:has(.balloon-k-sleep.sleep-due)::before { 
     <!-- ===== さがす ===== -->
     <section id="screen-search" class="screen">
       <div class="search-wrap">
-        <div class="search-line">
-          <input type="text" id="search-input" enterkeyhint="search" data-t-ph placeholder="記憶をさがす（パン、太郎）">
-          <button type="button" class="mic-btn search-mic" id="search-mic" data-t-aria aria-label="話して検索" hidden>🎤</button>
+        <div class="search-bar-box">
+          <div class="search-line">
+            <input type="text" id="search-input" enterkeyhint="search" data-t-ph placeholder="記憶をさがす（パン、太郎）">
+            <button type="button" class="mic-btn search-mic" id="search-mic" data-t-aria aria-label="話して検索" hidden>🎤</button>
+          </div>
+          <!-- 打つと少し待って結果が出る作りだが、ボタンが無いと「どうすれば探せるの？」と迷う（2026-10-17 Yukiさん） -->
+          <button type="button" class="btn btn-primary btn-xl search-go" id="search-go" data-t>さがす</button>
         </div>
-        <!-- 打つと少し待って結果が出る作りだが、ボタンが無いと「どうすれば探せるの？」と迷う（2026-10-17 Yukiさん） -->
-        <button type="button" class="btn btn-primary btn-xl search-go" id="search-go" data-t>さがす</button>
         <div id="search-results"></div>
       </div>
       <button class="back-fab" id="search-back" data-t data-t-aria aria-label="戻る">← 戻る</button>
@@ -5480,6 +5499,7 @@ function openSearch(viaMic) {
   searchFrom = cur === "screen-calendar" ? "screen-calendar" : "screen-home";
   // 見返すから来たときは「← 戻る」を出す（ホームから来たときは下のタブで戻れるので出さない）
   document.getElementById("search-back").style.display = searchFrom === "screen-calendar" ? "inline-flex" : "";
+  document.getElementById("screen-search").classList.toggle("search-with-back", searchFrom === "screen-calendar");
   document.getElementById("search-input").value = "";
   lastSearchQ = null;
   runSearch("");
@@ -5558,7 +5578,9 @@ function runSearch(q) {
   lastSearchQ = q;
   if (q) notePhUse("search-input");
   if (!q) {
-    box.innerHTML = `<p class="search-hint">${t("ことばを入れると、書いた日が出てきます。")}<br>${t("食べたもの・服装・行った場所・名前などから探せます。")}<br>${t("スペースで区切ると、いくつかの言葉でしぼり込めます。")}<br>${t("（例：牛丼　太郎）")}</p>`;
+    // 狭い画面でも区切りのいいところで折り返す（2026-10-17。「出てきま／す」と割れていた）
+    const nw = x => `<span class="nowrap">${x}</span>`;
+    box.innerHTML = `<p class="search-hint">${nw(t("ことばを入れると、"))}${nw(t("書いた日が出てきます。"))}<br>${nw(t("食べたもの・服装・"))}${nw(t("行った場所・名前などから"))}${nw(t("探せます。"))}<br>${nw(t("スペースで区切ると、"))}${nw(t("いくつかの言葉で"))}${nw(t("しぼり込めます。"))}<br>${nw(t("（例：牛丼　太郎）"))}</p>`;
     return;
   }
   // スペース区切りで最大5語（すべて含む日を表示＝AND検索）
@@ -8649,6 +8671,8 @@ function wireKeyboardInset() {
     document.getElementById("app").classList.toggle("kb-open", kbMaxH - vv.height > 150);
     const hidden = Math.max(0, window.innerHeight - vv.height - vv.offsetTop);
     document.body.style.paddingBottom = hidden > 40 ? hidden + "px" : "";
+    // キーボードに隠れている高さ（iPhone は画面が縮まないので、検索欄をキーボードの上に出すのに使う。2026-10-17）
+    document.documentElement.style.setProperty("--kb-hidden", (hidden > 40 ? hidden : 0) + "px");
     updateKbBottom();
   };
   vv.addEventListener("resize", update);
