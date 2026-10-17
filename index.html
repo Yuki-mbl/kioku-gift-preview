@@ -1766,6 +1766,11 @@ html.fixed-page .screen.active { min-height: 0; height: 100%; }
   width: min(20px, 5.4vw); height: min(20px, 5.4vw); flex: 0 0 auto;
 }
 @media (max-width: 340px) { .memo-open, .memo-bar { padding-left: 10px; padding-right: 10px; gap: 6px; } }
+/* ひらめきの「思い出してから開く（N）」は、分かりづらいので字を大きく・濃く（2026-10-17 Yukiさん） */
+#memo-wrap .memo-reveal {
+  font-size: max(17px, min(1.18rem, 5vw)); color: var(--text);
+  padding-top: clamp(11px, 1.6vh, 14px); padding-bottom: clamp(11px, 1.6vh, 14px);
+}
 /* 買い物の「今日買ったもの」帯は、先頭に来たぶん少し大きく見せる */
 #screen-shopping .memo-open {
   font-size: max(16px, min(1.12rem, 4.6vw));
@@ -2828,7 +2833,7 @@ html[data-theme="light"] .balloon-pos:has(.balloon-k-sleep.sleep-due)::before { 
             </div>
           </div>
           <div class="field ob-theme">
-            <span class="field-label" data-t>画面の色（あとで変えられます）</span>
+            <span class="field-label" data-t>画面の色（設定で変えられます）</span>
             <div class="theme-options">
               <button class="theme-opt" data-theme-opt="light">
                 <span class="theme-mini mini-light" aria-hidden="true"><i></i><i></i><i></i><i></i></span><span data-t>ライト</span>
