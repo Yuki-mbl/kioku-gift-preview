@@ -3260,6 +3260,11 @@ function showAlert(html) {
 // ブラウザ（プレビュー）にはファイルの仕組みが無いので、これまで通りdata URLのまま扱う。
 // =========================================================
 const PHOTO_DIR = "photos";
+// 残す写真の大きさ（2026-10-18 Yukiさん「ぼやけて思い出にならない」）。アルバム・服装・食事すべて同じ。
+// 前はアルバム480px・画質60%、服装800px、食事900pxで、画面いっぱいに出すと引き伸ばされてぼやけていた。
+// ファイルに置くようになったので（2026-10-04）、容量の心配はほぼない（1枚 約150〜250KB）
+const PHOTO_MAX_PX = 1280;
+const PHOTO_QUALITY = 0.8;
 let photoBase = ""; // 端末の写真置き場のURI。起動時に一度だけ調べる
 function fsPlugin() {
   return (window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.Filesystem) || null;
@@ -4690,14 +4695,14 @@ function renderMealSlot(slotEl) {
   if (cam) {
     const file = slotEl.querySelector(".meal-cam-file");
     cam.addEventListener("click", async () => {
-      const d = await pickPhotoNative(900);
+      const d = await pickPhotoNative(PHOTO_MAX_PX);
       if (d === undefined) { file.click(); return; } // ブラウザは従来の選択画面
-      if (d) shrinkDataUrl(d, 900, 0.72).then(toStoredPhoto).then(u => { setMealPhotoSlot(flow.date, slot, u); renderMealSlot(slotEl); });
+      if (d) shrinkDataUrl(d, PHOTO_MAX_PX, PHOTO_QUALITY).then(toStoredPhoto).then(u => { setMealPhotoSlot(flow.date, slot, u); renderMealSlot(slotEl); });
     });
     file.addEventListener("change", () => {
       const f = file.files && file.files[0];
       if (!f) return;
-      resizePhotoToDataURL(f, 900, 0.72).then(toStoredPhoto).then(u => { setMealPhotoSlot(flow.date, slot, u); renderMealSlot(slotEl); });
+      resizePhotoToDataURL(f, PHOTO_MAX_PX, PHOTO_QUALITY).then(toStoredPhoto).then(u => { setMealPhotoSlot(flow.date, slot, u); renderMealSlot(slotEl); });
     });
   }
   const thumb = slotEl.querySelector(".meal-thumb");
@@ -6708,12 +6713,12 @@ function renderOutfitMain() {
   fileInput.addEventListener("change", () => {
     const f = fileInput.files && fileInput.files[0];
     if (!f) return;
-    resizePhotoToDataURL(f, 800, 0.7).then(toStoredPhoto).then(url => { setOutfit(td, { photo: url }); renderOutfitMain(); });
+    resizePhotoToDataURL(f, PHOTO_MAX_PX, PHOTO_QUALITY).then(toStoredPhoto).then(url => { setOutfit(td, { photo: url }); renderOutfitMain(); });
   });
   document.getElementById("outfit-shot").addEventListener("click", async () => {
-    const d = await pickPhotoNative(800);
+    const d = await pickPhotoNative(PHOTO_MAX_PX);
     if (d === undefined) { fileInput.click(); return; } // ブラウザは従来の選択画面
-    if (d) shrinkDataUrl(d, 800, 0.7).then(toStoredPhoto).then(url => { setOutfit(td, { photo: url }); renderOutfitMain(); });
+    if (d) shrinkDataUrl(d, PHOTO_MAX_PX, PHOTO_QUALITY).then(toStoredPhoto).then(url => { setOutfit(td, { photo: url }); renderOutfitMain(); });
   });
   const note = document.getElementById("outfit-note");
   const growNote = () => { if (CSS.supports && CSS.supports("field-sizing", "content")) return; note.style.height = "auto"; note.style.height = (note.scrollHeight + note.offsetHeight - note.clientHeight) + "px"; }; // 書くほど下にのびる（枠線ぶんも足す）
@@ -6831,14 +6836,14 @@ function renderOutfitDay(ds) {
     const input = document.getElementById(inputId);
     if (!input) return;
     document.getElementById(btnId).addEventListener("click", async () => {
-      const d = await pickPhotoNative(800);
+      const d = await pickPhotoNative(PHOTO_MAX_PX);
       if (d === undefined) { input.click(); return; } // ブラウザは従来の選択画面
-      if (d) shrinkDataUrl(d, 800, 0.7).then(toStoredPhoto).then(url => { setOutfit(ds, { photo: url }); renderOutfitDay(ds); });
+      if (d) shrinkDataUrl(d, PHOTO_MAX_PX, PHOTO_QUALITY).then(toStoredPhoto).then(url => { setOutfit(ds, { photo: url }); renderOutfitDay(ds); });
     });
     input.addEventListener("change", () => {
       const f = input.files && input.files[0];
       if (!f) return;
-      resizePhotoToDataURL(f, 800, 0.7).then(toStoredPhoto).then(url => { setOutfit(ds, { photo: url }); renderOutfitDay(ds); });
+      resizePhotoToDataURL(f, PHOTO_MAX_PX, PHOTO_QUALITY).then(toStoredPhoto).then(url => { setOutfit(ds, { photo: url }); renderOutfitDay(ds); });
     });
   };
   pickInto("oday-pick", "oday-file-pick");
@@ -7020,7 +7025,7 @@ function renderAlbumPhotoView() {
       buzzSave();
       renderAlbumDone(true, formatYM(photoDate));
     };
-    if (isReal) shrinkDataUrl(emoji, 480, 0.6).then(toStoredPhoto).then(finish); // 実写真は小さくしてファイルへ
+    if (isReal) shrinkDataUrl(emoji, PHOTO_MAX_PX, PHOTO_QUALITY).then(toStoredPhoto).then(finish); // 実写真はファイルへ（大きさは PHOTO_MAX_PX）
     else finish(emoji);
   });
   document.getElementById("album-skip").addEventListener("click", () => { markAlbumDone(); goHome(); });
@@ -8902,7 +8907,29 @@ async function restoreBackupPhotos() {
     try { await fs.copy({ from: BKPHOTO_DIR + "/" + n, to: PHOTO_DIR + "/" + n, directory: "DATA", toDirectory: "DATA" }); } catch (e) {}
   }
 }
-// ふだん：順番どおり、量に収まる分だけバックアップの置き場にそろえる（足りない分は写し、外れた分は消す）
+// バックアップには写真を中くらいの大きさ（長辺720px）で入れる（2026-10-18）。
+// 写真を1280pxにしたので、そのまま入れると15MBに約100枚しか入らない。720pxの写しなら約300枚（実際の写真20枚で測った平均：1280px 145KB／720px 46KB）。設定の「約300枚」はそのままでよい
+// 戻った写真は少し甘くなるが、ケーブルでの引っ越しと「新しいスマホへ送る」では元の大きさのまま移る
+const BACKUP_PHOTO_PX = 720;
+const BACKUP_PHOTO_QUALITY = 0.75;
+// バックアップ用の写しを作る（縮めても軽くならない写真は null＝そのまま写す）
+function makeBackupCopy(n, origSize) {
+  return new Promise(resolve => {
+    const img = new Image();
+    img.onload = () => {
+      const k = Math.min(1, BACKUP_PHOTO_PX / Math.max(img.width, img.height));
+      const c = document.createElement("canvas");
+      c.width = Math.round(img.width * k); c.height = Math.round(img.height * k);
+      c.getContext("2d").drawImage(img, 0, 0, c.width, c.height);
+      const b64 = c.toDataURL("image/jpeg", BACKUP_PHOTO_QUALITY).split(",")[1] || "";
+      const bytes = Math.floor(b64.length * 3 / 4);
+      resolve(bytes && bytes < origSize ? { b64, bytes } : null); // 前の小さい写真（480px など）は縮めると逆に重くなる
+    };
+    img.onerror = () => resolve(null);
+    img.src = photoSrc("file:" + n);
+  });
+}
+// ふだん：順番どおり、量に収まる分だけバックアップの置き場にそろえる（足りない分は写しを作り、外れた分は消す）
 async function syncBackupPhotos() {
   const fs = fsPlugin();
   if (!fs || !photoBase || !isAndroidApp()) return;
@@ -8913,14 +8940,22 @@ async function syncBackupPhotos() {
   let total = 0;
   for (const n of backupPhotoOrder()) {
     let size = 0;
-    try { size = Number((await fs.stat({ path: PHOTO_DIR + "/" + n, directory: "DATA" })).size) || 0; } catch (e) { continue; } // 写真が無い
-    if (total + size > BACKUP_PHOTO_BUDGET) break; // ここから先は入りきらない（順番を守るため、後ろの小さい写真で埋めない）
-    total += size;
-    want.add(n);
-  }
-  for (const n of want) {
-    if (inBk.has(n)) continue;
-    try { await fs.copy({ from: PHOTO_DIR + "/" + n, to: BKPHOTO_DIR + "/" + n, directory: "DATA", toDirectory: "DATA" }); } catch (e) {}
+    if (inBk.has(n)) { // もう写しがある（大きさは写しのほうで数える）
+      try { size = Number((await fs.stat({ path: BKPHOTO_DIR + "/" + n, directory: "DATA" })).size) || 0; } catch (e) { continue; }
+      if (total + size > BACKUP_PHOTO_BUDGET) break; // ここから先は入りきらない（順番を守るため、後ろの小さい写真で埋めない）
+      total += size; want.add(n);
+      continue;
+    }
+    let orig = 0;
+    try { orig = Number((await fs.stat({ path: PHOTO_DIR + "/" + n, directory: "DATA" })).size) || 0; } catch (e) { continue; } // 写真が無い
+    const cp = await makeBackupCopy(n, orig);
+    size = cp ? cp.bytes : orig;
+    if (total + size > BACKUP_PHOTO_BUDGET) break;
+    try {
+      if (cp) await fs.writeFile({ path: BKPHOTO_DIR + "/" + n, directory: "DATA", data: cp.b64, recursive: true });
+      else await fs.copy({ from: PHOTO_DIR + "/" + n, to: BKPHOTO_DIR + "/" + n, directory: "DATA", toDirectory: "DATA" });
+    } catch (e) { continue; }
+    total += size; want.add(n);
   }
   for (const n of inBk) {
     if (want.has(n)) continue;
