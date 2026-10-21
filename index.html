@@ -3209,8 +3209,8 @@ html[data-theme="light"] .balloon-pos:has(.balloon-k-sleep.sleep-due)::before { 
     <div id="cal-intro-pop" hidden>
       <div class="alert-card cal-intro">
         <div class="cal-intro-title" data-t>予定を思い出す</div>
-        <p class="alert-msg cal-intro-msg"><span data-t>スマホのカレンダーと同期すると、予定の1週間前と前日の夜（20:30）に、</span><b data-t>「何の予定か、思い出せますか？」</b><span data-t>とお知らせが届きます。</span></p>
-        <p class="cal-intro-note" data-t>予定の名前はお知らせに出ません。カレンダーは読むだけで、スマホの外には送りません。日にちや回数は、あとで設定から変えられます。</p>
+        <p class="alert-msg cal-intro-msg"><span data-t>スマホのカレンダーと同期すると、指定の日時に</span><b data-t>「予定は何か思い出せますか？」</b><span data-t>とお知らせが届きます。</span></p>
+        <p class="cal-intro-note" data-t>予定の名前はお知らせに出ません。カレンダーは読むだけで、スマホの外には送りません。日時や回数は、設定で変えられます。</p>
         <button type="button" class="btn btn-primary btn-xl" id="cal-intro-yes" data-t>同期する</button>
         <button type="button" class="btn btn-secondary btn-xl" id="cal-intro-no" data-t>今はしない</button>
       </div>
@@ -7908,9 +7908,10 @@ function calWhen(dateKey) {
   return days === 0 ? t("今日（{d}）", { d }) : days === 1 ? t("明日（{d}）", { d }) : d;
 }
 function calQuestion(when, n) {
+  // 短く（2026-10-21 Yukiさん「明日（10月28日（水））の予定は何か思い出せますか？（2件）」）
   return n > 1
-    ? t("{w}に予定が{n}つあります。何の予定か、思い出せますか？", { w: when, n })
-    : t("{w}に予定があります。何の予定か、思い出せますか？", { w: when });
+    ? t("{w}の予定は何か思い出せますか？（{n}件）", { w: when, n })
+    : t("{w}の予定は何か思い出せますか？", { w: when });
 }
 let calScheduling = false;
 async function scheduleCalNotify() {
@@ -8014,7 +8015,7 @@ async function renderCalCard() {
   const cals = c.on && permitted ? await calCalendars() : [];
   const dayOpts = sel => CAL_DAY_CHOICES.map(d => `<option value="${d}"${d === sel ? " selected" : ""}>${d === 0 ? t("当日") : d === 7 ? t("1週間前") : t("{n}日前", { n: d })}</option>`).join("");
   box.innerHTML = `
-    <p class="settings-hint" style="margin-top:0;">${t("スマホのカレンダーの予定を、前もって「何の予定か、思い出せますか？」とお知らせします。予定の名前はお知らせに出ません")}</p>
+    <p class="settings-hint" style="margin-top:0;">${t("スマホのカレンダーの予定を、前もって「予定は何か思い出せますか？」とお知らせします。予定の名前はお知らせに出ません")}</p>
     <div class="seg-group" id="cal-onoff">
       <button class="seg${c.on ? " selected" : ""}" data-v="1">${t("オン")}</button>
       <button class="seg${c.on ? "" : " selected"}" data-v="0">${t("オフ")}</button>
