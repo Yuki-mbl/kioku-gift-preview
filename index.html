@@ -2340,7 +2340,7 @@ html[data-fontsize="xlarge"] .tabb-name { font-size: min(.95rem, 4vw); }
 #app.kb-open .flow-footer { display: none; }
 #app.kb-open.kb-bottom .flow-footer { display: flex; }
 #app.kb-open .shop-fab, #app.kb-open .back-fab { display: none; }
-#app.kb-open.kb-bottom .shop-fab { display: block; bottom: 20px; }
+/* 「保存して買い物へ」などの浮きボタンも、キーボード中は出さない（書いている欄とマイクに重なっていた。2026-10-21 Yukiさん決定：閉じれば出る） */
 /* 「← 戻る」はキーボード中はいつも隠す（下まで来ても出さない）。キーボードのすぐ上に出ると、検索の「さがす」・アルバムの「保存」・
    買い物の欄・服のカレンダーなどに重なっていた（2026-10-21 Yukiさん）。戻りたいときはキーボードを閉じれば出る */
 
