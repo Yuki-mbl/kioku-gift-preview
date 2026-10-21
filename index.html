@@ -879,7 +879,11 @@ html[data-fontsize="xlarge"] #album-skip { font-size: min(1.4rem, 5.2vw); }
   display: block; width: auto; height: auto;
   max-width: 100%; max-height: clamp(220px, 38vh, 340px);
   margin: 0 auto; border-radius: 24px; box-shadow: var(--shadow);
+  transition: max-height .25s ease;
 }
+/* タップで少し大きく（画面いっぱいにはしない。2026-10-21） */
+.album-photo.has-img img { cursor: zoom-in; }
+.album-photo.has-img.zoomed img { max-height: clamp(360px, 62vh, 600px); cursor: zoom-out; }
 /* 一覧の小さなサムネイル（実写真のとき） */
 .album-item-photo img { width: 48px; height: 48px; object-fit: cover; border-radius: 10px; display: block; }
 .album-photo .ph-emoji { font-size: 5rem; }
@@ -2796,6 +2800,7 @@ html[data-theme="light"] .balloon-pos:has(.balloon-k-sleep.sleep-due)::before { 
 /* キーボードが出ているとき（下のタブは隠れる）：キーボードのすぐ上に */
 #app.kb-open #screen-search.screen.active { padding-bottom: 8px; }
 #app.kb-open #screen-search .search-bar-box { bottom: calc(var(--kb-hidden, 0px) + 8px); }
+#app.kb-open #screen-search .back-fab { display: none; } /* キーボード中は「さがす」に重なるので隠す（戻るはキーボードを閉じれば出る。2026-10-21） */
 </style>
 <div id="app">
 
@@ -7003,6 +7008,14 @@ function renderAlbumPhotoView() {
     <button type="button" class="btn btn-primary btn-xl" id="album-keep">${t("保存")}</button>
     <button type="button" class="btn btn-secondary btn-xl" id="album-list" style="margin-top:10px;">${t("「メモリーアルバム」を見る（{n}）", { n: memos.length })}</button>`;
   wireMics(document.getElementById("album-wrap")); // 話して書く
+  // 写真をタップすると少し大きく、もう一度タップで元に戻す（2026-10-21 Yukiさん「小さいのでタップで少し大きく。画面いっぱいでなくていい」）
+  const albumImg = document.querySelector("#album-wrap .album-photo.has-img img");
+  // ふだんは下のボタンまで1画面に収まるよう縮めている（fitAlbumPhoto）。大きくしたときはその縮めを外し、スクロールにまかせる
+  if (albumImg) albumImg.addEventListener("click", () => {
+    const zoomed = albumImg.closest(".album-photo").classList.toggle("zoomed");
+    if (zoomed) { albumImg.style.maxHeight = ""; setTimeout(schedulePageFixed, 300); } // スクロールの要・不要を測り直す
+    else fitAlbumPhoto();
+  });
   // メモリーアルバム：写真だけでは残さない。言葉があってはじめて「思い出せる」記録になる（2026-09-15）
   const albumText = document.getElementById("album-text");
   const keepBtn = document.getElementById("album-keep");
@@ -7049,6 +7062,7 @@ function fitAlbumPhoto() {
   const apply = () => {
     if (document.querySelector(".screen.active")?.id !== "screen-album") return;
     if (!wrap.contains(img)) return; // 画面が描き直されていたら何もしない
+    if (img.closest(".zoomed")) return; // タップで大きくしているあいだは縮めない
     const last = wrap.lastElementChild;
     if (!last) return;
     img.style.maxHeight = ""; // いったん戻して、素の大きさで測る
