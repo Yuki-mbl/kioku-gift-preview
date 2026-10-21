@@ -2546,13 +2546,14 @@ html[data-theme="dark"][data-fontsize] #screen-home #home-doors { height: auto; 
 }
 [data-theme="dark"] .balloon-lg .balloon-ico { width: min(38px, 9.6vw); height: min(38px, 9.6vw); color: var(--brass-strong-ed); }
 [data-theme="dark"] .balloon:active { transform: none; opacity: .6; }
-/* 検索：枠のない1本の罫線に */
+/* 検索：真鍮の細い縁の丸い欄（2026-10-21 Yukiさん「罫線1本だと検索欄とわかりづらい。かっこよさは残して淡い配色くらいに」。
+   検索画面の欄と同じ真鍮の縁にそろえた） */
 [data-theme="dark"] .home-search-line { margin-top: 18px; }
 [data-theme="dark"] .home-wrap .search-trigger {
-  background: none; border: none; border-bottom: 1px solid var(--line-ed);
-  border-radius: 0; box-shadow: none; padding: 12px 2px; opacity: 1;
+  background: rgba(255, 255, 255, .05); border: 1px solid rgba(217, 184, 118, .6);
+  border-radius: 999px; box-shadow: none; padding: 14px 14px 14px 18px; opacity: 1;
 }
-[data-theme="dark"] .home-search-line .search-mic { background: none; border: 1px solid var(--line-ed); box-shadow: none; }
+[data-theme="dark"] .home-search-line .search-mic { background: none; border: 1px solid rgba(217, 184, 118, .6); box-shadow: none; }
 [data-theme="dark"] #home-count { color: var(--muted); font-size: min(.86rem, 3.7vw); letter-spacing: .1em; text-align: left; padding-left: 2px; }
 /* 文字サイズ「大」「特大」用の風船ルール（絵が幅37%など）を、ダークの目次では打ち消す。
    打ち消さないと絵が巨大になって行が高くなり、小さい端末で最後の行がタブに隠れる（2026-09-14） */
@@ -2638,13 +2639,17 @@ html[data-theme="light"][data-fontsize] #screen-home #home-doors .balloon-lg .ba
   width: min(38px, 9.6vw); height: min(38px, 9.6vw); opacity: 1;
 }
 html[data-theme="light"] .balloon:active { transform: none; opacity: .55; }
-/* 検索：罫線1本。茎の位置に合わせて左を揃える */
+/* 検索：白地に深緑の細い縁の丸い欄（2026-10-21 罫線1本ではわかりづらかった）。茎の位置に合わせて左を揃える */
 html[data-theme="light"] .home-search-line { margin: clamp(10px, 1.8vh, 16px) 0 0 22px; }
 html[data-theme="light"] .home-wrap .search-trigger {
-  background: none; border: none; border-bottom: 1.5px solid var(--border);
-  border-radius: 0; box-shadow: none; padding: 12px 2px; opacity: 1;
+  background: var(--card); border: 1.5px solid rgba(62, 114, 88, .45);
+  border-radius: 999px; box-shadow: 0 2px 10px rgba(44, 84, 63, .07); padding: 14px 14px 14px 16px; opacity: 1;
 }
-html[data-theme="light"] .home-search-line .search-mic { background: none; border: 1.5px solid var(--border); box-shadow: none; }
+html[data-theme="light"] .home-search-line .search-mic { background: var(--card); border: 1.5px solid rgba(62, 114, 88, .45); box-shadow: none; }
+/* 茎に合わせて左を空けているぶん欄が狭いので、例の「）」まで入るよう字を少し小さく */
+html[data-theme="light"] #screen-home .search-trigger { padding: clamp(10px, 1.6vh, 15px) 12px clamp(10px, 1.6vh, 15px) 16px; } /* #screen-home の 20px より強く */
+html[data-theme="light"] #screen-home .search-trigger:has(.search-eg) { font-size: min(1.24rem, 4.0vw) !important; }
+@media (max-width: 340px) { html[data-theme="light"] #screen-home .search-trigger:has(.search-eg) { font-size: min(1.2rem, 3.6vw) !important; } }
 html[data-theme="light"] #home-count { text-align: left; padding-left: 24px; color: var(--muted); }
 
 /* とても狭い端末では、ホームの検索の字をもう少し小さく（例の「）」まで見せる。2026-09-14） */
