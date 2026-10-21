@@ -2806,6 +2806,35 @@ html[data-theme="light"] .balloon-pos:has(.balloon-k-sleep.sleep-due)::before { 
 /* キーボードが出ているとき（下のタブは隠れる）：キーボードのすぐ上に */
 #app.kb-open #screen-search.screen.active { padding-bottom: 8px; }
 #app.kb-open #screen-search .search-bar-box { bottom: calc(var(--kb-hidden, 0px) + 8px); }
+
+/* ===== 予定を思い出す（2026-10-21） ===== */
+#cal-intro-pop { position: fixed; inset: 0; z-index: 1000; background: rgba(0, 0, 0, .45); display: flex; align-items: center; justify-content: center; padding: 20px; }
+#cal-intro-pop[hidden] { display: none; }
+.cal-intro { max-width: 420px; width: 100%; display: flex; flex-direction: column; gap: 12px; }
+.cal-intro-title { font-size: 1.3rem; font-weight: 800; text-align: center; color: var(--accent-strong); }
+[data-theme="dark"] .cal-intro-title { color: var(--brass-strong-ed); }
+.cal-intro-msg { text-align: left; line-height: 1.75; margin: 0; }
+.cal-intro-msg b { display: inline; margin: 0; }
+.cal-intro-note { font-size: .92rem; color: var(--muted); line-height: 1.6; margin: 0 0 4px; }
+.cal-sub { font-weight: 800; margin: 16px 0 8px; }
+.cal-rem-row { display: flex; align-items: center; gap: 8px; margin-top: 10px; flex-wrap: wrap; }
+.cal-rem-row { flex-wrap: nowrap; }
+.cal-rem-row select, .cal-rem-row input[type="time"] {
+  width: auto; flex: 0 1 auto; min-width: 0;
+  font: inherit; font-size: 1.05rem; padding: 10px 12px; border-radius: 12px;
+  border: 1.5px solid var(--border); background: var(--card); color: var(--text);
+}
+.cal-list { display: flex; flex-direction: column; gap: 8px; }
+.cal-check { display: flex; align-items: flex-start; gap: 10px; padding: 10px 12px; border: 1.5px solid var(--border); border-radius: 14px; background: var(--card); }
+.cal-check input { width: 22px; height: 22px; flex: 0 0 auto; margin-top: 2px; accent-color: var(--accent); }
+.cal-check small { display: block; color: var(--muted); font-size: .82rem; word-break: break-all; }
+.cal-warn { color: var(--accent2); font-weight: 700; }
+.calq-wrap { padding-bottom: 140px; }
+.calq-item { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 12px; margin-bottom: 10px; }
+.calq-time { font-weight: 800; color: var(--accent-strong); }
+[data-theme="dark"] .calq-time { color: var(--brass-strong-ed); }
+.calq-title { font-weight: 800; }
+.calq-place { flex-basis: 100%; color: var(--muted); font-size: .95rem; }
 </style>
 <div id="app">
 
@@ -2996,6 +3025,13 @@ html[data-theme="light"] .balloon-pos:has(.balloon-k-sleep.sleep-due)::before { 
       <button class="back-fab" id="sleep-back" data-t data-t-aria aria-label="戻る">← 戻る</button>
     </section>
 
+    <!-- ===== 予定を思い出す（通知を押したとき。2026-10-21） ===== -->
+    <section id="screen-calq" class="screen">
+      <header class="flow-header"><div class="flow-date" id="calq-date"></div></header>
+      <div class="flow-content calq-wrap" id="calq-wrap"></div>
+      <button class="back-fab" id="calq-back" data-t data-t-aria aria-label="戻る">← 戻る</button>
+    </section>
+
     <!-- ===== 買い物の記憶 ===== -->
     <section id="screen-shopping" class="screen">
       <div class="shopping-wrap" id="shopping-wrap"></div>
@@ -3050,6 +3086,10 @@ html[data-theme="light"] .balloon-pos:has(.balloon-k-sleep.sleep-due)::before { 
             <button class="seg" data-t data-value="1">オン</button>
             <button class="seg" data-t data-value="0">オフ</button>
           </div>
+        </div>
+        <div class="card" id="cal-card">
+          <div class="settings-label" data-t>予定を思い出す</div>
+          <div id="cal-card-body"></div>
         </div>
         <div class="card" id="siri-card" hidden>
           <div class="settings-label" data-t>声でメモを残す（Siri）</div>
@@ -3165,6 +3205,17 @@ html[data-theme="light"] .balloon-pos:has(.balloon-k-sleep.sleep-due)::before { 
 
     <!-- ===== 買い物の答え合わせ（上から降りるシート。買えたらチェックで消す） ===== -->
     <!-- 押すまで消えない案内（記録が消える場面でだけ使う。帯では見逃されるため 2026-10-04） -->
+    <!-- 予定を思い出す：初めに一度だけ聞く（2026-10-21） -->
+    <div id="cal-intro-pop" hidden>
+      <div class="alert-card cal-intro">
+        <div class="cal-intro-title" data-t>予定を思い出す</div>
+        <p class="alert-msg cal-intro-msg"><span data-t>スマホのカレンダーと同期すると、予定の1週間前と前日の夜（20:30）に、</span><b data-t>「何の予定か、思い出せますか？」</b><span data-t>とお知らせが届きます。</span></p>
+        <p class="cal-intro-note" data-t>予定の名前はお知らせに出ません。カレンダーは読むだけで、スマホの外には送りません。日にちや回数は、あとで設定から変えられます。</p>
+        <button type="button" class="btn btn-primary btn-xl" id="cal-intro-yes" data-t>同期する</button>
+        <button type="button" class="btn btn-secondary btn-xl" id="cal-intro-no" data-t>今はしない</button>
+      </div>
+    </div>
+
     <div id="alert-pop" hidden>
       <div class="alert-card">
         <p class="alert-msg" id="alert-msg"></p>
@@ -4000,7 +4051,7 @@ function setupOnboarding() {
       store.set("mn_settings", settings);
       applySettings();
     }
-    applyStart();
+    askCalendarThen(applyStart); // カレンダーの予定を思い出すお知らせを使うか、ここで一度だけ聞く（2026-10-21）
   });
 }
 
@@ -5827,6 +5878,7 @@ function openSettings() {
       b.classList.toggle("selected", (b.dataset.value === "1") === (settings.quickMemoNotify !== false)));
   }
   renderResetArea();
+  renderCalCard(); // 予定を思い出す（2026-10-21）
   showScreen("screen-settings");
 }
 
@@ -5866,6 +5918,11 @@ function checkRelock() {
 document.addEventListener("visibilitychange", () => { if (document.hidden) noteAppHidden(); else checkRelock(); });
 document.addEventListener("pause", noteAppHidden);
 document.addEventListener("resume", checkRelock);
+// アプリに戻ったとき、カレンダーに足した予定を予約に入れ直す（多くても10分に1回）
+let calLastSync = 0;
+function calResync() { if (Date.now() - calLastSync < 600000) return; calLastSync = Date.now(); scheduleCalNotify(); }
+document.addEventListener("visibilitychange", () => { if (!document.hidden) calResync(); });
+document.addEventListener("resume", calResync);
 let pendingUnlock = null; // 解除後の行き先 {type:"diary"|"detail"|"search", ds}
 
 function lockPassOf() { return lockMode === "diary" ? settings.diaryPass : settings.passcode; }
@@ -7571,7 +7628,7 @@ function wireIap() {
 // ※残りの【　】2か所（お問い合わせ先メールアドレス・管轄裁判所名）だけ、公開前に埋めること。
 // ※中身を変えたら「最終改定日」も直すこと。内容は実装と一致させること（嘘を書かない）。
 const LEGAL_BLANK_NOTE = `<p class="legal-note">【　】の部分は、公開までに正式な内容を入れます。</p>`;
-const LEGAL_UPDATED = "2026年10月12日";
+const LEGAL_UPDATED = "2026年10月21日"; // 10/21：5章にカレンダー（予定を思い出す）を足した
 const LEGAL_TEXTS = {
   privacy: {
     title: "プライバシーポリシー",
@@ -7591,8 +7648,9 @@ const LEGAL_TEXTS = {
       <h3>4. 音声入力について</h3>
       <p>「話して書く」は、お使いのスマホに備わっている音声認識の仕組みを利用します。当社が音声や文字を受け取ることはありません。ただし、<b>機種や設定によっては、音声認識の処理が端末メーカー（Google・Apple など）のサーバーで行われることがあります</b>。その場合の取り扱いは、各社の方針にしたがいます。</p>
 
-      <h3>5. 通知について</h3>
+      <h3>5. 通知とカレンダーについて</h3>
       <p>おやすみのお知らせなどの通知は、端末の中だけで動きます。通知の内容が外部へ送られることはありません。設定でいつでもオフにできます。</p>
+      <p>「予定を思い出す」は、<b>お客さまが許可した場合にだけ</b>、端末のカレンダーの予定（日時・題名・場所）を読み取り、お知らせの予約と、答えを表示する画面に使います。<b>予定を書き換えることはなく、本アプリの中に保存することも、外部へ送ることもありません。</b>お知らせには予定の題名を出しません。許可は端末の設定で、お知らせは本アプリの設定で、いつでもやめられます。</p>
 
       <h3>6. バックアップと引き継ぎについて</h3>
       <p>端末の設定にしたがって、記録が iCloud（iPhone）または Google（Android）へ自動でバックアップされることがあります。これはお客さまご自身のアカウントの中で守られる仕組みで、当社は中身を読めません。</p>
@@ -7754,6 +7812,269 @@ function scheduleGratNotify() {
     }, ms);
   }
 }
+// =========================================================
+// 予定を思い出す（スマホのカレンダーから。2026-10-21 Yukiさん）
+// =========================================================
+// 友人の困りごと「カレンダーに数日前の知らせを付けていても、当日になって気づく」から。
+// カレンダーの知らせは答え（予定の名前）を見せるだけなので流しやすい。こちらは先に
+// 「何の予定か、思い出せますか？」と問いかけ、押すと答えを見せる。予定の名前は通知に出さない（ロック画面で人に見られても分からない）。
+// カレンダーは読むだけ。読んだ予定は通知の予約と答えの画面に使うだけで、保存も外への送信もしない。
+// 通知は、おやすみと同じく「アプリを開くたびに先の分を予約し直す」。開いていない間に足した予定は、次に開くまで入らない
+function calPlugin() {
+  return (window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.KiokuCalendar) || null;
+}
+const CAL_NOTIFY_ID_BASE = 8101; // 8101〜8130 の30枠（iPhone は予約が64件まで。おやすみの30件と分け合う）
+const CAL_NOTIFY_MAX = 30;
+const CAL_HORIZON_DAYS = 90;     // 3か月先の予定まで予約しておく（しばらく開かなくても、もとからある予定の知らせは届く）
+const CAL_DAY_CHOICES = [7, 6, 5, 4, 3, 2, 1, 0]; // 何日前（0＝当日）
+// 初期値：1週間前の20:30と前日の20:30（2026-10-21 Yukiさん）。回数は1回か2回
+const CAL_DEFAULT_REM = [{ days: 7, time: "20:30" }, { days: 1, time: "20:30" }];
+function loadCal() {
+  const c = store.get("mn_cal", null) || {};
+  const rem = (Array.isArray(c.rem) && c.rem.length ? c.rem : CAL_DEFAULT_REM).slice(0, 2)
+    .map((r, i) => ({ days: CAL_DAY_CHOICES.includes(+r.days) ? +r.days : CAL_DEFAULT_REM[i].days, time: /^\d\d:\d\d$/.test(r.time) ? r.time : "20:30" }));
+  while (rem.length < 2) rem.push({ ...CAL_DEFAULT_REM[rem.length] });
+  return { on: !!c.on, asked: !!c.asked, count: c.count === 1 ? 1 : 2, rem, off: Array.isArray(c.off) ? c.off : null };
+}
+function saveCal(c) { store.set("mn_cal", c); }
+// 祝日・誕生日のカレンダーは、初めから使わない（毎年の祝日や人の誕生日まで知らせると多すぎる）
+function calAutoOff(cal) {
+  const s = ((cal.name || "") + " " + (cal.account || "")).toLowerCase();
+  return /holiday|祝日|休日|birthday|誕生日|#contacts|連絡先/.test(s);
+}
+function calIsOff(c, cal) { return c.off ? c.off.includes(cal.id) : calAutoOff(cal); }
+// 週1回以上くり返す予定（毎週のごみ出し・習い事など）は外す。月1回の通院などは残す
+function calTooFrequent(rrule) {
+  const r = String(rrule || "").toUpperCase();
+  if (!r) return false;
+  const freq = (r.match(/FREQ=([A-Z]+)/) || [])[1];
+  const interval = +((r.match(/INTERVAL=(\d+)/) || [])[1] || 1);
+  if (freq === "DAILY" || freq === "HOURLY" || freq === "MINUTELY") return true;
+  return freq === "WEEKLY" && interval <= 1;
+}
+// 予定の日付（YYYY-MM-DD）。終日の予定は世界時の0時で届くので、世界時の日付で読む
+function calDateKey(ev) {
+  const d = new Date(ev.start);
+  if (ev.allDay) return `${d.getUTCFullYear()}-${String(d.getUTCMonth() + 1).padStart(2, "0")}-${String(d.getUTCDate()).padStart(2, "0")}`;
+  return toDateStr(d);
+}
+// ブラウザ（プレビュー）では、見本の予定で動かす
+function calSample() {
+  const at = (days, h, m) => { const d = new Date(); d.setDate(d.getDate() + days); d.setHours(h, m, 0, 0); return d.getTime(); };
+  return {
+    calendars: [{ id: "s1", name: t("カレンダー"), account: t("見本") }, { id: "s2", name: t("日本の祝日"), account: "holiday" }],
+    events: [
+      { id: "e1", calendarId: "s1", title: t("歯医者"), start: at(7, 14, 0), end: at(7, 15, 0), allDay: false, location: t("駅前歯科"), rrule: "" },
+      { id: "e2", calendarId: "s1", title: t("町内会の集まり"), start: at(7, 19, 0), end: at(7, 20, 30), allDay: false, location: "", rrule: "" },
+      { id: "e3", calendarId: "s1", title: t("燃えるごみ"), start: at(2, 8, 0), end: at(2, 8, 30), allDay: false, location: "", rrule: "FREQ=WEEKLY;BYDAY=TU" },
+    ],
+  };
+}
+async function calPermitted() {
+  const P = calPlugin();
+  if (!P) return true; // ブラウザは見本なので許可は要らない
+  try { const r = await P.checkPermission(); return !!(r && r.granted); } catch (e) { return false; }
+}
+async function calCalendars() {
+  const P = calPlugin();
+  if (!P) return calSample().calendars;
+  try { const r = await P.listCalendars(); return (r && r.calendars) || []; } catch (e) { return []; }
+}
+// 使う予定だけを、日付ごとにまとめて返す（Map: 日付 → 予定の配列）
+async function calEventsByDay(from, to) {
+  const P = calPlugin();
+  let events = [], cals = [];
+  if (P) {
+    try { events = ((await P.getEvents({ from: from.getTime(), to: to.getTime() })) || {}).events || []; } catch (e) { events = []; }
+    cals = await calCalendars();
+  } else {
+    const s = calSample(); events = s.events.filter(e => e.start >= from.getTime() && e.start < to.getTime()); cals = s.calendars;
+  }
+  const c = loadCal();
+  const offIds = new Set(cals.filter(x => calIsOff(c, x)).map(x => x.id));
+  const map = new Map();
+  for (const ev of events) {
+    if (offIds.has(ev.calendarId) || calTooFrequent(ev.rrule)) continue;
+    const k = calDateKey(ev);
+    if (!map.has(k)) map.set(k, []);
+    map.get(k).push(ev);
+  }
+  return map;
+}
+// 「明日（10月28日（水））」のように、近い日は言葉を添える
+function calWhen(dateKey) {
+  const days = Math.round((fromDateStr(dateKey) - fromDateStr(todayStr())) / 86400000);
+  const d = formatJP(dateKey);
+  return days === 0 ? t("今日（{d}）", { d }) : days === 1 ? t("明日（{d}）", { d }) : d;
+}
+function calQuestion(when, n) {
+  return n > 1
+    ? t("{w}に予定が{n}つあります。何の予定か、思い出せますか？", { w: when, n })
+    : t("{w}に予定があります。何の予定か、思い出せますか？", { w: when });
+}
+let calScheduling = false;
+async function scheduleCalNotify() {
+  const SLN = nativeLocalNotify();
+  if (!SLN || calScheduling) return; // 通知はアプリ版だけ（ブラウザは見本の画面だけ見られる）
+  calScheduling = true;
+  try {
+    await SLN.cancel({ notifications: Array.from({ length: CAL_NOTIFY_MAX }, (_, i) => ({ id: CAL_NOTIFY_ID_BASE + i })) });
+    const c = loadCal();
+    if (!c.on || !calPlugin() || !(await calPermitted())) return;
+    const perm = await SLN.requestPermissions();
+    if (perm && perm.display && perm.display !== "granted") return;
+    const now = new Date();
+    const from = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    const to = new Date(from.getFullYear(), from.getMonth(), from.getDate() + CAL_HORIZON_DAYS + 8);
+    const byDay = await calEventsByDay(from, to);
+    const plan = [];
+    for (const [dateKey, evs] of byDay) {
+      for (const r of c.rem.slice(0, c.count)) {
+        const [hh, mm] = r.time.split(":").map(Number);
+        const base = fromDateStr(dateKey);
+        const at = new Date(base.getFullYear(), base.getMonth(), base.getDate() - r.days, hh, mm, 0, 0);
+        if (at <= now) continue;
+        const d = formatJP(dateKey);
+        const when = r.days === 0 ? t("今日（{d}）", { d }) : r.days === 1 ? t("明日（{d}）", { d }) : d;
+        plan.push({ at, dateKey, body: calQuestion(when, evs.length) });
+      }
+    }
+    plan.sort((a, b) => a.at - b.at);
+    const list = plan.slice(0, CAL_NOTIFY_MAX).map((p, i) => ({
+      id: CAL_NOTIFY_ID_BASE + i,
+      title: t("予定を思い出す"),
+      body: p.body,
+      schedule: { at: p.at, allowWhileIdle: true },
+      smallIcon: "ic_stat_memo",
+      channelId: "kioku_cal", // MainActivity で作る「予定を思い出す」のチャンネル（おやすみとは別にオン・オフできる）
+      extra: { kind: "cal", date: p.dateKey },
+    }));
+    if (list.length) await SLN.schedule({ notifications: list });
+  } catch (e) {
+  } finally { calScheduling = false; }
+}
+// 使うと決めたとき：カレンダーの許可 → 通知の許可 → 予約
+async function calTurnOn() {
+  const c = loadCal();
+  const P = calPlugin();
+  if (P) {
+    let ok = false;
+    try { const r = await P.requestPermission(); ok = !!(r && r.granted); } catch (e) {}
+    if (!ok) { c.on = false; c.asked = true; saveCal(c); return false; }
+  }
+  c.on = true; c.asked = true; saveCal(c);
+  scheduleCalNotify();
+  return true;
+}
+
+// ---------- 答えの画面（通知を押したとき） ----------
+function calTimeText(ev) {
+  if (ev.allDay) return t("終日");
+  const d = new Date(ev.start);
+  return `${d.getHours()}:${String(d.getMinutes()).padStart(2, "0")}`;
+}
+async function openCalRecall(dateKey) {
+  if (!dateKey) return;
+  const wrap = document.getElementById("calq-wrap");
+  document.getElementById("calq-date").innerHTML =
+    `${formatJP(todayStr())}<small>${t("{y}年", { y: new Date().getFullYear() })}</small>`;
+  const base = fromDateStr(dateKey);
+  const byDay = await calEventsByDay(base, new Date(base.getFullYear(), base.getMonth(), base.getDate() + 1));
+  const evs = (byDay.get(dateKey) || []).sort((a, b) => (b.allDay - a.allDay) || (a.start - b.start));
+  const when = calWhen(dateKey);
+  wrap.innerHTML = evs.length ? `
+    <div class="step-title">${t("予定を思い出す")}</div>
+    <div class="quiz-q">${calQuestion(when, evs.length)}</div>
+    <p class="quiz-say">${t("声に出して言ってみて")}</p>
+    <div class="quiz-reveal-slot" id="calq-slot"></div>
+    <div class="quiz-actions"><button class="btn btn-primary btn-xl" id="calq-reveal">${t("答えを見る")}</button></div>`
+    : `
+    <div class="step-title">${t("予定を思い出す")}</div>
+    <p class="quiz-say">${t("{w}の予定は見つかりませんでした。カレンダーで消したり、日にちを変えたりしたのかもしれません。", { w: when })}</p>
+    <button class="btn btn-secondary btn-xl" id="calq-home">${t("ホームへ")}</button>`;
+  const rv = document.getElementById("calq-reveal");
+  if (rv) rv.addEventListener("click", () => {
+    document.getElementById("calq-slot").innerHTML = `
+      <div class="quiz-answer-label">${t("カレンダーの予定")}</div>
+      ${evs.map(ev => `<div class="quiz-answer calq-item"><span class="calq-time">${calTimeText(ev)}</span><span class="calq-title">${esc(ev.title || t("（題名なし）"))}</span>${ev.location ? `<span class="calq-place">${esc(ev.location)}</span>` : ""}</div>`).join("")}`;
+    wrap.querySelector(".quiz-actions").outerHTML = `<button class="btn btn-secondary btn-xl" id="calq-home">${t("思い出せました（ホームへ）")}</button>`;
+    document.getElementById("calq-home").addEventListener("click", goHome);
+  });
+  const hm = document.getElementById("calq-home");
+  if (hm) hm.addEventListener("click", goHome);
+  showScreen("screen-calq");
+}
+
+// ---------- 設定のカード ----------
+async function renderCalCard() {
+  const box = document.getElementById("cal-card-body");
+  if (!box) return;
+  const c = loadCal();
+  const permitted = c.on ? await calPermitted() : true;
+  const cals = c.on && permitted ? await calCalendars() : [];
+  const dayOpts = sel => CAL_DAY_CHOICES.map(d => `<option value="${d}"${d === sel ? " selected" : ""}>${d === 0 ? t("当日") : d === 7 ? t("1週間前") : t("{n}日前", { n: d })}</option>`).join("");
+  box.innerHTML = `
+    <p class="settings-hint" style="margin-top:0;">${t("スマホのカレンダーの予定を、前もって「何の予定か、思い出せますか？」とお知らせします。予定の名前はお知らせに出ません")}</p>
+    <div class="seg-group" id="cal-onoff">
+      <button class="seg${c.on ? " selected" : ""}" data-v="1">${t("オン")}</button>
+      <button class="seg${c.on ? "" : " selected"}" data-v="0">${t("オフ")}</button>
+    </div>
+    ${c.on && !permitted ? `<p class="settings-hint cal-warn">${t("カレンダーを読む許可がありません。スマホの設定で「記憶のギフト」にカレンダーを許可してください")}</p>` : ""}
+    ${c.on && permitted ? `
+    <div class="cal-sub">${t("お知らせの回数")}</div>
+    <div class="seg-group" id="cal-count">
+      <button class="seg${c.count === 1 ? " selected" : ""}" data-v="1">${t("1回")}</button>
+      <button class="seg${c.count === 2 ? " selected" : ""}" data-v="2">${t("2回")}</button>
+    </div>
+    ${c.rem.slice(0, c.count).map((r, i) => `
+    <div class="cal-rem-row">
+      <select class="cal-days" data-i="${i}" aria-label="${t("何日前")}">${dayOpts(r.days)}</select>
+      <span>${t("の")}</span>
+      <input type="time" class="cal-time" data-i="${i}" value="${r.time}">
+    </div>`).join("")}
+    <div class="cal-sub">${t("使うカレンダー")}</div>
+    <div class="cal-list">${cals.length ? cals.map(x => `
+      <label class="cal-check"><input type="checkbox" data-id="${esc(x.id)}"${calIsOff(c, x) ? "" : " checked"}><span>${esc(x.name || t("カレンダー"))}${x.account && x.account !== x.name ? `<small>${esc(x.account)}</small>` : ""}</span></label>`).join("")
+      : `<p class="settings-hint">${t("カレンダーが見つかりませんでした")}</p>`}</div>
+    <p class="settings-hint">${t("新しく足した予定は、このアプリを開いたときにお知らせに入ります。")}</p>
+    <p class="settings-hint">${t("出てこない予定があるときは、お使いのカレンダーのアプリを、スマホ本体のカレンダーと同期させてください（TimeTree など、一部のアプリの予定は読めません）。毎週くり返す予定はお知らせしません。")}</p>` : ""}`;
+  box.querySelectorAll("#cal-onoff .seg").forEach(b => b.addEventListener("click", async () => {
+    if (b.dataset.v === "1") { await calTurnOn(); }
+    else { const x = loadCal(); x.on = false; x.asked = true; saveCal(x); scheduleCalNotify(); }
+    renderCalCard();
+  }));
+  box.querySelectorAll("#cal-count .seg").forEach(b => b.addEventListener("click", () => {
+    const x = loadCal(); x.count = +b.dataset.v; saveCal(x); scheduleCalNotify(); renderCalCard();
+  }));
+  box.querySelectorAll(".cal-days").forEach(s => s.addEventListener("change", () => {
+    const x = loadCal(); x.rem[+s.dataset.i].days = +s.value; saveCal(x); scheduleCalNotify();
+  }));
+  box.querySelectorAll(".cal-time").forEach(s => s.addEventListener("change", () => {
+    if (!/^\d\d:\d\d$/.test(s.value)) return;
+    const x = loadCal(); x.rem[+s.dataset.i].time = s.value; saveCal(x); scheduleCalNotify();
+  }));
+  box.querySelectorAll(".cal-check input").forEach(cb => cb.addEventListener("change", () => {
+    const x = loadCal();
+    // 初めて触ったときに、いまの見え方（祝日・誕生日は外れている）を「使わない一覧」として決める
+    const off = new Set(x.off || cals.filter(k => calAutoOff(k)).map(k => k.id));
+    box.querySelectorAll(".cal-check input").forEach(k => { if (k.checked) off.delete(k.dataset.id); else off.add(k.dataset.id); });
+    x.off = [...off]; saveCal(x); scheduleCalNotify();
+  }));
+}
+
+// ---------- 初めに聞く（新しく入れた人は初回の設定のあと、前から使っている人は次に開いたとき1回だけ） ----------
+// 「同期すると、予定を思い出すお知らせが届く」ことを書く（書かないとオフにする人が多そう。2026-10-21 Yukiさん）。
+// Android は許可の画面の文をアプリから変えられないので、この画面で伝えるのが要
+function askCalendarThen(next) {
+  const c = loadCal();
+  if (c.asked) { if (next) next(); return; }
+  const pop = document.getElementById("cal-intro-pop");
+  const done = () => { pop.hidden = true; if (next) next(); };
+  document.getElementById("cal-intro-yes").onclick = async () => { await calTurnOn(); done(); };
+  document.getElementById("cal-intro-no").onclick = () => { const x = loadCal(); x.asked = true; saveCal(x); done(); };
+  pop.hidden = false;
+}
+
 // =========================================================
 // 買い物の記憶（4カテゴリの買い物リスト→隠す→思い出しながら開ける）
 // =========================================================
@@ -8427,10 +8748,21 @@ function wireEvents() {
     }
   });
   document.getElementById("sleep-back").addEventListener("click", goHome); // 1層だけの画面になった（2026-10-03）
+  document.getElementById("calq-back").addEventListener("click", goHome); // 予定を思い出す（通知から開く1層だけの画面）
   scheduleGratNotify(); // 起動時に通知を予約（設定オンなら。アプリ版は30日ぶんOSに予約し直す）
-  // アプリ版：おやすみ通知をタップしたら、おやすみの記憶画面を開く
+  scheduleCalNotify();  // 予定を思い出す：開くたびに先の分を予約し直す（2026-10-21）
+  // アプリ版：通知をタップしたら、おやすみの記憶画面（予定を思い出すの通知なら、その日の問いかけ）を開く
   const SLN0 = nativeLocalNotify();
-  if (SLN0) { try { SLN0.addListener("localNotificationActionPerformed", () => { try { openSleepFromNotice(); } catch (e) {} }); } catch (e) {} }
+  if (SLN0) { try { SLN0.addListener("localNotificationActionPerformed", ev => {
+    try {
+      const ex = ev && ev.notification && ev.notification.extra;
+      if (ex && ex.kind === "cal") openCalRecall(ex.date); else openSleepFromNotice();
+    } catch (e) {}
+  }); } catch (e) {} }
+  // 前から使っている人には、次に開いたときに1回だけ「予定を思い出す」を聞く（ホームのときだけ。ロック画面の上には出さない）
+  setTimeout(() => {
+    if (profile && !loadCal().asked && document.querySelector(".screen.active")?.id === "screen-home") askCalendarThen();
+  }, 900);
   document.getElementById("btn-settings").addEventListener("click", openSettings);
   wireIap(); // 設定「広告を消す」（買い切り）
 
