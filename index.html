@@ -2341,7 +2341,8 @@ html[data-fontsize="xlarge"] .tabb-name { font-size: min(.95rem, 4vw); }
 #app.kb-open.kb-bottom .flow-footer { display: flex; }
 #app.kb-open .shop-fab, #app.kb-open .back-fab { display: none; }
 #app.kb-open.kb-bottom .shop-fab { display: block; bottom: 20px; }
-#app.kb-open.kb-bottom .back-fab { display: inline-flex; bottom: 20px; }
+/* 「← 戻る」はキーボード中はいつも隠す（下まで来ても出さない）。キーボードのすぐ上に出ると、検索の「さがす」・アルバムの「保存」・
+   買い物の欄・服のカレンダーなどに重なっていた（2026-10-21 Yukiさん）。戻りたいときはキーボードを閉じれば出る */
 
 /* タブのある画面は、下がタブ＋広告に隠れないよう余白を足す */
 #app.has-tabs .screen.active { padding-bottom: 128px; }
@@ -2805,7 +2806,6 @@ html[data-theme="light"] .balloon-pos:has(.balloon-k-sleep.sleep-due)::before { 
 /* キーボードが出ているとき（下のタブは隠れる）：キーボードのすぐ上に */
 #app.kb-open #screen-search.screen.active { padding-bottom: 8px; }
 #app.kb-open #screen-search .search-bar-box { bottom: calc(var(--kb-hidden, 0px) + 8px); }
-#app.kb-open #screen-search .back-fab { display: none; } /* キーボード中は「さがす」に重なるので隠す（戻るはキーボードを閉じれば出る。2026-10-21） */
 </style>
 <div id="app">
 
@@ -5552,7 +5552,7 @@ function openSearch(viaMic) {
   searchFrom = cur === "screen-calendar" ? "screen-calendar" : "screen-home";
   // 見返すから来たときは「← 戻る」を出す（ホームから来たときは下のタブで戻れるので出さない）
   // 「← 戻る」はいつも出す（ホームから来たときも。2026-10-17 Yukiさん）
-  document.getElementById("search-back").style.display = "inline-flex";
+  document.getElementById("search-back").style.display = ""; // CSS のまま（じかに inline-flex を書くと、キーボード中に隠す CSS が効かなかった）
   document.getElementById("screen-search").classList.add("search-with-back");
   document.getElementById("search-input").value = "";
   lastSearchQ = null;
