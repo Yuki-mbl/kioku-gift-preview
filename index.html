@@ -7168,6 +7168,21 @@ function renderAlbumPhotoView() {
   // 自動でキーボードは出さない（写真を見る時間を守る）
 }
 
+// 「答えを見る」を押したら、次へ進むボタン（次の思い出し・もっと思い出す・戻る）が見えるところまで送る（2026-10-22）。
+// 写真の問題では答えと写真で長くなり、ボタンが下に隠れて「次に行けない」と感じやすい
+document.addEventListener("click", e => {
+  if (!e.target.closest || !e.target.closest("#quiz-reveal")) return;
+  setTimeout(() => {
+    const box = document.getElementById("flow-content");
+    const btn = box && box.querySelector("#quiz-next");
+    if (!btn) return;
+    const back = document.getElementById("quiz-back");
+    let bottom = box.getBoundingClientRect().bottom;
+    if (back && back.offsetParent) bottom = Math.min(bottom, back.getBoundingClientRect().top);
+    const over = btn.getBoundingClientRect().bottom - (bottom - 12);
+    if (over > 0) box.scrollBy({ top: over, behavior: "smooth" });
+  }, 80);
+}, true);
 // 思い出すの手がかりの写真を、「答えを見る」が画面に収まる大きさまで縮める（2026-10-22 Yukiさん
 // 「1問目から2問目に行けない」：縦長の写真で「答えを見る」が下に隠れ、気づけなかった）。
 // アルバムの fitAlbumPhoto と同じ考え。小さくしすぎない（140px）。それでも入らないときはスクロールにまかせる
