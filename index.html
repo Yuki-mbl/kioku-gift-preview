@@ -5318,7 +5318,7 @@ function buildDeepQuestions(excludeKeys, max) {
     // 服装：写真がある日は写真を手がかりに（期間無制限）。写真が無い日は7日以内だけ
     if (outfitText(ds)) {
       const op = outfitOf(ds)?.photo;
-      const cue = String(op || "").startsWith("data:") ? op : null;
+      const cue = hasPhoto(op) ? op : null; // ファイル（file:）の写真も手がかりに（2026-10-22。data: だけ見ていて、10/4 以降の写真が使われていなかった）
       if (cue) pushQ(others, ds, "outfit", t("この服を着た日のこと、思い出せますか？"), outfitText(ds), null, cue);
       else if (ds >= d7) pushQ(others, ds, "outfit", t("{d}、どんな服装でしたか？", { d: formatJP(ds) }), outfitText(ds), op);
     }
@@ -7224,13 +7224,18 @@ function renderAlbumView(idx) {
   setBackLabel("album-back", true);
   const m = loadAlbumMemos()[idx];
   if (!m) { renderAlbumList(); return; }
-  const isReal = String(m.photo).startsWith("data:");
+  // 写真はファイル（file:）で残すようになったので、data: だけで見分けると見本の枠（4:3・はみ出しを切る）に入り、
+  // 縦長の写真の上下が切れていた（2026-10-22 Yukiさん）。hasPhoto で見分ける
+  const isReal = hasPhoto(m.photo);
   document.getElementById("album-wrap").innerHTML = `
     <div class="album-photo${isReal ? " has-img" : ""}"><span class="ph-emoji">${albumPhotoHtml(m.photo)}</span></div>
     <div class="album-view-note">${m.note ? esc(m.note).replace(/\n/g, "<br>") : t("（メモなし）")}</div>
     <div class="album-item-date album-view-date"><span class="row-ico">${balloonIconSvg("cal")}</span>${m.photoDate ? t("{d}ごろの写真", { d: formatYM(m.photoDate) }) : t("撮影した年月なし")}<span class="album-rec">${t("・記録 {d}", { d: m.date })}</span></div>
     <button type="button" class="btn btn-secondary btn-xl" id="view-edit" style="margin-top:16px;"><span class="btn-ico">${balloonIconSvg("pencil")}</span>${t("追記する")}</button>`;
   document.getElementById("view-edit").addEventListener("click", () => renderAlbumEdit(idx));
+  // 今日の1枚と同じく、タップで少し大きく／もう一度で元に（2026-10-22）
+  const vImg = document.querySelector("#album-wrap .album-photo.has-img img");
+  if (vImg) vImg.addEventListener("click", () => { vImg.closest(".album-photo").classList.toggle("zoomed"); setTimeout(schedulePageFixed, 300); });
 }
 
 // メモリーアルバムに追記する（メモ・撮影日）
@@ -7247,7 +7252,7 @@ function renderAlbumEdit(idx) {
   const m = loadAlbumMemos()[idx];
   if (!m) { renderAlbumList(); return; }
   document.getElementById("album-wrap").innerHTML = `
-    <div class="album-photo${String(m.photo).startsWith("data:") ? " has-img" : ""}"><span class="ph-emoji">${albumPhotoHtml(m.photo)}</span></div>
+    <div class="album-photo${hasPhoto(m.photo) ? " has-img" : ""}"><span class="ph-emoji">${albumPhotoHtml(m.photo)}</span></div>
     <div class="album-q">${t("思い出を追記")}</div>
     <label class="field"><span class="album-field-label">${t("メモ")}</span>
       <div class="meal-line"><textarea id="edit-note" rows="3">${esc(m.note || "")}</textarea>${micMini("edit-note", "edit-save", "text")}</div></label>
@@ -7947,7 +7952,7 @@ async function scheduleCalNotify() {
       body: p.body,
       schedule: { at: p.at, allowWhileIdle: true },
       smallIcon: "ic_stat_memo",
-      channelId: "kioku_cal", // MainActivity で作る「予定を思い出す」のチャンネル（おやすみとは別にオン・オフできる）
+      channelId: "kioku_cal2", // MainActivity で作る「予定を思い出す」のチャンネル（帯で出る。おやすみとは別にオン・オフできる）
       extra: { kind: "cal", date: p.dateKey },
     }));
     if (list.length) await SLN.schedule({ notifications: list });
