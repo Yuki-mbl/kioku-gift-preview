@@ -1106,6 +1106,8 @@ mark {
 .detail-wrap { padding: 12px 20px 40px; display: flex; flex-direction: column; gap: 14px; }
 .detail-date { font-size: 1.5rem; font-weight: 900; margin: 6px 0 4px; }
 .detail-card { margin: 0; display: flow-root; } /* 右に浮かせた服の写真が、文が短くてもカードからはみ出さない（2026-10-12） */
+/* カードどうしの間をあける（2026-10-22 Yukiさん：服装と食事のカードがくっついて重なって見えた。#detail-cards の中は間が無かった） */
+#detail-cards { display: flex; flex-direction: column; gap: 14px; }
 /* カードはタップでその項目の置き場所が開く */
 .detail-card.tappable {
   position: relative;
