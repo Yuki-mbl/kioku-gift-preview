@@ -1308,7 +1308,9 @@ mark {
 .nowrap { white-space: nowrap; display: inline-block; } /* 折り返しは区切りのいい所だけ（ヒント文・ボタン共通） */
 .photo-preview { text-align: center; }
 .photo-preview img { display: block; width: 100%; max-width: 260px; border-radius: 14px; margin: 10px auto 4px; border: 1.5px solid var(--border); }
-.quiz-photo { display: block; width: 100%; max-width: 300px; border-radius: 14px; margin: 10px auto 0; border: 1.5px solid var(--border); }
+.quiz-photo { display: block; width: auto; max-width: min(100%, 300px); height: auto; max-height: min(36vh, 340px); border-radius: 14px; margin: 10px auto 0; border: 1.5px solid var(--border); }
+/* ↑ 高さにも上限（2026-10-22 Yukiさん「1問目から2問目に行けない」：縦長の写真（スクショなど）が画面いっぱいになり、
+   「答えを見る」が下に隠れて気づけなかった）。大きく見たいときは写真をタップ（openPhotoPop） */
 /* 問題と一緒に見せる手がかりの写真（アルバム・服装） */
 .quiz-photo.quiz-cue { margin: 0 auto 12px; }
 
@@ -5421,6 +5423,7 @@ function renderQuizStep(content) {
         <button class="btn btn-primary btn-xl" id="quiz-reveal">${t("答えを見る")}</button>
       </div>`;
     // 思い出す画面に入力欄は置かない（2026-09-15 Yukiさん判断。書いた言葉はどこにも使っていなかった）
+    fitQuizPhoto(); // 手がかりの写真を「答えを見る」が見える大きさに（2026-10-22）
     document.getElementById("quiz-reveal").addEventListener("click", () => {
       document.getElementById("quiz-reveal-slot").innerHTML = `
         <div class="quiz-answer-label">${q.photos.length ? t("あなたが残したもの") : t("あなたが入力したこと")}</div>
@@ -5505,6 +5508,7 @@ function renderQuizStep(content) {
         <div class="quiz-actions">
           <button class="btn btn-primary btn-xl" id="quiz-reveal">${t("答えを見る")}</button>
         </div>`;
+      fitQuizPhoto(); // 手がかりの写真を「答えを見る」が見える大きさに（2026-10-22）
       document.getElementById("quiz-reveal").addEventListener("click", () => {
         document.getElementById("quiz-reveal-slot").innerHTML = `
           <div class="quiz-answer-label">${q.photos.length ? t("あなたが残したもの") : t("あなたが入力したこと")}</div>
@@ -7111,6 +7115,30 @@ function renderAlbumPhotoView() {
   document.getElementById("album-list").addEventListener("click", renderAlbumList);
   fitAlbumPhoto(); // 写真を、下のボタンが隠れない大きさにそろえる
   // 自動でキーボードは出さない（写真を見る時間を守る）
+}
+
+// 思い出すの手がかりの写真を、「答えを見る」が画面に収まる大きさまで縮める（2026-10-22 Yukiさん
+// 「1問目から2問目に行けない」：縦長の写真で「答えを見る」が下に隠れ、気づけなかった）。
+// アルバムの fitAlbumPhoto と同じ考え。小さくしすぎない（140px）。それでも入らないときはスクロールにまかせる
+function fitQuizPhoto() {
+  const img = document.querySelector("#flow-content .quiz-cue");
+  const btn = document.getElementById("quiz-reveal");
+  const box = document.getElementById("flow-content");
+  if (!img || !btn || !box) return;
+  const apply = () => {
+    if (!document.body.contains(img) || !document.body.contains(btn)) return;
+    img.style.maxHeight = "";
+    let bottom = box.getBoundingClientRect().bottom;
+    const back = document.getElementById("quiz-back");
+    if (back && back.offsetParent) bottom = Math.min(bottom, back.getBoundingClientRect().top);
+    const over = btn.getBoundingClientRect().bottom + box.scrollTop - (bottom - 10);
+    if (over <= 0) return;
+    img.style.maxHeight = Math.max(140, img.getBoundingClientRect().height - over) + "px";
+    schedulePageFixed();
+  };
+  requestAnimationFrame(apply);
+  [120, 400, 900].forEach(ms => setTimeout(apply, ms));
+  if (!img.complete) img.addEventListener("load", apply, { once: true });
 }
 
 // 写真を「1画面に収まる大きさ」まで小さくする（2026-10-02 Yukiさん指摘）。
