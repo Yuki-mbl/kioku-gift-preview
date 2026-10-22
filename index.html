@@ -2262,10 +2262,16 @@ html[data-fontsize="xlarge"] .balloon-lg .balloon-name { font-size: min(1.3rem, 
 .tabb-name { font-size: min(.82rem, 3.6vw); font-weight: 800; white-space: nowrap; }
 /* 夜8時までに「思い出す」を開いていない日：＋ボタンと同じ色で知らせる（2026-10-17）。
    淡い配色のピンクはそのままだと文字が薄いので、同じ色みで濃くして読めるようにする */
-#tab-quiz.recall-due { color: #e68fa5; }
-[data-theme="pastel"] #tab-quiz.recall-due .tabb-name { color: #df8299; } /* ホームのおやすみと同じ淡いピンクにそろえた（2026-10-17） */
-[data-theme="light"] #tab-quiz.recall-due { color: #2f8a5b; } /* ＋の緑だと、ふだんの濃い字と見分けにくいので少し明るく */
-[data-theme="dark"] #tab-quiz.recall-due { color: #D9B876; }
+#tab-quiz.recall-due { --due-c: #e68fa5; --due-n: #e68fa5; color: var(--due-c); }
+[data-theme="pastel"] #tab-quiz.recall-due { --due-n: #df8299; } /* 字はホームのおやすみと同じ淡いピンクにそろえた（2026-10-17） */
+#tab-quiz.recall-due .tabb-name { color: var(--due-n); }
+[data-theme="light"] #tab-quiz.recall-due { --due-c: #2f8a5b; --due-n: #2f8a5b; } /* ＋の緑だと、ふだんの濃い字と見分けにくいので少し明るく */
+[data-theme="dark"] #tab-quiz.recall-due { --due-c: #D9B876; --due-n: #D9B876; }
+/* 色が変わっただけでは気づかない（2026-10-22 Yukiさん）→ その時間を過ぎて開いたら、知らせの色とふだんの色を 10 回交互に */
+@keyframes recallBlink { 0%, 100% { color: var(--due-c); } 50% { color: var(--text); } }
+@keyframes recallBlinkName { 0%, 100% { color: var(--due-n); } 50% { color: var(--text); } }
+#tab-quiz.recall-due.recall-blink { animation: recallBlink .9s ease-in-out 10; }
+#tab-quiz.recall-due.recall-blink .tabb-name { animation: recallBlinkName .9s ease-in-out 10; }
 /* 下タブ中央の「一瞬」ボタン：ここだけテーマ色で、堂々と浮かせる */
 .tab-quick {
   flex: 0 0 auto; width: 76px;
@@ -4871,6 +4877,16 @@ function updateRecallNudge() {
   const due = (h >= RECALL_NUDGE_HOUR || isLateNight()) && store.get("mn_recall_seen", "") !== todayStr();
   tab.classList.toggle("recall-due", due);
 }
+// 知らせの色になっているとき、アプリを開いたら 10 回点滅させる（2026-10-22 Yukiさん「色が変わっただけでは気づかない」）
+function blinkRecallNudge() {
+  const tab = document.getElementById("tab-quiz");
+  if (!tab || !tab.classList.contains("recall-due")) return;
+  tab.classList.remove("recall-blink");
+  void tab.offsetWidth; // 付け直して、もう一度はじめから点滅させる
+  tab.classList.add("recall-blink");
+  const done = e => { if (e.target === tab) { tab.classList.remove("recall-blink"); tab.removeEventListener("animationend", done); } };
+  tab.addEventListener("animationend", done);
+}
 // おやすみ通知の時刻（各自の設定）を過ぎて、今夜まだ「おやすみ」を開いていなければ、
 // ホームの「おやすみ」を＋ボタンの色にする（2026-10-17 Yukiさん）。通知をオフにしている人には出さない。
 // 夜中0〜3時は前の日の続き。ライトは＋もホームも緑なので、月の金色で目立たせる（CSS）
@@ -4887,7 +4903,7 @@ function updateSleepNudge() {
   b.classList.toggle("sleep-due", due);
 }
 setInterval(() => { updateRecallNudge(); updateSleepNudge(); }, 60 * 1000);
-document.addEventListener("visibilitychange", () => { if (!document.hidden) { updateRecallNudge(); updateSleepNudge(); } });
+document.addEventListener("visibilitychange", () => { if (!document.hidden) { updateRecallNudge(); updateSleepNudge(); blinkRecallNudge(); } });
 function startRecall() {
   store.set("mn_recall_seen", todayStr());
   updateRecallNudge();
@@ -9211,6 +9227,7 @@ function init() {
   wireKeyboardInset();
   syncQuickMemoNotify(); // すぐ書けるメモ通知（アプリ版のみ。通知から書かれた分も取り込む）
   updateRecallNudge();   // 夜8時を過ぎて「思い出す」をまだ開いていなければ、タブに色をつける
+  setTimeout(blinkRecallNudge, 600); // 開いたときに点滅（画面が出そろってから）
   if (!profile) {
     showScreen("screen-onboarding");
     appStarted = true;
