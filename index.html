@@ -3276,8 +3276,8 @@ html[data-theme="light"] .balloon-pos:has(.balloon-k-sleep.sleep-due)::before { 
     <div id="cal-intro-pop" hidden>
       <div class="alert-card cal-intro">
         <div class="cal-intro-title" data-t>予定を思い出す</div>
-        <p class="alert-msg cal-intro-msg"><span data-t>スマホのカレンダーと同期すると、指定の日時に</span><b data-t>「予定は何か思い出せますか？」</b><span data-t>とお知らせが届きます。</span></p>
-        <p class="cal-intro-note" data-t>予定の名前はお知らせに出ません。カレンダーは読むだけで、スマホの外には送りません。日時や回数は、設定で変えられます。</p>
+        <p class="alert-msg cal-intro-msg"><span data-t>スマホのカレンダーと同期すると、指定の日時に</span><b data-t>「予定は何か思い出せますか？」</b><span data-t>と通知が届きます。</span></p>
+        <p class="cal-intro-note" data-t>予定の内容は通知に出ません。カレンダーは読むだけで、スマホの外には送りません。日時や回数は、設定で変えられます。</p>
         <button type="button" class="btn btn-primary btn-xl" id="cal-intro-yes" data-t>同期する</button>
         <button type="button" class="btn btn-secondary btn-xl" id="cal-intro-no" data-t>今はしない</button>
       </div>
@@ -7781,7 +7781,7 @@ function wireIap() {
 // ※残りの【　】2か所（お問い合わせ先メールアドレス・管轄裁判所名）だけ、公開前に埋めること。
 // ※中身を変えたら「最終改定日」も直すこと。内容は実装と一致させること（嘘を書かない）。
 const LEGAL_BLANK_NOTE = `<p class="legal-note">【　】の部分は、公開までに正式な内容を入れます。</p>`;
-const LEGAL_UPDATED = "2026年10月21日"; // 10/21：5章にカレンダー（予定を思い出す）を足した
+const LEGAL_UPDATED = "2026年10月24日"; // 10/21：5章にカレンダー（予定を思い出す）を足した。10/24：5章の「お知らせ」を「通知」に
 const LEGAL_TEXTS = {
   privacy: {
     title: "プライバシーポリシー",
@@ -7803,7 +7803,7 @@ const LEGAL_TEXTS = {
 
       <h3>5. 通知とカレンダーについて</h3>
       <p>おやすみのお知らせなどの通知は、端末の中だけで動きます。通知の内容が外部へ送られることはありません。設定でいつでもオフにできます。</p>
-      <p>「予定を思い出す」は、<b>お客さまが許可した場合にだけ</b>、端末のカレンダーの予定（日時・題名・場所）を読み取り、お知らせの予約と、答えを表示する画面に使います。<b>予定を書き換えることはなく、本アプリの中に保存することも、外部へ送ることもありません。</b>お知らせには予定の題名を出しません。許可は端末の設定で、お知らせは本アプリの設定で、いつでもやめられます。</p>
+      <p>「予定を思い出す」は、<b>お客さまが許可した場合にだけ</b>、端末のカレンダーの予定（日時・題名・場所）を読み取り、通知の予約と、答えを表示する画面に使います。<b>予定を書き換えることはなく、本アプリの中に保存することも、外部へ送ることもありません。</b>通知には予定の内容を出しません。許可は端末の設定で、通知は本アプリの設定で、いつでもやめられます。</p>
 
       <h3>6. バックアップと引き継ぎについて</h3>
       <p>端末の設定にしたがって、記録が iCloud（iPhone）または Google（Android）へ自動でバックアップされることがあります。これはお客さまご自身のアカウントの中で守られる仕組みで、当社は中身を読めません。</p>
@@ -8175,8 +8175,8 @@ function calHelpHtml() {
   ];
   // 設定の説明が多すぎるので、細かい決まりも押すと開く中へ（2026-10-24 Yukiさん）
   return `<details class="cal-help set-more"><summary><span class="nowrap">${t("くわしく・")}</span><span class="nowrap">${t("予定が出てこないときは")}</span></summary>
-    <p class="settings-hint" style="margin-top:10px;">${t("新しく足した予定は、このアプリを開いたときにお知らせに入ります。")}</p>
-    <p class="settings-hint">${t("毎週くり返す予定はお知らせしません。")}</p>
+    <p class="settings-hint" style="margin-top:10px;">${t("新しく足した予定は、このアプリを開いたときに通知に入ります。")}</p>
+    <p class="settings-hint">${t("毎週くり返す予定は通知しません。")}</p>
     <div class="set-more-sub">${t("予定が出てこないときは")}</div>
     <ol>${steps.map(x => `<li>${x}</li>`).join("")}</ol>
     <p class="settings-hint">${t("TimeTree など、予定を自分のところだけにしまうアプリの予定は読めません。")}</p></details>`;
@@ -8191,7 +8191,7 @@ async function renderCalCard() {
   const cals = c.on && permitted ? await calCalendars() : [];
   const dayOpts = sel => CAL_DAY_CHOICES.map(d => `<option value="${d}"${d === sel ? " selected" : ""}>${d === 0 ? t("当日") : d === 7 ? t("1週間前") : t("{n}日前", { n: d })}</option>`).join("");
   box.innerHTML = `
-    <p class="settings-hint" style="margin-top:0;">${t("スマホのカレンダーの予定を、前もって「予定は何か思い出せますか？」とお知らせします。予定の名前はお知らせに出ません")}</p>
+    <p class="settings-hint" style="margin-top:0;">${t("スマホのカレンダーの予定を、前もって「予定は何か思い出せますか？」と通知します。予定の内容は通知に出ません")}</p>
     <div class="seg-group" id="cal-onoff">
       <button class="seg${c.on ? " selected" : ""}" data-v="1">${t("オン")}</button>
       <button class="seg${c.on ? "" : " selected"}" data-v="0">${t("オフ")}</button>
@@ -8199,7 +8199,7 @@ async function renderCalCard() {
     ${c.on && !permitted ? `<p class="settings-hint cal-warn">${t("カレンダーを読む許可がありません。スマホの設定で「記憶のギフト」にカレンダーを許可してください")}</p>
     <button type="button" class="btn btn-secondary btn-xl" id="cal-ask">${t("カレンダーの許可を求める")}</button>` : ""}
     ${c.on && permitted ? `
-    <div class="cal-sub">${t("お知らせの回数")}</div>
+    <div class="cal-sub">${t("通知の回数")}</div>
     <div class="seg-group" id="cal-count">
       <button class="seg${c.count === 1 ? " selected" : ""}" data-v="1">${t("1回")}</button>
       <button class="seg${c.count === 2 ? " selected" : ""}" data-v="2">${t("2回")}</button>
