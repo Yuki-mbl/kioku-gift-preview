@@ -2878,6 +2878,13 @@ html[data-theme="light"] .balloon-pos:has(.balloon-k-sleep.sleep-due)::before { 
 [data-theme="dark"] .cal-help summary { color: var(--brass-strong-ed); }
 .cal-help ol { margin: 10px 0 4px; padding-left: 1.4em; line-height: 1.7; }
 .cal-help li { margin-bottom: 6px; }
+/* 設定の「押すと開く」説明（2026-10-24 Yukiさん「設定の説明が多すぎる」）。予定を思い出すの案内と同じ見た目 */
+.set-more { margin-top: 14px; border: 1.5px solid var(--border); border-radius: 14px; background: var(--card); padding: 12px 14px; }
+.set-more summary { font-weight: 800; cursor: pointer; color: var(--accent-strong); }
+[data-theme="dark"] .set-more summary { color: var(--brass-strong-ed); }
+.set-more ol { margin: 10px 0 4px; padding-left: 1.4em; line-height: 1.7; }
+.set-more li { margin-bottom: 6px; }
+.set-more-sub { font-weight: 800; margin-top: 12px; }
 </style>
 <div id="app">
 
@@ -3172,12 +3179,25 @@ html[data-theme="light"] .balloon-pos:has(.balloon-k-sleep.sleep-due)::before { 
         <div class="card">
           <div class="settings-label" data-t>データの引き継ぎ</div>
           <p class="about-one" style="font-size:1.05rem;" data-t>🔒 記録は自動で守られます</p>
-          <p class="settings-hint" style="margin-top:8px;" data-t>機種変更しても、新しいスマホを同じ設定（iPhoneはApple ID、AndroidはGoogleアカウント）で引き継げば、記録もそのまま戻ります。ふだんは何もしなくて大丈夫です。</p>
+          <details class="set-more"><summary data-t>くわしく</summary>
+          <p class="settings-hint" style="margin-top:10px;" data-t>機種変更しても、新しいスマホを同じ設定（iPhoneはApple ID、AndroidはGoogleアカウント）で引き継げば、記録もそのまま戻ります。ふだんは何もしなくて大丈夫です。</p>
           <p class="settings-hint" id="backup-photo-note" hidden style="margin-top:8px;"><span class="nowrap" data-t>写真は、新しいものから</span><span class="nowrap" data-t>約300枚まで戻ります。</span><span class="nowrap" data-t>全部の写真を移したいときは、</span><span class="nowrap" data-t>下の「新しいスマホへ送る」でも</span><span class="nowrap" data-t>移せます。</span></p>
+          <p class="settings-hint" style="margin-top:8px;"><span class="nowrap" data-t>新しいスマホにも</span><span class="nowrap" data-t>記録があるときは、</span><span class="nowrap" data-t>両方の記録が</span><span class="nowrap" data-t>合わさります。</span><span class="nowrap" data-t>どちらの記録も</span><span class="nowrap" data-t>消えません。</span></p>
+          </details>
           <p class="settings-hint" style="margin-top:16px;"><span class="nowrap" data-t>iPhoneと</span><span class="nowrap" data-t>Androidのあいだで</span><span class="nowrap" data-t>移すときや、</span><span class="nowrap" data-t>自動で</span><span class="nowrap" data-t>戻らなかったときは</span><span class="nowrap" data-t>こちら↓</span></p>
           <button type="button" class="btn btn-secondary btn-xl" id="transfer-make" style="margin-top:8px;" data-t>新しいスマホへ送る</button>
           <button type="button" class="btn btn-secondary btn-xl" id="transfer-take" style="margin-top:10px;" data-t>前のスマホから受け取る</button>
-          <p class="settings-hint" style="margin-top:12px;"><span class="nowrap" data-t>新しいスマホにも</span><span class="nowrap" data-t>記録があるときは、</span><span class="nowrap" data-t>両方の記録が</span><span class="nowrap" data-t>合わさります。</span><span class="nowrap" data-t>どちらの記録も</span><span class="nowrap" data-t>消えません。</span></p>
+        </div>
+        <!-- 話して書くときのコツ（2026-10-24 Yukiさん：マイクの案内は最初の10回しか出ないので、いつでも見返せるように。押すと開く） -->
+        <div class="card">
+          <div class="settings-label" data-t>使い方のコツ</div>
+          <details class="set-more" style="margin-top:4px;"><summary data-t>話して書くときのコツ</summary>
+            <ol>
+              <li data-t>欄の横のマイクを押して、そのまま話します。</li>
+              <li data-t>話し終わりに「保存」と言うと、そのまま保存されます。食事の画面では、保存したあとも画面にとどまるので、続けて次の食事を話せます。</li>
+              <li data-t>10秒だまっていると、マイクは自然に止まります。</li>
+            </ol>
+          </details>
         </div>
         <div class="card">
           <div class="settings-label" data-t>このアプリについて</div>
@@ -8149,7 +8169,11 @@ function calHelpHtml() {
     t("出ていれば、記憶のギフトでも読めます。上の「使うカレンダー」に、その予定のカレンダーのチェックが入っているか確かめてください。"),
     t("出ていなければ、お使いのカレンダーのアプリの設定に「スマホのカレンダーと同期」のような項目がないか見て、オンにしてください。"),
   ];
-  return `<details class="cal-help"><summary>${t("予定が出てこないときは")}</summary>
+  // 設定の説明が多すぎるので、細かい決まりも押すと開く中へ（2026-10-24 Yukiさん）
+  return `<details class="cal-help set-more"><summary><span class="nowrap">${t("くわしく・")}</span><span class="nowrap">${t("予定が出てこないときは")}</span></summary>
+    <p class="settings-hint" style="margin-top:10px;">${t("新しく足した予定は、このアプリを開いたときにお知らせに入ります。")}</p>
+    <p class="settings-hint">${t("毎週くり返す予定はお知らせしません。")}</p>
+    <div class="set-more-sub">${t("予定が出てこないときは")}</div>
     <ol>${steps.map(x => `<li>${x}</li>`).join("")}</ol>
     <p class="settings-hint">${t("TimeTree など、予定を自分のところだけにしまうアプリの予定は読めません。")}</p></details>`;
 }
@@ -8186,8 +8210,6 @@ async function renderCalCard() {
     <div class="cal-list">${cals.length ? cals.map(x => `
       <label class="cal-check"><input type="checkbox" data-id="${esc(x.id)}"${calIsOff(c, x) ? "" : " checked"}><span>${esc(x.name || t("カレンダー"))}${x.account && x.account !== x.name ? `<small>${esc(x.account)}</small>` : ""}</span></label>`).join("")
       : `<p class="settings-hint">${t("カレンダーが見つかりませんでした")}</p>`}</div>
-    <p class="settings-hint">${t("新しく足した予定は、このアプリを開いたときにお知らせに入ります。")}</p>
-    <p class="settings-hint">${t("毎週くり返す予定はお知らせしません。")}</p>
     ${calHelpHtml()}` : ""}`;
   box.querySelectorAll("#cal-onoff .seg").forEach(b => b.addEventListener("click", async () => {
     if (b.dataset.v === "1") { await calTurnOn(); }
