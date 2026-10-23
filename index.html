@@ -2865,6 +2865,11 @@ html[data-theme="light"] .balloon-pos:has(.balloon-k-sleep.sleep-due)::before { 
   width: 56px; height: 56px; border-radius: 50%; background: var(--danger, #c85a4b); color: #fff;
   font-size: 1.6rem; font-weight: 800; touch-action: none; cursor: grab; box-shadow: 0 2px 8px rgba(0,0,0,.25);
 }
+.cal-help { margin-top: 14px; border: 1.5px solid var(--border); border-radius: 14px; background: var(--card); padding: 12px 14px; }
+.cal-help summary { font-weight: 800; cursor: pointer; color: var(--accent-strong); }
+[data-theme="dark"] .cal-help summary { color: var(--brass-strong-ed); }
+.cal-help ol { margin: 10px 0 4px; padding-left: 1.4em; line-height: 1.7; }
+.cal-help li { margin-bottom: 6px; }
 </style>
 <div id="app">
 
@@ -8121,6 +8126,25 @@ async function openCalRecall(dateKey) {
   showScreen("screen-calq");
 }
 
+// 「予定が出てこないときは」（2026-10-23 Yukiさん「こういう情報をユーザーに教えてあげたい」）。
+// 読めるのはスマホ本体の予定の置き場だけなので、まず本体のカレンダーに出ているかを見てもらう。iPhone と Android で書き分ける
+function calHelpHtml() {
+  const ios = !!(window.Capacitor && window.Capacitor.getPlatform && window.Capacitor.getPlatform() === "ios");
+  const steps = ios ? [
+    t("iPhoneに最初から入っている「カレンダー」アプリを開いて、その予定が出ているか見てください。"),
+    t("出ていれば、記憶のギフトでも読めます。上の「使うカレンダー」に、その予定のカレンダーのチェックが入っているか確かめてください。"),
+    t("出ていなければ、お使いのカレンダーのアプリの設定に「iPhoneのカレンダーと同期」のような項目がないか見て、オンにしてください。"),
+    t("Googleカレンダーを使っている方は、iPhoneの「設定」→「カレンダー」→「カレンダーアカウント」でGoogleのアカウントを足すと読めます。"),
+  ] : [
+    t("スマホのカレンダー（Googleカレンダーや、スマホに最初から入っているカレンダー）を開いて、その予定が出ているか見てください。"),
+    t("出ていれば、記憶のギフトでも読めます。上の「使うカレンダー」に、その予定のカレンダーのチェックが入っているか確かめてください。"),
+    t("出ていなければ、お使いのカレンダーのアプリの設定に「スマホのカレンダーと同期」のような項目がないか見て、オンにしてください。"),
+  ];
+  return `<details class="cal-help"><summary>${t("予定が出てこないときは")}</summary>
+    <ol>${steps.map(x => `<li>${x}</li>`).join("")}</ol>
+    <p class="settings-hint">${t("TimeTree など、予定を自分のところだけにしまうアプリの予定は読めません。")}</p></details>`;
+}
+
 // ---------- 設定のカード ----------
 async function renderCalCard() {
   const box = document.getElementById("cal-card-body");
@@ -8154,7 +8178,8 @@ async function renderCalCard() {
       <label class="cal-check"><input type="checkbox" data-id="${esc(x.id)}"${calIsOff(c, x) ? "" : " checked"}><span>${esc(x.name || t("カレンダー"))}${x.account && x.account !== x.name ? `<small>${esc(x.account)}</small>` : ""}</span></label>`).join("")
       : `<p class="settings-hint">${t("カレンダーが見つかりませんでした")}</p>`}</div>
     <p class="settings-hint">${t("新しく足した予定は、このアプリを開いたときにお知らせに入ります。")}</p>
-    <p class="settings-hint">${t("出てこない予定があるときは、お使いのカレンダーのアプリを、スマホ本体のカレンダーと同期させてください（TimeTree など、一部のアプリの予定は読めません）。毎週くり返す予定はお知らせしません。")}</p>` : ""}`;
+    <p class="settings-hint">${t("毎週くり返す予定はお知らせしません。")}</p>
+    ${calHelpHtml()}` : ""}`;
   box.querySelectorAll("#cal-onoff .seg").forEach(b => b.addEventListener("click", async () => {
     if (b.dataset.v === "1") { await calTurnOn(); }
     else { const x = loadCal(); x.on = false; x.asked = true; saveCal(x); scheduleCalNotify(); }
