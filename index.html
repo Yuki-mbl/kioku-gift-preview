@@ -8545,6 +8545,14 @@ function voiceSave(btn) {
   const saveBtnId = btn.dataset.voiceSave;
   if (!saveBtnId) return;
   const hs = micHintState(); hs.saves++; store.set("mn_mic_hint", hs); // 「保存」と言えた回数（案内を出すかどうかに使う）
+  // 食事の欄（朝・昼・晩・間食・いちばんの1つ・外食）で「保存」と言ったときは、書いた分を残して**この画面にとどまる**
+  // （2026-10-24 Yukiさん「マイクで記録して保存と言うと、ホームに戻ってしまう」。朝を言ったあと昼も続けて話したいため）。
+  // 指で「保存」を押したときは今までどおり（書き終わり＝ホームへ）
+  if (saveBtnId === "flow-skip" && /^(meal-|eo-)/.test(btn.dataset.mic || "")) {
+    saveFlowDraftIfAny();
+    toastMemo(t("保存しました"));
+    return;
+  }
   const cont = saveBtnId === "memo-save";
   const before = cont ? loadMemos().length : 0;
   if (cont) voiceSavedRecent = { text: (document.getElementById("memo-input")?.value || "").trim(), at: Date.now() };
