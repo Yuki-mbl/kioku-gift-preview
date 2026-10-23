@@ -2885,6 +2885,7 @@ html[data-theme="light"] .balloon-pos:has(.balloon-k-sleep.sleep-due)::before { 
 .set-more ol { margin: 10px 0 4px; padding-left: 1.4em; line-height: 1.7; }
 .set-more li { margin-bottom: 6px; }
 .set-more-sub { font-weight: 800; margin-top: 12px; }
+.set-divider { border-top: 1.5px dashed var(--border); margin: 20px 0 16px; }
 </style>
 <div id="app">
 
@@ -3181,13 +3182,15 @@ html[data-theme="light"] .balloon-pos:has(.balloon-k-sleep.sleep-due)::before { 
           <!-- 「自動で守られる」のは iPhone同士・Android同士の機種変更だと前に出す（2026-10-24 Yukiさん：ほとんどの人はこちら） -->
           <p class="about-one" style="font-size:1.05rem;"><span class="nowrap" data-t>🔒 iPhone同士・Android同士の</span><span class="nowrap" data-t>機種変更なら、</span><span class="nowrap" data-t>記録は自動で引き継がれます</span></p>
           <p class="settings-hint" style="margin-top:8px;" data-t>新しいスマホを、前と同じApple ID（iPhone）・Googleアカウント（Android）で始めるだけです。ふだんは何もしなくて大丈夫です。</p>
+          <!-- ここから下は、iPhoneとAndroidのあいだで移す人などだけ。ボタンが目立つと皆が押してしまうので、点線で区切って「くわしく」の中へ（2026-10-24 Yukiさん） -->
+          <div class="set-divider"></div>
+          <p class="settings-hint" style="margin-top:0;"><span class="nowrap" data-t>iPhoneと</span><span class="nowrap" data-t>Androidのあいだで</span><span class="nowrap" data-t>移すときや、</span><span class="nowrap" data-t>自動で</span><span class="nowrap" data-t>戻らなかったときは</span><span class="nowrap" data-t>こちら↓</span></p>
           <details class="set-more"><summary data-t>くわしく</summary>
-          <p class="settings-hint" id="backup-photo-note" hidden style="margin-top:10px;"><span class="nowrap" data-t>写真は、新しいものから</span><span class="nowrap" data-t>約300枚まで戻ります。</span><span class="nowrap" data-t>全部の写真を移したいときは、</span><span class="nowrap" data-t>下の「新しいスマホへ送る」でも</span><span class="nowrap" data-t>移せます。</span></p>
-          <p class="settings-hint" style="margin-top:8px;"><span class="nowrap" data-t>新しいスマホにも</span><span class="nowrap" data-t>記録があるときは、</span><span class="nowrap" data-t>両方の記録が</span><span class="nowrap" data-t>合わさります。</span><span class="nowrap" data-t>どちらの記録も</span><span class="nowrap" data-t>消えません。</span></p>
-          </details>
-          <p class="settings-hint" style="margin-top:16px;"><span class="nowrap" data-t>iPhoneと</span><span class="nowrap" data-t>Androidのあいだで</span><span class="nowrap" data-t>移すときや、</span><span class="nowrap" data-t>自動で</span><span class="nowrap" data-t>戻らなかったときは</span><span class="nowrap" data-t>こちら↓</span></p>
-          <button type="button" class="btn btn-secondary btn-xl" id="transfer-make" style="margin-top:8px;" data-t>新しいスマホへ送る</button>
+          <button type="button" class="btn btn-secondary btn-xl" id="transfer-make" style="margin-top:12px;" data-t>新しいスマホへ送る</button>
           <button type="button" class="btn btn-secondary btn-xl" id="transfer-take" style="margin-top:10px;" data-t>前のスマホから受け取る</button>
+          <p class="settings-hint" id="backup-photo-note" hidden style="margin-top:12px;"><span class="nowrap" data-t>写真は、新しいものから</span><span class="nowrap" data-t>約300枚まで戻ります。</span><span class="nowrap" data-t>全部の写真を移したいときは、</span><span class="nowrap" data-t>下の「新しいスマホへ送る」でも</span><span class="nowrap" data-t>移せます。</span></p>
+          <p class="settings-hint" style="margin-top:12px;"><span class="nowrap" data-t>新しいスマホにも</span><span class="nowrap" data-t>記録があるときは、</span><span class="nowrap" data-t>両方の記録が</span><span class="nowrap" data-t>合わさります。</span><span class="nowrap" data-t>どちらの記録も</span><span class="nowrap" data-t>消えません。</span></p>
+          </details>
         </div>
         <!-- 話して書くときのコツ（2026-10-24 Yukiさん：マイクの案内は最初の10回しか出ないので、いつでも見返せるように。押すと開く） -->
         <div class="card">
