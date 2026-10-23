@@ -8135,7 +8135,8 @@ async function renderCalCard() {
       <button class="seg${c.on ? " selected" : ""}" data-v="1">${t("オン")}</button>
       <button class="seg${c.on ? "" : " selected"}" data-v="0">${t("オフ")}</button>
     </div>
-    ${c.on && !permitted ? `<p class="settings-hint cal-warn">${t("カレンダーを読む許可がありません。スマホの設定で「記憶のギフト」にカレンダーを許可してください")}</p>` : ""}
+    ${c.on && !permitted ? `<p class="settings-hint cal-warn">${t("カレンダーを読む許可がありません。スマホの設定で「記憶のギフト」にカレンダーを許可してください")}</p>
+    <button type="button" class="btn btn-secondary btn-xl" id="cal-ask">${t("カレンダーの許可を求める")}</button>` : ""}
     ${c.on && permitted ? `
     <div class="cal-sub">${t("お知らせの回数")}</div>
     <div class="seg-group" id="cal-count">
@@ -8159,6 +8160,8 @@ async function renderCalCard() {
     else { const x = loadCal(); x.on = false; x.asked = true; saveCal(x); scheduleCalNotify(); }
     renderCalCard();
   }));
+  const ask = document.getElementById("cal-ask");
+  if (ask) ask.addEventListener("click", async () => { await calTurnOn(); renderCalCard(); });
   box.querySelectorAll("#cal-count .seg").forEach(b => b.addEventListener("click", () => {
     const x = loadCal(); x.count = +b.dataset.v; saveCal(x); scheduleCalNotify(); renderCalCard();
   }));
@@ -8176,6 +8179,16 @@ async function renderCalCard() {
     box.querySelectorAll(".cal-check input").forEach(k => { if (k.checked) off.delete(k.dataset.id); else off.add(k.dataset.id); });
     x.off = [...off]; saveCal(x); scheduleCalNotify();
   }));
+}
+
+// 「同期する」を選んだのにカレンダーの許可がまだの人に、開いたとき一度だけ許可を求める（2026-10-23）。
+// カレンダーの部品が入る前の版で「同期する」を押した iPhone は、許可をもらえないまま「オン」になっていた。
+// すでに断った人には OS が画面を出さないので、何度呼んでもうるさくならない
+async function calEnsurePermission() {
+  const c = loadCal(), P = calPlugin();
+  if (!c.on || !P || await calPermitted()) return;
+  try { await P.requestPermission(); } catch (e) {}
+  scheduleCalNotify();
 }
 
 // ---------- 初めに聞く（新しく入れた人は初回の設定のあと、前から使っている人は次に開いたとき1回だけ） ----------
@@ -8867,6 +8880,7 @@ function wireEvents() {
   document.getElementById("calq-back").addEventListener("click", goHome); // 予定を思い出す（通知から開く1層だけの画面）
   scheduleGratNotify(); // 起動時に通知を予約（設定オンなら。アプリ版は30日ぶんOSに予約し直す）
   scheduleCalNotify();  // 予定を思い出す：開くたびに先の分を予約し直す（2026-10-21）
+  setTimeout(calEnsurePermission, 1500); // 「同期する」なのに許可がまだなら、ここで求める（2026-10-23）
   // アプリ版：通知をタップしたら、おやすみの記憶画面（予定を思い出すの通知なら、その日の問いかけ）を開く
   const SLN0 = nativeLocalNotify();
   if (SLN0) { try { SLN0.addListener("localNotificationActionPerformed", ev => {
