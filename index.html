@@ -5305,8 +5305,9 @@ function buildQuizQuestions() {
   return questions;
 }
 
-// 「もっと思い出す」：過去の記録から出題。浸りすぎないよう1日1回・10問まで
-const MORE_RECALL_MAX = 10;
+// 「もっと思い出す」：過去の記録から出題。浸りすぎないよう1日1回・20問まで
+// （2026-10-23 Yukiさん 10→20：時間がある人もいるので、もう少し探して見せてあげたい）
+const MORE_RECALL_MAX = 20;
 function moreRecallUsed() {
   const o = store.get("mn_recall_more", {});
   return o.date === todayStr() ? (o.n || 0) : 0;
@@ -5314,7 +5315,7 @@ function moreRecallUsed() {
 function noteMoreRecall() {
   store.set("mn_recall_more", { date: todayStr(), n: moreRecallUsed() + 1, done: moreRecallDoneToday() });
 }
-// 浸りすぎ防止：「もっと思い出す」は1日1回だけ挑戦できる（その1回で最大10問）
+// 浸りすぎ防止：「もっと思い出す」は1日1回だけ挑戦できる（その1回で最大 MORE_RECALL_MAX 問）
 function moreRecallDoneToday() {
   const o = store.get("mn_recall_more", {});
   return o.date === todayStr() && !!o.done;
@@ -5484,12 +5485,12 @@ function renderQuizStep(content) {
       const moreLeft = MORE_RECALL_MAX - moreRecallUsed();
       const canMore = isLast && flow.recallOnly && !moreRecallDoneToday();
       const morePool = canMore ? buildDeepQuestions(questions.map(x => x.key), moreLeft) : [];
-      // 今日の10問を使い切った人には、ボタンのかわりにひとこと
+      // 今日のぶん（MORE_RECALL_MAX 問）を使い切った人には、ボタンのかわりにひとこと
       const moreHtml = morePool.length
         ? `<div class="quiz-judge">
             <button class="btn btn-secondary btn-xl" id="quiz-more">${t("もっと思い出す")}<span class="btn-ico btn-ico-r">${balloonIconSvg("sprout")}</span></button>
           </div>
-          ${morePool.capped ? `<p class="quiz-more-note">${t("1日10問までです")}</p>` : ""}`
+          ${morePool.capped ? `<p class="quiz-more-note">${t("1日{n}問までです", { n: MORE_RECALL_MAX })}</p>` : ""}`
         : (isLast && flow.recallOnly && (moreRecallDoneToday() || moreLeft <= 0)
             ? `<p class="quiz-more-note">${t("「もっと思い出す」は1日1回です。また明日。")}</p>` : "");
       content.querySelector(".quiz-actions").outerHTML = isLast
@@ -5546,7 +5547,7 @@ function renderQuizStep(content) {
     function renderDeepQ() {
       const q = pool[di];
       const isLastD = di === pool.length - 1;
-      noteMoreRecall(); // 1日10問の数に入れる
+      noteMoreRecall(); // 1日の上限（MORE_RECALL_MAX）の数に入れる
       content.scrollTop = 0; // いちばん上から見せる
       content.innerHTML = `
         <div class="step-title">${t("思い出す")}</div>
@@ -5584,7 +5585,7 @@ function renderQuizStep(content) {
         <div class="quiz-empty">
           <div class="big big-ico">${balloonIconSvg("sprout")}</div>
           ${pool.capped
-            ? `${t("1日10問までです。")}<br>${t("また明日、思い出しに来てください。")}`
+            ? `${t("1日{n}問までです。", { n: MORE_RECALL_MAX })}<br>${t("また明日、思い出しに来てください。")}`
             : `${t("全部思い出しました。")}<br>${t("記録のある日は、すべて振り返りました。")}`}
         </div>
         <button class="btn btn-primary btn-xl" id="quiz-home">${t("ホームへ")}</button>`;
