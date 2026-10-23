@@ -2715,11 +2715,19 @@ body:has(#memo-pop:not([hidden])) .memo-toast { top: calc(14px + env(safe-area-i
   display: block; width: 100%; margin-top: 12px;
   text-align: center; text-decoration: none;
 }
+/* 押せると分かる形に（2026-10-23 Yukiさん「下線の言葉だけだと押す所と分からない・冷たい」）：枠のある横長のボタン＋右の › */
 .siri-manual-toggle {
-  display: block; margin: 14px auto 0; padding: 6px 2px;
-  background: none; border: none; color: var(--muted);
-  font-size: .95rem; text-decoration: underline; cursor: pointer;
+  display: flex; align-items: center; justify-content: space-between; gap: 10px;
+  width: 100%; margin: 16px 0 0; padding: 14px 16px;
+  font-family: inherit; font-size: 1rem; font-weight: 700; text-align: left;
+  color: var(--accent-strong); background: var(--card);
+  border: 1.5px solid var(--border); border-radius: 14px; cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
 }
+.siri-manual-toggle:active { background: var(--accent-soft); }
+[data-theme="dark"] .siri-manual-toggle { color: var(--brass-strong-ed); }
+.siri-manual-chev { font-size: 1.5rem; line-height: 1; transition: transform .2s ease; }
+.siri-manual-toggle[aria-expanded="true"] .siri-manual-chev { transform: rotate(90deg); }
 .siri-url {
   display: inline-block; margin-top: 4px; padding: 6px 10px;
   background: var(--accent-soft); border-radius: 8px;
@@ -3136,7 +3144,7 @@ html[data-theme="light"] .balloon-pos:has(.balloon-k-sleep.sleep-due)::before { 
               <li data-t>「ショートカットを追加」を押す</li>
               <li data-t>これで完了。「ヘイ Siri、ひらめき」で使えます</li>
             </ol>
-            <button type="button" class="siri-manual-toggle" id="siri-manual-toggle"><span class="nowrap" data-t>うまくいかないときは、</span><span class="nowrap" data-t>自分で作る</span></button>
+            <button type="button" class="siri-manual-toggle" id="siri-manual-toggle" aria-expanded="false"><span class="siri-manual-text"><span class="nowrap" data-t>うまくいかないときは、</span><span class="nowrap" data-t>自分で作る手順を見る</span></span><span class="siri-manual-chev" aria-hidden="true">›</span></button>
           </div>
           <ol class="siri-steps" id="siri-manual">
             <li data-t>iPhoneの「ショートカット」アプリを開いて、右上の「＋」</li>
@@ -8938,7 +8946,7 @@ function wireEvents() {
   const siriManualToggle = document.getElementById("siri-manual-toggle");
   if (siriManualToggle) siriManualToggle.addEventListener("click", () => {
     const m = document.getElementById("siri-manual");
-    if (m) m.hidden = !m.hidden;
+    if (m) { m.hidden = !m.hidden; siriManualToggle.setAttribute("aria-expanded", String(!m.hidden)); }
   });
   document.querySelectorAll("#set-quickmemo .seg").forEach(b => b.addEventListener("click", () => {
     settings.quickMemoNotify = b.dataset.value === "1";
