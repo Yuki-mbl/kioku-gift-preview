@@ -3144,24 +3144,40 @@ html[data-theme="light"] .balloon-pos:has(.balloon-k-sleep.sleep-due)::before { 
         </div>
         <div class="card" id="siri-card" hidden>
           <div class="settings-label" data-t>声でメモを残す（Siri）</div>
-          <p class="settings-hint" style="margin-top:0;" data-t>「ヘイ Siri、ひらめき」と話しかけるだけで、思いついたことをこのアプリに残せます。はじめに一度だけ、用意してください。</p>
-          <div id="siri-easy" hidden>
-            <a class="btn btn-primary siri-get" id="siri-get" target="_blank" rel="noopener" data-t>ショートカットを受け取る</a>
-            <ol class="siri-steps">
-              <li data-t>上のボタンを押して、出てきた画面をいちばん下まで動かす</li>
-              <li data-t>「ショートカットを追加」を押す</li>
-              <li data-t>これで完了。「ヘイ Siri、ひらめき」で使えます</li>
-            </ol>
-            <button type="button" class="siri-manual-toggle" id="siri-manual-toggle" aria-expanded="false"><span class="siri-manual-text"><span class="nowrap" data-t>うまくいかないときは、</span><span class="nowrap" data-t>自分で作る手順を見る</span></span><span class="siri-manual-chev" aria-hidden="true">›</span></button>
+          <!-- iOS 16 以上：App Intents（2026-10-25）。ショートカットを入れなくても「ヘイSiri、ひらめき」で、ロックしたままでも残せる -->
+          <div id="siri-new">
+            <p class="settings-hint" style="margin-top:0;" data-t>「ヘイSiri、ひらめき」と話しかけると、Siriが「何を残しますか？」と聞きます。話した言葉が「一瞬のひらめき」に残ります。ロックしたままでも使えます。</p>
+            <details class="set-more"><summary data-t>くわしく</summary>
+              <ol>
+                <li data-t>初めて使うときだけ、「Siriでの“記憶のギフト”のショートカットをオンにしますか？」と出ます。「オンにする」を押してください。</li>
+                <li data-t>「ヘイSiri、記憶のギフト」でも同じように使えます。</li>
+                <li data-t>「〜にメモ」と言うと、iPhoneの「メモ」アプリに入ってしまいます。「メモ」は付けずに話しかけてください。</li>
+                <li data-t>残した言葉は、アプリを開くと「一瞬のひらめき」に並びます。</li>
+                <li data-t>前に「ひらめき」という名前のショートカットを入れた方は、ショートカットアプリから消してください（同じ名前が2つあると、Siriが前のほうを使います）。</li>
+              </ol>
+            </details>
           </div>
-          <ol class="siri-steps" id="siri-manual">
-            <li data-t>iPhoneの「ショートカット」アプリを開いて、右上の「＋」</li>
-            <li data-t>「アクションを追加」→ さがす欄に「音声入力」と入れて、<b>「テキストを音声入力」</b>を選ぶ</li>
-            <li data-t>もう一度「アクションを追加」→「URLエンコード」と入れて、<b>「テキストをURLエンコード」</b>を選ぶ</li>
-            <li data-t>もう一度「アクションを追加」→「URL」と入れて、<b>「URLを開く」</b>を選ぶ</li>
-            <li><span data-t>URLの欄に次を貼り付け、そのうしろに「エンコードされたテキスト」を差し込む</span><br><code class="siri-url">kiokugift://memo?text=</code></li>
-            <li data-t>上の名前を「ひらめき」にして完了。以降は「ヘイ Siri、ひらめき」で使えます</li>
-          </ol>
+          <!-- iOS 15：App Intents が使えないので、前からのショートカットを配る形のまま -->
+          <div id="siri-legacy" hidden>
+            <p class="settings-hint" style="margin-top:0;" data-t>「ヘイ Siri、ひらめき」と話しかけるだけで、思いついたことをこのアプリに残せます。はじめに一度だけ、用意してください。</p>
+            <div id="siri-easy" hidden>
+              <a class="btn btn-primary siri-get" id="siri-get" target="_blank" rel="noopener" data-t>ショートカットを受け取る</a>
+              <ol class="siri-steps">
+                <li data-t>上のボタンを押して、出てきた画面をいちばん下まで動かす</li>
+                <li data-t>「ショートカットを追加」を押す</li>
+                <li data-t>これで完了。「ヘイ Siri、ひらめき」で使えます</li>
+              </ol>
+              <button type="button" class="siri-manual-toggle" id="siri-manual-toggle" aria-expanded="false"><span class="siri-manual-text"><span class="nowrap" data-t>うまくいかないときは、</span><span class="nowrap" data-t>自分で作る手順を見る</span></span><span class="siri-manual-chev" aria-hidden="true">›</span></button>
+            </div>
+            <ol class="siri-steps" id="siri-manual">
+              <li data-t>iPhoneの「ショートカット」アプリを開いて、右上の「＋」</li>
+              <li data-t>「アクションを追加」→ さがす欄に「音声入力」と入れて、<b>「テキストを音声入力」</b>を選ぶ</li>
+              <li data-t>もう一度「アクションを追加」→「URLエンコード」と入れて、<b>「テキストをURLエンコード」</b>を選ぶ</li>
+              <li data-t>もう一度「アクションを追加」→「URL」と入れて、<b>「URLを開く」</b>を選ぶ</li>
+              <li><span data-t>URLの欄に次を貼り付け、そのうしろに「エンコードされたテキスト」を差し込む</span><br><code class="siri-url">kiokugift://memo?text=</code></li>
+              <li data-t>上の名前を「ひらめき」にして完了。以降は「ヘイ Siri、ひらめき」で使えます</li>
+            </ol>
+          </div>
         </div>
         <div class="card" id="iap-card" hidden><!-- 広告なしの間は出さない。ADS_ENABLED のときだけ renderIapCard() が出す（2026-10-17：設定を開く関数を通らない道で出てしまっていた） -->
           <div class="settings-label" data-t>広告を消す</div>
@@ -5929,6 +5945,12 @@ function renderSiriCard() {
   const siri = document.getElementById("siri-card");
   if (!siri) return;
   siri.hidden = !isIOSApp();
+  // iOS 16 以上は App Intents（ショートカット不要・ロックしたまま）。iOS 15 だけ前からのショートカットの案内（2026-10-25）
+  const m = navigator.userAgent.match(/OS (\d+)_/);
+  const iosMajor = m ? +m[1] : 99;
+  const nw = document.getElementById("siri-new"), legacy = document.getElementById("siri-legacy");
+  if (nw) nw.hidden = iosMajor < 16;
+  if (legacy) legacy.hidden = iosMajor >= 16;
   const easy = document.getElementById("siri-easy");
   const manual = document.getElementById("siri-manual");
   const link = document.getElementById("siri-get");
