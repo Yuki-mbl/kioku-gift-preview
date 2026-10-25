@@ -8221,15 +8221,17 @@ function calHelpHtml() {
     t("出ていなければ、お使いのカレンダーのアプリの設定に「スマホのカレンダーと同期」のような項目がないか見て、オンにしてください。"),
   ];
   // 設定の説明が多すぎるので、細かい決まりも押すと開く中へ（2026-10-24 Yukiさん）
-  return `<details class="cal-help set-more"><summary><span class="nowrap">${t("くわしく・")}</span><span class="nowrap">${t("予定が出てこないときは")}</span></summary>
-    <p class="settings-hint" style="margin-top:10px;">${t("新しく足した予定は、このアプリを開いたときに通知に入ります。")}</p>
+  return `
+    <p class="settings-hint" style="margin-top:14px;">${t("新しく足した予定は、このアプリを開いたときに通知に入ります。")}</p>
     <p class="settings-hint">${t("毎週くり返す予定は通知しません。")}</p>
     <div class="set-more-sub">${t("予定が出てこないときは")}</div>
     <ol>${steps.map(x => `<li>${x}</li>`).join("")}</ol>
-    <p class="settings-hint">${t("TimeTree など、予定を自分のところだけにしまうアプリの予定は読めません。")}</p></details>`;
+    <p class="settings-hint">${t("TimeTree など、予定を自分のところだけにしまうアプリの予定は読めません。")}</p>`;
 }
 
 // ---------- 設定のカード ----------
+// 説明とオン・オフ（と許可がないときの一言）だけ出して、時間などの設定と案内は「くわしく」の中へ（2026-10-25 Yukiさん「長い」）
+let calMoreOpen = false;
 async function renderCalCard() {
   const box = document.getElementById("cal-card-body");
   if (!box) return;
@@ -8238,7 +8240,7 @@ async function renderCalCard() {
   const cals = c.on && permitted ? await calCalendars() : [];
   const dayOpts = sel => CAL_DAY_CHOICES.map(d => `<option value="${d}"${d === sel ? " selected" : ""}>${d === 0 ? t("当日") : d === 7 ? t("1週間前") : t("{n}日前", { n: d })}</option>`).join("");
   box.innerHTML = `
-    <p class="settings-hint" style="margin-top:0;">${t("スマホのカレンダーの予定を、前もって「予定は何か思い出せますか？」と通知します。予定の内容は通知に出ません")}</p>
+    <p class="settings-hint" style="margin-top:0;">${t("スマホのカレンダーの予定を、前もって「予定は何か思い出せますか？」と通知します。予定の内容は通知に出ません。")}</p>
     <div class="seg-group" id="cal-onoff">
       <button class="seg${c.on ? " selected" : ""}" data-v="1">${t("オン")}</button>
       <button class="seg${c.on ? "" : " selected"}" data-v="0">${t("オフ")}</button>
@@ -8246,6 +8248,8 @@ async function renderCalCard() {
     ${c.on && !permitted ? `<p class="settings-hint cal-warn">${t("カレンダーを読む許可がありません。スマホの設定で「記憶のギフト」にカレンダーを許可してください")}</p>
     <button type="button" class="btn btn-secondary btn-xl" id="cal-ask">${t("カレンダーの許可を求める")}</button>` : ""}
     ${c.on && permitted ? `
+    <p class="settings-hint" style="margin-top:14px;">${t("時間等の設定はこちら↓")}</p>
+    <details class="set-more" id="cal-more" style="margin-top:6px;"${calMoreOpen ? " open" : ""}><summary>${t("くわしく")}</summary>
     <div class="cal-sub">${t("通知の回数")}</div>
     <div class="seg-group" id="cal-count">
       <button class="seg${c.count === 1 ? " selected" : ""}" data-v="1">${t("1回")}</button>
@@ -8261,7 +8265,10 @@ async function renderCalCard() {
     <div class="cal-list">${cals.length ? cals.map(x => `
       <label class="cal-check"><input type="checkbox" data-id="${esc(x.id)}"${calIsOff(c, x) ? "" : " checked"}><span>${esc(x.name || t("カレンダー"))}${x.account && x.account !== x.name ? `<small>${esc(x.account)}</small>` : ""}</span></label>`).join("")
       : `<p class="settings-hint">${t("カレンダーが見つかりませんでした")}</p>`}</div>
-    ${calHelpHtml()}` : ""}`;
+    ${calHelpHtml()}
+    </details>` : ""}`;
+  // 回数などを変えると描き直すので、開いたままにしておく
+  document.getElementById("cal-more")?.addEventListener("toggle", e => { calMoreOpen = e.target.open; });
   box.querySelectorAll("#cal-onoff .seg").forEach(b => b.addEventListener("click", async () => {
     if (b.dataset.v === "1") { await calTurnOn(); }
     else { const x = loadCal(); x.on = false; x.asked = true; saveCal(x); scheduleCalNotify(); }
