@@ -3951,6 +3951,16 @@ function swipeAnim(dir) {
 // 「ひとつ戻る」：画面の「← 戻る」と同じ行き先へ（来た道を戻る）。なぞりと Android の戻るボタンの両方で使う。
 // 戻れた／何かを閉じたら true。ホームなど、これ以上戻れないときは false（2026-10-17：前はなぞりが日記・
 // 書き足し・買い物などでいつもホームへ行き、Android の戻るボタンはどの画面でもアプリを閉じていた）
+// アルバムで写真をタップして大きくしているとき、「戻る」はホームへ行かず、写真を元の大きさに戻す
+// （2026-10-25 Yukiさん「また小さくしようとして戻るを押すとホームへ行ってしまう」）
+function unzoomAlbumPhoto() {
+  if (document.querySelector(".screen.active")?.id !== "screen-album") return false;
+  const z = document.querySelector("#album-wrap .album-photo.zoomed");
+  if (!z) return false;
+  z.classList.remove("zoomed");
+  if (albumView === "photo") fitAlbumPhoto(); else setTimeout(schedulePageFixed, 300);
+  return true;
+}
 function goBackOneStep() {
   // 上に開いているものを先に閉じる
   const alertPop = document.getElementById("alert-pop");
@@ -3959,6 +3969,7 @@ function goBackOneStep() {
   if (photoPop && !photoPop.hidden) { photoPop.hidden = true; return true; }
   const shopPop = document.getElementById("shop-pop");
   if (shopPop && !shopPop.hidden) { closeShopPop(); return true; }
+  if (unzoomAlbumPhoto()) return true; // アルバムの写真を大きくしているときは、まず元の大きさに（2026-10-25）
   const memoPop = document.getElementById("memo-pop");
   if (memoPop && !memoPop.hidden) {
     if (memoMove) { memoMove = memoMove.dest ? { i: memoMove.i } : null; renderMemoScreen(); } // 行き先えらびの途中は1つ前へ
@@ -8599,6 +8610,16 @@ function voiceSave(btn) {
     toastMemo(t("保存しました"));
     return;
   }
+  // 買い物の欄も同じ：「保存」と言っても「思い出しながら、お買い物」へ進まず、**書く画面にとどまる**
+  // （2026-10-25 Yukiさん「次に野菜や果物を書こうとして戻るを押すとホームへ行き、すごく大変」）。
+  // 進むのは右下の「保存して買い物へ」を指で押したときだけ
+  if (saveBtnId === "shop-hide") {
+    const o = loadShopping();
+    document.querySelectorAll("#screen-shopping textarea[data-key]").forEach(ta => { o[ta.dataset.key] = ta.value.trim(); });
+    saveShopping(o);
+    toastMemo(t("保存しました"));
+    return;
+  }
   const cont = saveBtnId === "memo-save";
   const before = cont ? loadMemos().length : 0;
   if (cont) voiceSavedRecent = { text: (document.getElementById("memo-input")?.value || "").trim(), at: Date.now() };
@@ -8944,6 +8965,7 @@ function wireEvents() {
     } else goHome();
   });
   document.getElementById("album-back").addEventListener("click", () => {
+    if (unzoomAlbumPhoto()) return; // 写真を大きくしていたら、まず元の大きさに
     if (albumView === "edit") { leaveAlbumEdit(); return; }
     if (albumView === "view") { renderAlbumList(true); return; }
     if (albumView === "list") {
