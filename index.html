@@ -4450,8 +4450,14 @@ function renderMemoMove() {
 // Android＝通知欄の「一瞬のひらめき」／iPhone＝Siri。書く欄の上に、はっきり見える枠で出す。
 // 「わかりました」を押すか、ひらめきを3回開いたら出なくなる（mn_quick_tip {seen, done}）
 const QUICK_TIP_MAX = 3;
+// iPhone の iOS の版（ブラウザなどで分からないときは大きな数＝新しい扱い）
+function iosMajorVersion() {
+  const m = navigator.userAgent.match(/OS (\d+)_/);
+  return m ? +m[1] : 99;
+}
 function quickTipKind() {
-  if (isIOSApp()) return SIRI_SHORTCUT_URL ? "siri" : "";
+  // iOS 16 以上は App Intents（用意いらず・ロックしたまま）。iOS 15 だけ前からのショートカットの案内（2026-10-25）
+  if (isIOSApp()) return iosMajorVersion() >= 16 ? "siri-new" : (SIRI_SHORTCUT_URL ? "siri" : "");
   if (quickMemoPlugin()) return settings.quickMemoNotify === false ? "" : "notify";
   return "notify"; // ブラウザ（プレビュー）では Android の形で見せる
 }
@@ -4460,6 +4466,14 @@ function quickTipHtml() {
   const st = (store.get("mn_quick_tip", null) || { seen: 0, done: false });
   if (!kind || st.done || st.seen > QUICK_TIP_MAX) return "";
   const bell = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 16V11a6 6 0 0 1 12 0v5l1.6 2H4.4Z"/><path d="M10 20.5a2.2 2.2 0 0 0 4 0"/></svg>';
+  if (kind === "siri-new") return `
+    <div class="quick-tip" id="quick-tip">
+      <div class="quick-tip-head"><span class="quick-tip-ico">${micIconSvg()}</span><b><span class="nowrap">${t("Siri に話しかけても")}</span><span class="nowrap">${t("残せます")}</span></b></div>
+      <p class="quick-tip-body"><span class="nowrap">${t("「ヘイSiri、記憶のギフト」と")}</span><span class="nowrap">${t("話しかけると、")}</span><span class="nowrap">${t("ここに残せます。")}</span><span class="nowrap">${t("ロックしたままでも")}</span><span class="nowrap">${t("使えます。")}</span></p>
+      <div class="quick-tip-btns">
+        <button type="button" class="btn btn-secondary" id="quick-tip-ok">${t("わかりました")}</button>
+      </div>
+    </div>`;
   if (kind === "siri") return `
     <div class="quick-tip" id="quick-tip">
       <div class="quick-tip-head"><span class="quick-tip-ico">${micIconSvg()}</span><b><span class="nowrap">${t("Siri に話しかけても")}</span><span class="nowrap">${t("残せます")}</span></b></div>
@@ -4966,10 +4980,11 @@ function updateSleepNudge() {
 }
 setInterval(() => { updateRecallNudge(); updateSleepNudge(); }, 60 * 1000);
 document.addEventListener("visibilitychange", () => { if (!document.hidden) { updateRecallNudge(); updateSleepNudge(); blinkRecallNudge(); } });
-function startRecall() {
+function startRecall(opt) {
   store.set("mn_recall_seen", todayStr());
   updateRecallNudge();
-  flow = { date: todayStr(), step: 0, sub: "select", mode: null, steps: [{ id: "quiz" }], recallOnly: true };
+  flow = { date: todayStr(), step: 0, sub: "select", mode: null, steps: [{ id: "quiz" }], recallOnly: true,
+           backToMeal: (opt && opt.backToMeal) || null }; // 食事の選択画面の「思い出す」から来たら、戻るでそこへ（2026-10-25）
   if (!entries[flow.date]) entries[flow.date] = {};
   renderStep();
   showScreen("screen-flow");
@@ -5104,7 +5119,7 @@ function nextStep() {
 
 // 大きい方のボタン（保存して戻る／次へ。今日の選択画面では思い出す問題へ）
 function flowSkip() {
-  if (flow.sub === "select" && flow.steps.length === 1 && !flow.recallOnly) { startRecall(); return; }
+  if (flow.sub === "select" && flow.steps.length === 1 && !flow.recallOnly) { startRecall({ backToMeal: flow.date }); return; }
   if (collectStep) { collectStep(); buzzSave(); }
   saveEntries();
   nextStep();
@@ -5118,7 +5133,7 @@ function flowHasBack() {
     const def = STEP_DEFS[flow.steps[flow.step].id];
     if (def && def.options.length > 1) return true; // 入力 → 同じ項目の選択画面へ戻れる
   }
-  if (flow.recallOnly) return false;                // 思い出すだけ：戻る＝ホーム
+  if (flow.recallOnly) return !!flow.backToMeal;   // 思い出すだけ：戻る＝ホーム（食事の選択画面から来たときはそこへ）
   if (flow.step > 0) return true;                   // 2つめ以降の項目 → 前の項目へ
   return !!(flow.fromPicker || flow.returnTo);      // 「この日を書き足す」や日別ページから来た
 }
@@ -5132,6 +5147,7 @@ function updateFlowBack() {
 
 // 戻るボタン
 function prevStep() {
+  if (flow.recallOnly && flow.backToMeal) { const d = flow.backToMeal; startMeal(d); return; } // 食事の選択画面へ戻る
   // 「一瞬のひらめき」から うつして来たときは、ひと押しで一覧へ帰す（2026-09-30 Yukiさん要望）。
   // 途中の選択画面（全部書く／いちばん記憶にのこす）を挟むと、続けて振り分けるのが面倒になるため
   if (flow.returnTo && flow.returnTo.screen === "memo") {
@@ -5955,8 +5971,7 @@ function renderSiriCard() {
   if (!siri) return;
   siri.hidden = !isIOSApp();
   // iOS 16 以上は App Intents（ショートカット不要・ロックしたまま）。iOS 15 だけ前からのショートカットの案内（2026-10-25）
-  const m = navigator.userAgent.match(/OS (\d+)_/);
-  const iosMajor = m ? +m[1] : 99;
+  const iosMajor = iosMajorVersion();
   const nw = document.getElementById("siri-new"), legacy = document.getElementById("siri-legacy");
   if (nw) nw.hidden = iosMajor < 16;
   if (legacy) legacy.hidden = iosMajor >= 16;
