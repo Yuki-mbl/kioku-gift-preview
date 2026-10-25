@@ -4385,7 +4385,7 @@ function moveMemoTo(i, dest, slot) {
   if (dest === "meal") { startMeal(ds, ret); flow.sub = "input"; flow.mode = "full"; renderStep(); }
   else if (dest === "shopping") { shoppingReturnTo = ret; renderShoppingHub(); showScreen("screen-shopping"); } // 書く画面を開く（移した言葉がその場で見える）
   else if (dest === "outfit") { outfitReturnTo = ret; renderOutfitDay(ds); showScreen("screen-outfit"); } // その日の服装欄を開く（移した言葉がその場で見える）
-  toastMemo(t("{d}にうつしました", { d: dest === "meal" ? t("食事") : dest === "shopping" ? t("買い物") : t("服装") }));
+  toastMemo(t("{d}に移しました", { d: dest === "meal" ? t("食事") : dest === "shopping" ? t("買い物") : t("服装") }));
 }
 // 行き先をえらぶ画面（シートの中で、1画面に1つの問いだけ）
 function renderMemoMove() {
@@ -4395,7 +4395,7 @@ function renderMemoMove() {
   const wrap = document.getElementById("memo-wrap");
   if (!memoMove.dest) {
     wrap.innerHTML = `
-      <p class="memo-lead">${t("どこにうつしますか？")}</p>
+      <p class="memo-lead">${t("どこに移しますか？")}</p>
       <p class="memo-move-text">${esc(m.text)}</p>
       <div class="memo-dests">
         ${MEMO_DESTS.map(d => `<button type="button" class="btn btn-secondary btn-xl memo-dest" data-dest="${d.key}"><span class="btn-ico">${balloonIconSvg(d.icon)}</span>${t(d.name)}</button>`).join("")}
@@ -4485,7 +4485,7 @@ function renderMemoScreen() {
         <svg class="balloon-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>
       </button>
       <span class="memo-text">${esc(m.text)}</span>
-      <button type="button" class="memo-move" data-memo-move="${i}">${t("うつす")}<span class="memo-move-ar" aria-hidden="true">→</span></button>
+      <button type="button" class="memo-move" data-memo-move="${i}">${t("移す")}<span class="memo-move-ar" aria-hidden="true">→</span></button>
     </div>`).join("");
   // 書きとめた中身はすぐ見せない。「思い出してから開く」を押したら並ぶ
   // 下の案内（できたらチェック／クイズには出ません）は廃止（2026-10-02 Yukiさん指示。
@@ -4494,7 +4494,7 @@ function renderMemoScreen() {
     ? `<div class="memo-list">${list}</div>`
     : `<button type="button" class="memo-open memo-reveal" id="memo-reveal">${t("思い出してから開く（{n}）", { n: a.length })}</button>`);
   const writePart = full
-    ? `<p class="memo-note"><span class="nowrap">${t("{n}個でいっぱいです。", { n: MEMO_MAX })}</span><br><span class="nowrap">${t("済んだものを消すか、")}</span><span class="nowrap">${t("「うつす」と、また書けます")}</span></p>` // 2026-10-15 Yukiさん：うつしても空くことも伝える
+    ? `<p class="memo-note"><span class="nowrap">${t("{n}個でいっぱいです。", { n: MEMO_MAX })}</span><br><span class="nowrap">${t("済んだものを消すか、")}</span><span class="nowrap">${t("「移す」と、また書けます")}</span></p>` // 2026-10-15 Yukiさん：移しても空くことも伝える（2026-10-24「うつす」→「移す」：「うっす」とヤンキーの返事に見えた）
     : `<div class="memo-line">
         <textarea id="memo-input" class="grow-input" rows="1" placeholder="${phEx("memo-input", t("例：お風呂掃除　庭に水やり"))}"></textarea>
         ${micMini("memo-input", "memo-save")}
