@@ -8983,7 +8983,10 @@ function wireEvents() {
       // 答え合わせの「書き足す・修正」から来たときだけ答え合わせへ戻す（入力は書くたび自動保存済み）
       if (shopHubFromRecall && shoppingHasAny()) renderShoppingRecall(); else goHome();
     } else {
-      goHome();
+      // 「思い出しながら、お買い物」の戻る＝書く画面へ（2026-10-25 Yukiさん「保存して買い物へで進んだのに、戻るでホームへ行く」）。
+      // 書く画面からの戻るはホーム（ここで「書き足す・修正」扱いにすると、行ったり来たりになるため）
+      shopHubFromRecall = false;
+      renderShoppingHub();
     }
   });
   document.getElementById("sleep-back").addEventListener("click", goHome); // 1層だけの画面になった（2026-10-03）
