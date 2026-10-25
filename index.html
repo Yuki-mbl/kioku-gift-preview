@@ -8027,14 +8027,14 @@ const CAL_NOTIFY_ID_BASE = 8101; // 8101〜8130 の30枠（iPhone は予約が64
 const CAL_NOTIFY_MAX = 30;
 const CAL_HORIZON_DAYS = 90;     // 3か月先の予定まで予約しておく（しばらく開かなくても、もとからある予定の知らせは届く）
 const CAL_DAY_CHOICES = [7, 6, 5, 4, 3, 2, 1, 0]; // 何日前（0＝当日）
-// 初期値：1週間前の20:30と前日の20:30（2026-10-21 Yukiさん）。回数は1回か2回
-const CAL_DEFAULT_REM = [{ days: 7, time: "20:30" }, { days: 1, time: "20:30" }];
+// 初期値：1回・前日の20:30だけ（2026-10-25 Yukiさん。前は2回＝1週間前と前日）。2回にしたときの2つめの初期値は1週間前の20:30
+const CAL_DEFAULT_REM = [{ days: 1, time: "20:30" }, { days: 7, time: "20:30" }];
 function loadCal() {
   const c = store.get("mn_cal", null) || {};
   const rem = (Array.isArray(c.rem) && c.rem.length ? c.rem : CAL_DEFAULT_REM).slice(0, 2)
     .map((r, i) => ({ days: CAL_DAY_CHOICES.includes(+r.days) ? +r.days : CAL_DEFAULT_REM[i].days, time: /^\d\d:\d\d$/.test(r.time) ? r.time : "20:30" }));
   while (rem.length < 2) rem.push({ ...CAL_DEFAULT_REM[rem.length] });
-  return { on: !!c.on, asked: !!c.asked, count: c.count === 1 ? 1 : 2, rem, off: Array.isArray(c.off) ? c.off : null };
+  return { on: !!c.on, asked: !!c.asked, count: c.count === 2 ? 2 : 1, rem, off: Array.isArray(c.off) ? c.off : null };
 }
 function saveCal(c) { store.set("mn_cal", c); }
 // 祝日・誕生日のカレンダーは、初めから使わない（毎年の祝日や人の誕生日まで知らせると多すぎる）
