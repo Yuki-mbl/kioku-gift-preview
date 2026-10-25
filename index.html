@@ -8622,6 +8622,7 @@ function voiceSave(btn) {
   // 指で「保存」を押したときは今までどおり（書き終わり＝ホームへ）
   if (saveBtnId === "flow-skip" && /^(meal-|eo-)/.test(btn.dataset.mic || "")) {
     saveFlowDraftIfAny();
+    buzzSave(); // 保存したら震わせる（指で保存を押したときと同じ。2026-10-25 Yukiさん「食事で保存と言っても震えない」）
     toastMemo(t("保存しました"));
     return;
   }
@@ -8632,6 +8633,7 @@ function voiceSave(btn) {
     const o = loadShopping();
     document.querySelectorAll("#screen-shopping textarea[data-key]").forEach(ta => { o[ta.dataset.key] = ta.value.trim(); });
     saveShopping(o);
+    buzzSave();
     toastMemo(t("保存しました"));
     return;
   }
