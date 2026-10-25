@@ -4396,6 +4396,7 @@ function moveMemoTo(i, dest, slot) {
   if (dest === "meal") { startMeal(ds, ret); flow.sub = "input"; flow.mode = "full"; renderStep(); }
   else if (dest === "shopping") { shoppingReturnTo = ret; renderShoppingHub(); showScreen("screen-shopping"); } // 書く画面を開く（移した言葉がその場で見える）
   else if (dest === "outfit") { outfitReturnTo = ret; renderOutfitDay(ds); showScreen("screen-outfit"); } // その日の服装欄を開く（移した言葉がその場で見える）
+  buzzSave(); // 移したら震わせる（2026-10-25 Yukiさん）
   toastMemo(t("{d}に移しました", { d: dest === "meal" ? t("食事") : dest === "shopping" ? t("買い物") : t("服装") }));
 }
 // 行き先をえらぶ画面（シートの中で、1画面に1つの問いだけ）
