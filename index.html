@@ -2911,16 +2911,16 @@ p, li, .settings-hint, .about-one { word-break: auto-phrase; text-wrap: pretty; 
 html[data-fontsize="xlarge"] #set-font-size, html[data-fontsize="large"] #set-font-size { flex-direction: column; }
 
 /* おやすみの画面は、ライト・淡い配色でも少し暗く（寝る前に明るすぎた。2026-10-31 Yukiさん）。
-   画面を開いているあいだだけ、背景とカードの色を一段落とす（下のタブも同じ色になじむ） */
+   画面を開いているあいだだけ、背景とカードの色をはっきり落とす（10/31 一段では分からないと言われ、さらに暗く）（下のタブも同じ色になじむ） */
 :root[data-theme="light"]:has(#screen-sleep.active) {
-  --bg: #dedcd2;
-  --bg-accent: linear-gradient(180deg, #e0ded4 0%, #dedcd2 55%, #dad8cd 100%);
-  --card: #eceae2;
+  --bg: #c4c2b7;
+  --bg-accent: linear-gradient(180deg, #c7c5ba 0%, #c4c2b7 55%, #bfbdb1 100%);
+  --card: #d3d1c7;
 }
 :root[data-theme="pastel"]:has(#screen-sleep.active) {
-  --bg: #ddd6c8;
-  --bg-accent: linear-gradient(180deg, #dfd8cb 0%, #ddd6c8 55%, #d9d1c2 100%);
-  --card: #ebe5d9;
+  --bg: #c6bdab;
+  --bg-accent: linear-gradient(180deg, #c9c0ae 0%, #c6bdab 55%, #c1b7a4 100%);
+  --card: #d5cdbe;
 }
 </style>
 <div id="app">
