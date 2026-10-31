@@ -3,6 +3,12 @@
 <meta charset="utf-8">
 <title>記憶のギフト ～未来の自分へ～</title>
 <style>
+/* 淡い配色の丸ゴシック Zen Maru Gothic（500・700・900）。2026-10-26 までは Google から毎回読み込んでいたが、
+   外と通信しないようにアプリの中に同梱（fonts/。SIL Open Font License 1.1、fonts/OFL.txt）。
+   プレビュー（standalone.html）には入れていない（重いので。スマホの丸ゴシックか、ふつうのゴシックで出る） */
+@font-face { font-family: "Zen Maru Gothic"; font-style: normal; font-weight: 500; font-display: swap; src: url(fonts/zenmaru-500.woff2) format("woff2"); }
+@font-face { font-family: "Zen Maru Gothic"; font-style: normal; font-weight: 700; font-display: swap; src: url(fonts/zenmaru-700.woff2) format("woff2"); }
+@font-face { font-family: "Zen Maru Gothic"; font-style: normal; font-weight: 900; font-display: swap; src: url(fonts/zenmaru-900.woff2) format("woff2"); }
 /* ホームの大きな日付の数字だけに使う書体：Playfair Display 900。
    0〜9 の10文字だけを抜き出して同梱（3.6KB）＝圏外でも同じ姿、どの大きさでもなめらか。
    unicode-range で数字だけに効かせるので、ほかの文字はテーマの書体のまま。
@@ -208,8 +214,8 @@ body {
 }
 
 .btn-xl {
-  font-size: 1.18rem;
-  padding: 18px 24px;
+  font-size: min(1.18rem, 5.6vw); /* 狭いスマホ・大きい字で「…送／る」と1字だけ落ちないように */
+  padding: 18px 20px;
   min-height: 62px;
   border-radius: 999px;
   width: 100%;
@@ -559,7 +565,7 @@ button { color: inherit; } /* 色未指定のボタンがブラウザ標準の�
   display: flex; align-items: baseline; justify-content: center; gap: 8px;
   font-size: 1.3rem; font-weight: 800; letter-spacing: .08em;
 }
-.oalb-y { font-size: .95rem; font-weight: 700; color: var(--muted); letter-spacing: .06em; }
+.oalb-y { white-space: nowrap; font-size: .95rem; font-weight: 700; color: var(--muted); letter-spacing: .06em; }
 .oalb-head { margin-bottom: 8px; }
 /* ページをめくる動き */
 @keyframes oalb-in-next { from { opacity: 0; transform: translateX(24px); } }
@@ -973,7 +979,7 @@ html[data-fontsize="xlarge"] #album-skip { font-size: min(1.4rem, 5.2vw); }
   display: flex; align-items: center; justify-content: space-between;
   margin: 0 4px 14px;
 }
-.cal-month { font-size: 1.3rem; font-weight: 800; }
+.cal-month { font-size: 1.3rem; font-weight: 800; white-space: nowrap; } /* 「12／月」と縦に割れないように */
 /* 年えらび＋月（中央のまとまり） */
 .cal-ym { display: flex; align-items: center; gap: 8px; }
 #cal-year {
@@ -1308,6 +1314,9 @@ mark {
   margin: 26px 0 12px; font-size: 1.15rem; font-weight: 800; color: var(--text);
 }
 .nowrap { white-space: nowrap; display: inline-block; } /* 折り返しは区切りのいい所だけ（ヒント文・ボタン共通） */
+/* 1つのかたまりが1行より長いときだけ、かたまりの中で折り返す（狭いスマホで画面の右にはみ出していた。2026-10-26）。
+   inline-block は入るなら1行のまま次の行へ送られ、入らないときだけ中で折れる */
+.nowrap { white-space: normal; max-width: 100%; }
 .photo-preview { text-align: center; }
 .photo-preview img { display: block; width: 100%; max-width: 260px; border-radius: 14px; margin: 10px auto 4px; border: 1.5px solid var(--border); }
 .quiz-photo { display: block; width: auto; max-width: min(100%, 300px); height: auto; max-height: min(36vh, 340px); border-radius: 14px; margin: 10px auto 0; border: 1.5px solid var(--border); }
@@ -1397,7 +1406,7 @@ mark {
 .link-row:active { background: var(--accent-soft); }
 .link-ico { width: 28px; height: 28px; flex: 0 0 28px; display: inline-flex; align-items: center; justify-content: center; }
 .link-ico svg { width: 26px; height: 26px; }
-.link-label { flex: 1; font-size: 1.15rem; font-weight: 700; }
+.link-label { flex: 1; min-width: 0; font-size: 1.15rem; font-weight: 700; } /* 狭い画面・大きい字で › が右にはみ出していた */
 .link-chev { color: var(--muted); font-size: 1.5rem; font-weight: 700; line-height: 1; }
 .about-note { background: var(--accent-soft); color: var(--text); padding: 12px 14px; border-radius: 12px; line-height: 1.6; }
 
@@ -2162,8 +2171,9 @@ html.fixed-page .screen.active { min-height: 0; height: 100%; }
 /* 服装「この日のこと」の行アイコン（フォークとナイフ・場所ピン） */
 .ctx-ico.ctx-ico .balloon-ico { width: 22px; height: 22px; color: var(--accent); }
 .ctx-ico { margin-right: 7px; vertical-align: -.24em; }
-.balloon-name { font-size: min(.95rem, 3.8vw); font-weight: 800; white-space: nowrap; letter-spacing: .06em; line-height: 1.2; }
-.balloon-lg .balloon-name { font-size: min(1.08rem, 4.3vw); }
+/* 淡い配色の風船の名前（明るい・暗いは下で別に決めている）。2026-10-25「字が小さい」と言われ、スマホの設定のまま＝前の「もっと大きい字」の大きさ、もっと大きい字はさらに大きく */
+.balloon-name { font-size: min(1.24rem, 4.4vw); font-weight: 800; white-space: nowrap; letter-spacing: .06em; line-height: 1.2; }
+.balloon-lg .balloon-name { font-size: min(1.38rem, 4.9vw); }
 /* 文字の大きさに合わせて、風船（絵）も連動して大きく（四隅は少し外へ逃がして重なり防止） */
 html[data-fontsize="large"] #screen-home #home-doors { height: clamp(282px, 42vh, 360px); }
 html[data-fontsize="large"] .balloon { width: min(120px, 29vw, 15.4vh); height: min(120px, 29vw, 15.4vh); }
@@ -2176,10 +2186,10 @@ html[data-fontsize="xlarge"] .balloon-lg { width: min(164px, 39vw, 19.6vh); heig
 /* ホームの風船の中の絵だけ拡大（他の線画には効かせない） */
 html[data-fontsize="large"] .balloon .balloon-ico { width: 37%; }
 html[data-fontsize="xlarge"] .balloon .balloon-ico { width: 40%; }
-html[data-fontsize="large"] .balloon-name { font-size: min(1.08rem, 4.4vw); }
-html[data-fontsize="large"] .balloon-lg .balloon-name { font-size: min(1.2rem, 4.9vw); }
-html[data-fontsize="xlarge"] .balloon-name { font-size: min(1.16rem, 4.8vw); }
-html[data-fontsize="xlarge"] .balloon-lg .balloon-name { font-size: min(1.3rem, 5.3vw); }
+html[data-fontsize="large"] .balloon-name { font-size: min(1.22rem, 5.3vw); }
+html[data-fontsize="large"] .balloon-lg .balloon-name { font-size: min(1.36rem, 5.9vw); }
+html[data-fontsize="xlarge"] .balloon-name { font-size: min(1.18rem, 5.7vw); }
+html[data-fontsize="xlarge"] .balloon-lg .balloon-name { font-size: min(1.3rem, 6.3vw); }
 /* 風船の個別サイズ：買い物は少し大きく（食事よりは小さい）、おやすみは少し小さく（2026-08-30 Yukiさん指定） */
 /* 個別サイズは廃止：食事だけ大きく、他の4つは同じ大きさ（2026-09-06 Yukiさん指定） */
 /* ===== 球体の立体感（全テーマ共通の作り：左上のつや＋下側の丸い陰り。2026-09-13 Yukiさん要望）=====
@@ -2866,7 +2876,7 @@ html[data-theme="light"] .balloon-pos:has(.balloon-k-sleep.sleep-due)::before { 
 }
 .reset-slide-label {
   position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;
-  padding-left: 56px; font-weight: 800; color: var(--danger, #c85a4b); font-size: min(1.05rem, 4.2vw); pointer-events: none;
+  padding-left: 56px; font-weight: 800; color: var(--danger, #c85a4b); font-size: min(1.05rem, 3.9vw); white-space: nowrap; pointer-events: none; /* 狭いスマホで「す」だけ落ちてつまみの下に隠れていた */
 }
 .reset-slide-knob {
   position: relative; z-index: 1; display: flex; align-items: center; justify-content: center;
@@ -2886,6 +2896,32 @@ html[data-theme="light"] .balloon-pos:has(.balloon-k-sleep.sleep-due)::before { 
 .set-more li { margin-bottom: 6px; }
 .set-more-sub { font-weight: 800; margin-top: 12px; }
 .set-divider { border-top: 1.5px dashed var(--border); margin: 20px 0 16px; }
+
+/* ---------- 字の折り返し（2026-10-26 製品版前の確認） ----------
+   ボタン・見出し・短い説明で、最後の1字（「す」「ら」「件）」など）だけが次の行に落ちないように。
+   auto-phrase は日本語を文節で折る（Android の WebView。iPhone は無視して、balance だけ効く）。 */
+button, .btn, .seg, summary, h1, h2, h3, .settings-label, .set-more-sub, .lock-forgot, .memo-toast,
+.quiz-q, .quiz-date-ref, .album-q, .q-soft, .legal-updated, .step-title, .step-lead,
+.field-label, .quick-tip-head b, .link-label {
+  word-break: auto-phrase; text-wrap: balance;
+}
+p, li, .settings-hint, .about-one { word-break: auto-phrase; text-wrap: pretty; }
+/* 文字の大きさの2つのボタンは、狭い画面では縦に並べる（「スマホの設定のま／ま」と割れていた） */
+@media (max-width: 380px) { #set-font-size { flex-direction: column; } }
+html[data-fontsize="xlarge"] #set-font-size, html[data-fontsize="large"] #set-font-size { flex-direction: column; }
+
+/* おやすみの画面は、ライト・淡い配色でも少し暗く（寝る前に明るすぎた。2026-10-31 Yukiさん）。
+   画面を開いているあいだだけ、背景とカードの色を一段落とす（下のタブも同じ色になじむ） */
+:root[data-theme="light"]:has(#screen-sleep.active) {
+  --bg: #dedcd2;
+  --bg-accent: linear-gradient(180deg, #e0ded4 0%, #dedcd2 55%, #dad8cd 100%);
+  --card: #eceae2;
+}
+:root[data-theme="pastel"]:has(#screen-sleep.active) {
+  --bg: #ddd6c8;
+  --bg-accent: linear-gradient(180deg, #dfd8cb 0%, #ddd6c8 55%, #d9d1c2 100%);
+  --card: #ebe5d9;
+}
 </style>
 <div id="app">
 
@@ -3105,7 +3141,7 @@ html[data-theme="light"] .balloon-pos:has(.balloon-k-sleep.sleep-due)::before { 
     <section id="screen-settings" class="screen">
       <div class="settings-wrap">
         <div class="card">
-          <div class="settings-label" data-t>テーマ</div>
+          <div class="settings-label" data-t>画面の色</div>
           <div class="theme-options">
             <button class="theme-opt" data-theme-opt="light">
               <span class="theme-mini mini-light" aria-hidden="true"><i></i><i></i><i></i><i></i></span><span data-t>ライト</span>
@@ -3157,13 +3193,13 @@ html[data-theme="light"] .balloon-pos:has(.balloon-k-sleep.sleep-due)::before { 
           </div>
           <!-- iOS 15：App Intents が使えないので、前からのショートカットを配る形のまま -->
           <div id="siri-legacy" hidden>
-            <p class="settings-hint" style="margin-top:0;" data-t>「ヘイ Siri、ひらめき」と話しかけるだけで、思いついたことをこのアプリに残せます。はじめに一度だけ、用意してください。</p>
+            <p class="settings-hint" style="margin-top:0;" data-t>「ヘイSiri、ひらめき」と話しかけるだけで、思いついたことをこのアプリに残せます。はじめに一度だけ、用意してください。</p>
             <div id="siri-easy" hidden>
               <a class="btn btn-primary siri-get" id="siri-get" target="_blank" rel="noopener" data-t>ショートカットを受け取る</a>
               <ol class="siri-steps">
                 <li data-t>上のボタンを押して、出てきた画面をいちばん下まで動かす</li>
                 <li data-t>「ショートカットを追加」を押す</li>
-                <li data-t>これで完了。「ヘイ Siri、ひらめき」で使えます</li>
+                <li data-t>これで完了。「ヘイSiri、ひらめき」で使えます</li>
               </ol>
               <button type="button" class="siri-manual-toggle" id="siri-manual-toggle" aria-expanded="false"><span class="siri-manual-text"><span class="nowrap" data-t>うまくいかないときは、</span><span class="nowrap" data-t>自分で作る手順を見る</span></span><span class="siri-manual-chev" aria-hidden="true">›</span></button>
             </div>
@@ -3173,7 +3209,7 @@ html[data-theme="light"] .balloon-pos:has(.balloon-k-sleep.sleep-due)::before { 
               <li data-t>もう一度「アクションを追加」→「URLエンコード」と入れて、<b>「テキストをURLエンコード」</b>を選ぶ</li>
               <li data-t>もう一度「アクションを追加」→「URL」と入れて、<b>「URLを開く」</b>を選ぶ</li>
               <li><span data-t>URLの欄に次を貼り付け、そのうしろに「エンコードされたテキスト」を差し込む</span><br><code class="siri-url">kiokugift://memo?text=</code></li>
-              <li data-t>上の名前を「ひらめき」にして完了。以降は「ヘイ Siri、ひらめき」で使えます</li>
+              <li data-t>上の名前を「ひらめき」にして完了。以降は「ヘイSiri、ひらめき」で使えます</li>
             </ol>
           </div>
         </div>
@@ -3202,7 +3238,7 @@ html[data-theme="light"] .balloon-pos:has(.balloon-k-sleep.sleep-due)::before { 
           <details class="set-more"><summary data-t>くわしく</summary>
           <button type="button" class="btn btn-secondary btn-xl" id="transfer-make" style="margin-top:12px;" data-t>新しいスマホへ送る</button>
           <button type="button" class="btn btn-secondary btn-xl" id="transfer-take" style="margin-top:10px;" data-t>前のスマホから受け取る</button>
-          <p class="settings-hint" id="backup-photo-note" hidden style="margin-top:12px;"><span class="nowrap" data-t>写真は、新しいものから</span><span class="nowrap" data-t>約300枚まで戻ります。</span><span class="nowrap" data-t>全部の写真を移したいときは、</span><span class="nowrap" data-t>下の「新しいスマホへ送る」でも</span><span class="nowrap" data-t>移せます。</span></p>
+          <p class="settings-hint" id="backup-photo-note" hidden style="margin-top:12px;"><span class="nowrap" data-t>写真は、新しいものから</span><span class="nowrap" data-t>約300枚まで戻ります。</span><span class="nowrap" data-t>全部の写真を移したいときは、</span><span class="nowrap" data-t>下の「新しいスマホへ送る」を</span><span class="nowrap" data-t>使ってください。</span></p>
           <p class="settings-hint" style="margin-top:12px;"><span class="nowrap" data-t>新しいスマホにも</span><span class="nowrap" data-t>記録があるときは、</span><span class="nowrap" data-t>両方の記録が</span><span class="nowrap" data-t>合わさります。</span><span class="nowrap" data-t>どちらの記録も</span><span class="nowrap" data-t>消えません。</span></p>
           </details>
         </div>
@@ -3253,7 +3289,7 @@ html[data-theme="light"] .balloon-pos:has(.balloon-k-sleep.sleep-due)::before { 
         </div>
         <div class="card">
           <div class="settings-label" data-t>すべてのデータを消す</div>
-          <p class="settings-hint" style="margin-top:0;" data-t>記録・設定をすべて消して、最初の状態にもどします。元に戻せません。</p>
+          <p class="settings-hint" style="margin-top:0;" data-t>記録・設定をすべて消して、最初の状態に戻します。元には戻せません。</p>
           <div id="reset-area" style="margin-top:14px;"></div>
         </div>
       </div>
@@ -3264,7 +3300,7 @@ html[data-theme="light"] .balloon-pos:has(.balloon-k-sleep.sleep-due)::before { 
     <nav id="tab-bar" hidden>
       <button type="button" class="tabb" id="tab-home"><span class="tabb-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M3.5 11.6 12 4.4l8.5 7.2"/><path d="M5.9 10.3V19a1.6 1.6 0 0 0 1.6 1.6h9A1.6 1.6 0 0 0 18.1 19v-8.7"/></svg></span><span class="tabb-name" data-t>ホーム</span></button>
       <button type="button" class="tabb" id="tab-write"><span class="tabb-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 6.2C10.1 4.7 7.1 4.2 4.2 4.7V18c2.9-.5 5.9 0 7.8 1.5 1.9-1.5 4.9-2 7.8-1.5V4.7c-2.9-.5-5.9 0-7.8 1.5Z"/><path d="M12 6.2v13.3"/></svg></span><span class="tabb-name" data-t>日記</span></button>
-      <button type="button" class="tab-quick" id="tab-quick" data-t-aria aria-label="一瞬の思いつきを記す">
+      <button type="button" class="tab-quick" id="tab-quick" data-t-aria aria-label="一瞬のひらめきを書く">
         <span class="tab-quick-circle"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5.5v13M5.5 12h13"/></svg><span class="tab-quick-badge" id="tab-quick-badge" hidden></span></span>
       </button>
       <button type="button" class="tabb" id="tab-quiz"><span class="tabb-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="12" cy="9.8" rx="8.2" ry="6.4"/><circle cx="6.6" cy="18.6" r="1.7"/><circle cx="3.9" cy="21.6" r="0.9"/></svg></span><span class="tabb-name" data-t>思い出す</span></button>
@@ -3290,9 +3326,9 @@ html[data-theme="light"] .balloon-pos:has(.balloon-k-sleep.sleep-due)::before { 
     <div id="cal-intro-pop" hidden>
       <div class="alert-card cal-intro">
         <div class="cal-intro-title" data-t>予定を思い出す</div>
-        <p class="alert-msg cal-intro-msg"><span data-t>スマホのカレンダーと同期すると、指定の日時に</span><b data-t>「予定は何か思い出せますか？」</b><span data-t>と通知が届きます。</span></p>
+        <p class="alert-msg cal-intro-msg"><span data-t>スマホのカレンダーを読み込むと、決めた日時に</span><b data-t>「予定は何か思い出せますか？」</b><span data-t>と通知が届きます。</span></p>
         <p class="cal-intro-note" data-t>予定の内容は通知に出ません。カレンダーは読むだけで、スマホの外には送りません。日時や回数は、設定で変えられます。</p>
-        <button type="button" class="btn btn-primary btn-xl" id="cal-intro-yes" data-t>同期する</button>
+        <button type="button" class="btn btn-primary btn-xl" id="cal-intro-yes" data-t>使う</button>
         <button type="button" class="btn btn-secondary btn-xl" id="cal-intro-no" data-t>今はしない</button>
       </div>
     </div>
@@ -3599,7 +3635,9 @@ async function syncKiokuInbox() {
     const have = new Set(a.map(m => m.text + "|" + m.at));
     let added = 0;
     items.forEach(m => {
-      const v = String((m && m.text) || "").trim();
+      // Siri は黙ると勝手に残すので、アプリのマイクのつもりで言った終わりの「保存」は外す。「保存」だけなら捨てる（2026-10-25 Yukiさん）
+      // 区切り（、。空白）のあとの「保存」だけ外す（「冷凍保存」を「冷凍」にしないため）
+      const v = String((m && m.text) || "").trim().replace(/(^|[、。,.\s]+)保存[。.!！]*$/, "").trim();
       const at = Number(m && m.at) || Date.now();
       if (v && !have.has(v + "|" + at)) { a.unshift({ text: v, at }); have.add(v + "|" + at); added++; }
     });
@@ -3609,7 +3647,7 @@ async function syncKiokuInbox() {
     updateMemoBadge();
     const pop = document.getElementById("memo-pop");
     if (pop && !pop.hidden) renderMemoScreen();
-    toastMemo(added > 1 ? t("Siri からメモを{n}つ受け取りました", { n: added }) : t("メモを1つ受け取りました"));
+    toastMemo(added > 1 ? t("Siriからひらめきを{n}つ受け取りました", { n: added }) : t("ひらめきを1つ受け取りました"));
   } catch (e) {}
 }
 async function syncQuickMemoNotify() {
@@ -3685,7 +3723,7 @@ function takeMemoFromUrl(url) {
   // 開いているメモの一覧はその場で新しくする
   const pop = document.getElementById("memo-pop");
   if (pop && !pop.hidden) renderMemoScreen();
-  toastMemo(added ? t("メモを1つ受け取りました") : t("メモがいっぱいです（{n}件）", { n: MEMO_MAX }));
+  toastMemo(added ? t("ひらめきを1つ受け取りました") : t("ひらめきがいっぱいです（{n}件）", { n: MEMO_MAX }));
   return true;
 }
 // 受け取ったことを、小さな帯でそっと知らせる（音も振動も出さない）
@@ -3796,7 +3834,12 @@ const NO_SLIDE_SCREENS = new Set(["screen-lock", "screen-flow"]);
 // ずっと開いたままで、保存してホームに戻ったあとも、日記がパスコードなしで見えていた）。
 // 日記を見る流れ（書く・日別・見返す・検索・ロック画面）から出たら、また鍵をかける
 const DIARY_OPEN_SCREENS = new Set(["screen-lock", "screen-flow", "screen-daydetail", "screen-calendar", "screen-search"]);
+// 設定から規約・引き継ぎ・パスコードを開いて戻ったら、設定の同じ場所へ（前はいちばん上に戻っていた。2026-10-26）
+const SCROLL_KEEP_FROM = { "screen-settings": new Set(["screen-passcode", "screen-legal", "screen-transfer-code", "screen-code-entry"]) };
+const screenScrollY = {};
 function showScreen(id) {
+  if (lastScreenId) screenScrollY[lastScreenId] = window.scrollY;
+  const keepY = SCROLL_KEEP_FROM[id] && SCROLL_KEEP_FROM[id].has(lastScreenId) ? screenScrollY[id] || 0 : 0;
   if (!DIARY_OPEN_SCREENS.has(id)) diaryUnlocked = false;
   stopMic(); // 画面を移ったらマイクは止める
   applySearchExample();
@@ -3820,7 +3863,8 @@ function showScreen(id) {
   else if (id === "screen-home") store.set("mn_resume", null);
   // 買い物ちゅうは画面を消灯させない（15分上限。触れば延長）
   if (id === "screen-shopping") acquireWake(); else releaseWake();
-  window.scrollTo(0, 0);
+  window.scrollTo(0, keepY);
+  regrowVisible(scr); // 前に書いた長い文の欄を、見えてから測り直す（iPhone など）
   updatePageFixed(); // 1画面に収まる画面では、ページ自体を動かさない
 }
 
@@ -3965,6 +4009,9 @@ function goBackOneStep() {
   // 上に開いているものを先に閉じる
   const alertPop = document.getElementById("alert-pop");
   if (alertPop && !alertPop.hidden) { alertPop.hidden = true; return true; }
+  // 予定を思い出すの最初の案内：戻る＝「今はしない」（Android の戻るでアプリが閉じて、案内が残っていた。2026-10-26）
+  const calIntro = document.getElementById("cal-intro-pop");
+  if (calIntro && !calIntro.hidden) { document.getElementById("cal-intro-no").click(); calIntro.hidden = true; return true; }
   const photoPop = document.getElementById("photo-pop");
   if (photoPop && !photoPop.hidden) { photoPop.hidden = true; return true; }
   const shopPop = document.getElementById("shop-pop");
@@ -3979,6 +4026,7 @@ function goBackOneStep() {
   const id = document.querySelector(".screen.active")?.id;
   if (!id || id === "screen-home" || id === "screen-onboarding") return false;
   if (id === "screen-lock") {
+    if (document.getElementById("rec-cancel")) { showLock(lockMode); return true; } // 合言葉の画面からは、4桁の画面へ（2026-10-26）
     if (lockMode !== "diary") return false; // アプリのロックは戻れない（中に入らせない）
     lockBack(); return true;
   }
@@ -4016,7 +4064,7 @@ function wireSwipeNav() {
     const scr = document.querySelector(".screen.active")?.id;
     // 入力欄・下タブから始めた指は対象外
     const from = e.target;
-    const inExcluded = from.closest("input, textarea, #tab-bar, #memo-pop, #shop-pop, #photo-pop, #alert-pop"); // どのカレンダーも月めくりは矢印のみ。なぞりはどこでもページ移動
+    const inExcluded = from.closest("input, textarea, #tab-bar, #memo-pop, #shop-pop, #photo-pop, #alert-pop, #cal-intro-pop, .reset-slide"); // すべらせて消すの途中で離すと戻ってしまっていた（2026-10-26） // どのカレンダーも月めくりは矢印のみ。なぞりはどこでもページ移動
     const diaryLock = scr === "screen-lock" && lockMode === "diary"; // 日記のパスコード画面はなぞりで先へ進めてよい（アプリ全体ロックは不可）
     ok = !!scr && (!SWIPE_OFF_SCREENS.has(scr) || diaryLock) && !inExcluded;
   }, { passive: true });
@@ -4275,6 +4323,7 @@ function addMemo(text) {
   if (a[0] && a[0].text === v && Date.now() - (a[0].at || 0) < 10000) return;
   a.unshift({ text: v, at: Date.now() });
   saveMemos(a);
+  return true; // 入れたときだけ true（振動はこのときだけ）
 }
 function removeMemo(i) {
   const a = loadMemos();
@@ -4478,7 +4527,7 @@ function quickTipHtml() {
   if (kind === "siri") return `
     <div class="quick-tip" id="quick-tip">
       <div class="quick-tip-head"><span class="quick-tip-ico">${micIconSvg()}</span><b><span class="nowrap">${t("Siri に話しかけても")}</span><span class="nowrap">${t("残せます")}</span></b></div>
-      <p class="quick-tip-body"><span class="nowrap">${t("「ヘイ Siri、ひらめき」と言うだけで、")}</span><span class="nowrap">${t("ここに入ります。")}</span><span class="nowrap">${t("はじめに一度だけ、")}</span><span class="nowrap">${t("用意が要ります")}</span></p>
+      <p class="quick-tip-body"><span class="nowrap">${t("「ヘイSiri、ひらめき」と言うだけで、")}</span><span class="nowrap">${t("ここに入ります。")}</span><span class="nowrap">${t("はじめに一度だけ、")}</span><span class="nowrap">${t("用意が要ります")}</span></p>
       <div class="quick-tip-btns">
         <button type="button" class="btn btn-primary" id="quick-tip-go">${t("用意する")}</button>
         <button type="button" class="btn btn-secondary" id="quick-tip-ok">${t("わかりました")}</button>
@@ -4501,6 +4550,7 @@ function wireQuickTip() {
     setTimeout(() => document.getElementById("siri-card")?.scrollIntoView({ block: "start", behavior: "smooth" }), 250);
   });
 }
+let memoDraft = ""; // ひらめきの書きかけ
 function renderMemoScreen() {
   if (memoMove) { renderMemoMove(); return; }
   const a = loadMemos();
@@ -4520,7 +4570,7 @@ function renderMemoScreen() {
     ? `<div class="memo-list">${list}</div>`
     : `<button type="button" class="memo-open memo-reveal" id="memo-reveal">${t("思い出してから開く（{n}）", { n: a.length })}</button>`);
   const writePart = full
-    ? `<p class="memo-note"><span class="nowrap">${t("{n}個でいっぱいです。", { n: MEMO_MAX })}</span><br><span class="nowrap">${t("済んだものを消すか、")}</span><span class="nowrap">${t("「移す」と、また書けます")}</span></p>` // 2026-10-15 Yukiさん：移しても空くことも伝える（2026-10-24「うつす」→「移す」：「うっす」とヤンキーの返事に見えた）
+    ? `<p class="memo-note"><span class="nowrap">${t("{n}件でいっぱいです。", { n: MEMO_MAX })}</span><br><span class="nowrap">${t("済んだものを消すか")}</span><span class="nowrap">${t("「移す」を押すと、また書けます")}</span></p>` // 2026-10-15 Yukiさん：移しても空くことも伝える（2026-10-24「うつす」→「移す」：「うっす」とヤンキーの返事に見えた）
     : `<div class="memo-line">
         <textarea id="memo-input" class="grow-input" rows="1" placeholder="${phEx("memo-input", t("例：お風呂掃除　庭に水やり"))}"></textarea>
         ${micMini("memo-input", "memo-save")}
@@ -4531,14 +4581,17 @@ function renderMemoScreen() {
     ${quickTipHtml()}
     ${writePart}
     ${listPart}`;
+  // 書きかけは、閉じたり「移す」を押したりしても残す（前は消えていた。2026-10-26）
+  const memoIn = document.getElementById("memo-input");
+  if (memoIn) { memoIn.value = memoDraft; memoIn.addEventListener("input", () => { memoDraft = memoIn.value; }); }
   wireMics(document.getElementById("memo-wrap"));
   wireGrowInputs(document.getElementById("memo-wrap"));
   wireQuickTip();
   const save = document.getElementById("memo-save");
   if (save) save.addEventListener("click", () => {
     const v = document.getElementById("memo-input").value;
-    addMemo(v);
-    if (v.trim()) buzzSave();
+    if (addMemo(v)) buzzSave();
+    memoDraft = "";
     renderMemoScreen();
     updateMemoBadge();
   });
@@ -4745,7 +4798,7 @@ const STEP_DEFS = {
 
   // ---------- 日々の出来事（旧・自由記憶。タブの📖日々から） ----------
   diary: {
-    emoji: "📖", icon: "book", title: "日記", note: "日記を書きますか？<br>今日のひと言にしますか？<br>すばらしい出来事や記憶にのこしたいことがありましたか？",
+    emoji: "📖", icon: "book", title: "日記", note: "今日のこと、ひと言でも書いてみませんか。",
     options: [
       { value: "write", label: "書く", action: "input" },
     ],
@@ -4758,8 +4811,8 @@ const STEP_DEFS = {
         </div>
       </div>
       <p class="photo-hint hint-strong" id="diary-limit" hidden style="margin-top:10px;"></p>
-      ${flow.returnTo ? "" : `<p class="photo-hint hint-strong" style="margin-top:14px;"><span class="nowrap">${t("前日までの日記は")}</span> <span class="nowrap">${t("「見返す」タブから")}</span><span class="nowrap">${t("追記できます")}</span></p>`}
-      ${settings.diaryPass ? "" : `<p class="photo-hint" style="margin-top:6px;">${t("設定から日記のみをロックできます")}</p>`}`,
+      ${flow.returnTo ? "" : `<p class="photo-hint hint-strong" style="margin-top:14px;"><span class="nowrap">${t("前日までの日記は")}</span> <span class="nowrap">${t("「見返す」タブから")}</span><span class="nowrap">${t("書き足せます")}</span></p>`}
+      ${settings.diaryPass ? "" : `<p class="photo-hint" style="margin-top:6px;">${t("設定から日記だけをロックできます")}</p>`}`,
     collect: (mode, e) => {
       const v = document.getElementById("diary-text")?.value.trim();
       if (v) e.diary = v; else delete e.diary;
@@ -4907,7 +4960,7 @@ function renderPickView() {
       <button class="opt-card" id="pick-diary">${t("日記")}</button>
     </div>`;
   const ret = flow.returnTo;
-  document.getElementById("pick-meal").addEventListener("click", () => { startMeal(flow.date, ret); flow.fromPicker = true; });
+  document.getElementById("pick-meal").addEventListener("click", () => { startMeal(flow.date, ret); flow.fromPicker = true; renderStep(); }); // 描き直して、下のボタンを「保存して次へ」に
   // 服装もここから書き足せる（2026-09-13 Yukiさん要望「服装に戻るのが面倒」）。もどるでこの選択画面へ
   document.getElementById("pick-outfit").addEventListener("click", () => {
     outfitReturnTo = { picker: true, ds: flow.date, ret };
@@ -5059,7 +5112,7 @@ function renderSelectView(stepId, content) {
   const cur = def.savedMode(e);
   // 選択画面はまだ何も書いていないので「保存」とは言わない。
   // 今日の食事の選択画面では、思い出す問題への近道にする（過去日の書き足しでは従来の飛ばし）
-  const soloToday = flow.steps.length === 1 && !flow.recallOnly;
+  const soloToday = mealRecallShortcut();
   const skipBtn = document.getElementById("flow-skip");
   if (soloToday) skipBtn.innerHTML = `<span class="btn-ico">${balloonIconSvg("recall")}</span>${t("思い出す")}`;
   else skipBtn.textContent = t("保存して次へ");
@@ -5119,8 +5172,13 @@ function nextStep() {
 }
 
 // 大きい方のボタン（保存して戻る／次へ。今日の選択画面では思い出す問題へ）
+// 今日の食事をホームから開いたときだけ、選択画面の下のボタンを「思い出す」への近道にする。
+// 過去の日の「この日を書き足す」などでは「保存して次へ」のまま（前は過去の日でも「思い出す」になり、昨日の問題が開いていた。2026-10-26）
+function mealRecallShortcut() {
+  return flow.steps.length === 1 && !flow.recallOnly && flow.date === todayStr() && !flow.fromPicker && !flow.returnTo;
+}
 function flowSkip() {
-  if (flow.sub === "select" && flow.steps.length === 1 && !flow.recallOnly) { startRecall({ backToMeal: flow.date }); return; }
+  if (flow.sub === "select" && mealRecallShortcut()) { startRecall({ backToMeal: flow.date }); return; }
   if (collectStep) { collectStep(); buzzSave(); }
   saveEntries();
   nextStep();
@@ -5510,7 +5568,7 @@ function renderQuizStep(content) {
         ${t("まずは今日のことを、ひとつだけ書いてみませんか。")}
       </div>
       <button class="btn btn-primary btn-xl" id="quiz-meal"><span class="btn-ico btn-ico-sm">${balloonIconSvg("daily")}</span><span class="nowrap">${t("今日の食事を記録")}</span></button>`;
-    document.getElementById("quiz-meal").addEventListener("click", () => startMeal(todayStr()));
+    document.getElementById("quiz-meal").addEventListener("click", () => startMeal(todayStr(), { screen: "recall" })); // 戻るで思い出すへ（2026-10-26）
     return;
   }
 
@@ -5544,7 +5602,7 @@ function renderQuizStep(content) {
     fitQuizPhoto(); // 手がかりの写真を「答えを見る」が見える大きさに（2026-10-22）
     document.getElementById("quiz-reveal").addEventListener("click", () => {
       document.getElementById("quiz-reveal-slot").innerHTML = `
-        <div class="quiz-answer-label">${q.photos.length ? t("あなたが残したもの") : t("あなたが入力したこと")}</div>
+        <div class="quiz-answer-label">${q.photos.length ? t("あなたが残したもの") : t("あなたが書いたこと")}</div>
         <div class="quiz-answer">${esc(q.answer).replace(/\n/g, "<br>")}</div>
         ${q.photos.map(u => `<img class="quiz-photo" src="${photoSrc(u)}" alt="${t("この日の写真")}">`).join("")}`;
       // 最後の問題のあとは「もっと思い出す」＋「ホームへ／今日の食事を記録」
@@ -5582,7 +5640,7 @@ function renderQuizStep(content) {
         qIndex++; showQuestion();
       });
       const mealBtn = document.getElementById("quiz-meal");
-      if (mealBtn) mealBtn.addEventListener("click", () => startMeal(todayStr()));
+      if (mealBtn) mealBtn.addEventListener("click", () => startMeal(todayStr(), { screen: "recall" })); // 戻るで思い出すへ（2026-10-26）
       const moreBtn = document.getElementById("quiz-more");
       if (moreBtn) moreBtn.addEventListener("click", () => {
         noteMoreRecallStart(); // 押したら今日の1回を使う（浸りすぎ防止）
@@ -5629,7 +5687,7 @@ function renderQuizStep(content) {
       fitQuizPhoto(); // 手がかりの写真を「答えを見る」が見える大きさに（2026-10-22）
       document.getElementById("quiz-reveal").addEventListener("click", () => {
         document.getElementById("quiz-reveal-slot").innerHTML = `
-          <div class="quiz-answer-label">${q.photos.length ? t("あなたが残したもの") : t("あなたが入力したこと")}</div>
+          <div class="quiz-answer-label">${q.photos.length ? t("あなたが残したもの") : t("あなたが書いたこと")}</div>
           <div class="quiz-answer">${esc(q.answer).replace(/\n/g, "<br>")}</div>
           ${q.photos.map(u => `<img class="quiz-photo" src="${photoSrc(u)}" alt="${t("この日の写真")}">`).join("")}`;
         content.querySelector(".quiz-actions").outerHTML = `
@@ -5688,7 +5746,7 @@ function entryFields(e) {
   if (e.diary) {
     // 日記ロック中（未解除）は中身を見せない（タップで解除できる）
     const lockedDiary = settings.diaryPass && !diaryUnlocked;
-    fields.push({ label: "日記", text: lockedDiary ? "🔒 " + t("ロックされています（タップで解除）") : e.diary });
+    fields.push({ label: "日記", text: lockedDiary ? "🔒 " + t("ロックされています（押すと解除）") : e.diary });
   }
   return fields;
 }
@@ -5713,7 +5771,7 @@ function dayFields(ds) {
   // 検索もこの関数を使うため、ロック中は日記の中身が検索結果に出ないことも同時に直る）
   let diaryFields = pick("日記");
   if (settings.diaryPass && !diaryUnlocked) {
-    diaryFields = diaryFields.map(() => ({ label: "日記", text: t("🔒 ロックされています。タップで解除できます") }));
+    diaryFields = diaryFields.map(() => ({ label: "日記", text: t("🔒 ロックされています（押すと解除）") }));
   }
   return [...outfitField, ...pick("外食"), ...pick("食事"),
           ...diaryFields, ...albumFieldsFor(ds), ...pick("行った場所")];
@@ -5937,6 +5995,7 @@ function goBackTo(ret) {
     return;
   }
   if (ret.screen === "sleep") { openSleep(); return; } // おやすみの「日記へ →」から来た（2026-10-03）
+  if (ret.screen === "recall") { startRecall(); return; } // 思い出すの「今日の食事を記録」から来た（2026-10-26）
   if (ret.screen === "outfitday") { renderOutfitDay(ret.ds); showScreen("screen-outfit"); return; }
   openDayDetail(ret.ds);
 }
@@ -6192,11 +6251,11 @@ function showRecovery() {
   wrap.innerHTML = `
     <div class="lock-logo">🔑</div>
     <h2 class="lock-title">${t("合言葉で確認")}</h2>
-    <p class="pc-note" style="text-align:center; margin-bottom:16px;">${esc(settings.recoveryQ) || t("合言葉を入力してください")}</p>
+    <p class="pc-note" style="text-align:center; margin-bottom:16px;">${esc(settings.recoveryQ) || t("合言葉を入れてください")}</p>
     <input type="text" id="rec-answer" placeholder="${t("こたえ")}" style="max-width:300px;">
     <div class="lock-msg" id="rec-msg"></div>
     <button type="button" class="btn btn-primary btn-xl" id="rec-submit" style="max-width:300px;">${t("確認する")}</button>
-    <button type="button" class="lock-forgot" id="rec-cancel">${t("パスコード入力にもどる")}</button>`;
+    <button type="button" class="lock-forgot" id="rec-cancel">${t("パスコードの画面に戻る")}</button>`;
   document.getElementById("rec-answer").focus();
   document.getElementById("rec-submit").addEventListener("click", () => {
     if (isLockedOut("rec")) { document.getElementById("rec-msg").textContent = t("5時間後にお試しください"); return; }
@@ -6210,7 +6269,7 @@ function showRecovery() {
       settings.lockUntil[lockMode] = 0;
       store.set("mn_settings", settings);
       document.getElementById("rec-msg").style.color = "var(--accent)";
-      document.getElementById("rec-msg").textContent = t("解除しました。ホームにもどります…");
+      document.getElementById("rec-msg").textContent = t("解除しました。ホームに戻ります…");
       setTimeout(goHome, 1200);
     } else {
       document.getElementById("rec-msg").textContent = noteLockFail("rec") ? t("5回まちがえました。5時間後にお試しください") : t("合言葉がちがうようです。");
@@ -6260,7 +6319,7 @@ function verifyPasscodeThen(target, next, opt) {
       <label class="field"><span class="field-label">${t("今の4桁")}</span>
       <input type="password" inputmode="numeric" maxlength="4" id="pcv-code" placeholder="＊＊＊＊" autocomplete="off"></label>
       <div class="lock-msg" id="pcv-err" style="min-height:0; text-align:center;"></div>
-      <button type="button" class="btn btn-primary btn-xl" id="pcv-ok">${t("確かめる")}</button>
+      <button type="button" class="btn btn-primary btn-xl" id="pcv-ok">${t("確認する")}</button>
       ${settings.recoveryQ ? `<button type="button" class="lock-forgot" id="pcv-forgot" style="margin-top:10px;">${t("4桁を忘れたときは、合言葉で")}</button>` : ""}
     </div>
     <button type="button" class="btn btn-secondary btn-xl" id="pcv-cancel" style="margin-top:6px;">${t("やめる")}</button>`;
@@ -6285,7 +6344,7 @@ function verifyPasscodeThen(target, next, opt) {
       <label class="field"><span class="field-label">${t("こたえ")}</span>
       <input type="text" id="pcv-ans" autocomplete="off"></label>
       <div class="lock-msg" id="pcv-err2" style="min-height:0; text-align:center;"></div>
-      <button type="button" class="btn btn-primary btn-xl" id="pcv-ok2">${t("確かめる")}</button>`;
+      <button type="button" class="btn btn-primary btn-xl" id="pcv-ok2">${t("確認する")}</button>`;
     document.getElementById("pcv-ok2").addEventListener("click", () => {
       const e2 = document.getElementById("pcv-err2");
       if (isLockedOut("rec")) { e2.textContent = t("5時間後にお試しください"); return; }
@@ -6339,7 +6398,7 @@ function renderPasscodeSetup(editTarget) {
       <label class="field"><span class="field-label">${t("質問（自分で決められます）")}</span>
       <input type="text" id="pc-q" placeholder="${t("例：好きな食べ物は？")}" value="${esc(settings.recoveryQ)}"></label>
       <label class="field"><span class="field-label">${t("こたえ")}</span>
-      <input type="text" id="pc-a" placeholder="${settings.recoveryA ? t("（設定済み。変えるときだけ入力）") : t("例：カレー")}"></label>
+      <input type="text" id="pc-a" placeholder="${settings.recoveryA ? t("（設定済み。変えるときだけ書く）") : t("例：カレー")}"></label>
     </div>
     <div class="lock-msg" id="pc-err" style="min-height:0; text-align:center;"></div>
     <button type="button" class="btn btn-primary btn-xl" id="pc-save">${t("保存")}</button>`;
@@ -6370,7 +6429,7 @@ function savePasscode(target) {
 // 違うアカウントや Android⇄iPhone のときは、記録を1つのファイルにまとめて
 // ご自分あてに送り（LINE・メールなど。送り方はOSの共有画面に任せる）、新しいスマホで開く。
 // サーバーは使わない。ファイルは当社を通らない。
-//  ・書き出しても、このスマホの記録は消えない
+//  ・送っても、このスマホの記録は消えない
 //  ・受け取りは「合わせる」＝今ある記録は残して足す（2026-10-12 Yukiさん決定）。何も消さない
 //  ・失敗したら何も変えない。終わったら件数で知らせる
 //  ・ファイルの形が新しすぎる（受け取る側のアプリが古い）ときは、何も変えずに更新をお願いする
@@ -6464,7 +6523,7 @@ async function renderTransferOut() {
   const days = transferDayCount(d);
   wrap.innerHTML = `
     <p class="transfer-step">${t("前のスマホでやること")}</p>
-    <p class="transfer-safe"><span class="nowrap">${t("書き出しても、")}</span><span class="nowrap">${t("このスマホの記録は")}</span><span class="nowrap">${t("消えません")}</span></p>
+    <p class="transfer-safe"><span class="nowrap">${t("送っても、")}</span><span class="nowrap">${t("このスマホの記録は")}</span><span class="nowrap">${t("消えません")}</span></p>
     <p class="transfer-lead"><span class="nowrap">${t("記録を1つの")}</span><span class="nowrap">${t("ファイルにまとめて、")}</span><span class="nowrap">${t("ご自分あてに送ります。")}</span></p>
     <p class="transfer-count">${t("{d}日分の記録", { d: days })}${count ? t("・写真{p}枚", { p: count }) : ""}</p>
     ${count ? `
@@ -6868,15 +6927,59 @@ function openOutfit() {
 }
 // ひとこと欄の高さを、画面が見えてから何度か測り直す（隠れているうちは0になるため）
 // 1行入力ふうの欄（食事・外食など）：長く書くと下にのびる
+function growToFit(el) { el.style.height = "auto"; el.style.height = (el.scrollHeight + el.offsetHeight - el.clientHeight) + "px"; }
 function wireGrowInputs(root) {
   const fs = CSS.supports && CSS.supports("field-sizing", "content");
   (root || document).querySelectorAll(".grow-input").forEach(el => {
     if (fs) return; // ブラウザが自動調整してくれる
-    const grow = () => { el.style.height = "auto"; el.style.height = (el.scrollHeight + el.offsetHeight - el.clientHeight) + "px"; };
-    el.addEventListener("input", grow);
-    grow();
+    if (!el.dataset.growWired) { el.dataset.growWired = "1"; el.addEventListener("input", () => growToFit(el)); }
+    if (el.offsetParent) growToFit(el); // 隠れているうちは0になるので、見えてから regrowVisible() で測る
   });
 }
+// 画面が見えてから、前に書いた長い文の高さを測り直す（field-sizing の無い iPhone など。2026-10-26）
+function regrowVisible(root) {
+  if (CSS.supports && CSS.supports("field-sizing", "content")) return;
+  const fix = () => (root || document).querySelectorAll(".grow-input").forEach(el => { if (el.offsetParent) growToFit(el); });
+  requestAnimationFrame(fix);
+  setTimeout(fix, 120);
+}
+
+// ---------- 書いて欄がのびたら、画面もついていく ----------
+// マイクで話すと欄が下にのびても画面が動かず、下のタブ・戻る・保存の帯の下に隠れていた（2026-10-26 製品版前の確認）。
+// 指で打つときも、今の行が画面の下にぴったりくっつかないよう、少し余白を空けて見せる。
+// 欄の終わりで書いているとき（マイクはいつも終わりに足す）だけ動かす。途中を直しているときはブラウザにまかせる
+const BOTTOM_BARS = "#tab-bar, .ad-banner, .back-fab, .shop-fab, .flow-footer, .search-bar-box";
+function keepInputInView(el) {
+  if (!el || !el.isConnected || !el.offsetParent) return;
+  const atEnd = document.activeElement !== el || el.selectionEnd == null || el.selectionEnd >= el.value.length - 1;
+  if (!atEnd) return;
+  const vv = window.visualViewport;
+  let limit = vv ? vv.offsetTop + vv.height : window.innerHeight;
+  const r = el.getBoundingClientRect();
+  document.querySelectorAll(BOTTOM_BARS).forEach(b => {
+    if (b.contains(el) || !b.getClientRects().length) return;
+    const st = getComputedStyle(b);
+    if (st.visibility === "hidden" || st.display === "none" || !/(fixed|sticky)/.test(st.position)) return;
+    const br = b.getBoundingClientRect();
+    if (br.top < limit * 0.5 || br.right < r.left || br.left > r.right) return; // 画面の下半分にあって、欄と横に重なるものだけ
+    limit = Math.min(limit, br.top);
+  });
+  const over = r.bottom + 14 - limit;
+  if (over <= 0) return;
+  // 欄が見える場所より高いときは、上がはみ出してもよい（書いている終わりのほうを見せる）
+  let box = el.parentElement;
+  while (box && box !== document.body) {
+    const oy = getComputedStyle(box).overflowY;
+    if (/(auto|scroll)/.test(oy) && box.scrollHeight > box.clientHeight + 2) break;
+    box = box.parentElement;
+  }
+  if (box && box !== document.body) box.scrollBy({ top: over }); else window.scrollBy({ top: over });
+}
+document.addEventListener("input", e => {
+  const el = e.target;
+  if (!el || el.tagName !== "TEXTAREA") return;
+  requestAnimationFrame(() => keepInputInView(el));
+});
 
 function regrowOutfitNotes() {
   if (CSS.supports && CSS.supports("field-sizing", "content")) return; // ブラウザが自動調整してくれる
@@ -7039,7 +7142,7 @@ function renderOutfitDay(ds) {
       <input type="file" id="oday-file-pick" accept="image/*" style="display:none;">
       <div class="meal-line" style="margin-top:12px;">
         <textarea id="oday-note" class="outfit-note-input" rows="1" placeholder="${phEx("oday-note", t("例：紺のセーター"))}">${esc(o.note || "")}</textarea>
-        ${micMini("oday-note")}
+        ${micMini("oday-note", "oday-keep")}
       </div>
       ${(o.photo || o.note) ? `<div class="oday-del-row"><button type="button" class="oday-del" id="outfit-day-del">${t("この日の服を消す")}</button></div>` : ""}
     </div>
@@ -7131,7 +7234,8 @@ function formatYear(ym) {
 }
 function openAlbum() {
   albumReturnTo = null; // ふつうの入口から来たときは、戻るは従来どおり
-  if (albumDoneToday()) renderAlbumDone(false); else renderAlbumPhoto();
+  // ひと言を書きかけて戻った人は、同じ写真と書きかけのまま（2026-10-26）
+  if (albumDoneToday()) renderAlbumDone(false); else renderAlbumPhoto(!!(albumNoteDraft.trim() && currentAlbumPhoto));
   showScreen("screen-album");
 }
 
@@ -7226,6 +7330,7 @@ function renderAlbumPhotoView() {
     <button type="button" class="btn btn-primary btn-xl" id="album-keep">${t("保存")}</button>
     <button type="button" class="btn btn-secondary btn-xl" id="album-list" style="margin-top:10px;">${t("「メモリーアルバム」を見る（{n}）", { n: memos.length })}</button>`;
   wireMics(document.getElementById("album-wrap")); // 話して書く
+  wireGrowInputs(document.getElementById("album-wrap")); // 長く書くと欄が下にのびる（iPhone でものびるように。2026-10-26）
   // 写真をタップすると少し大きく、もう一度タップで元に戻す（2026-10-21 Yukiさん「小さいのでタップで少し大きく。画面いっぱいでなくていい」）
   const albumImg = document.querySelector("#album-wrap .album-photo.has-img img");
   // ふだんは下のボタンまで1画面に収まるよう縮めている（fitAlbumPhoto）。大きくしたときはその縮めを外し、スクロールにまかせる
@@ -7357,8 +7462,11 @@ function renderAlbumDone(justSaved, reveal) {
 
 // メモリーアルバムの一覧（30件ずつ表示）
 let albumListShown = 30;
+let albumListScrollY = 0; // 一覧から写真を開いて戻ったとき、一覧の同じ場所へ（2026-10-26）
 function renderAlbumList(keep) {
   if (keep !== true) albumListShown = 30;
+  if (keep === true && albumListScrollY) { const y = albumListScrollY; requestAnimationFrame(() => window.scrollTo(0, y)); }
+  albumListScrollY = 0;
   albumView = "list";
   setBackLabel("album-back", true);
   const a = loadAlbumMemos();
@@ -7373,12 +7481,12 @@ function renderAlbumList(keep) {
             <div class="album-item-note">${m.note ? esc(m.note) : t("（メモなし）")}</div>
             <div class="album-item-date"><span class="row-ico">${balloonIconSvg("cal")}</span>${m.photoDate ? t("{d}ごろ", { d: formatYM(m.photoDate) }) : t("撮影した年月なし")}<span class="album-rec">${t("・記録 {d}", { d: m.date })}</span></div>
           </div>
-          <button type="button" class="album-edit" data-idx="${idx}" aria-label="${t("追記する")}">${balloonIconSvg("pencil")}</button>
+          <button type="button" class="album-edit" data-idx="${idx}" aria-label="${t("書き足す")}">${balloonIconSvg("pencil")}</button>
           <button type="button" class="album-del" data-idx="${idx}" aria-label="${t("消す")}">${balloonIconSvg("trash")}</button>
         </div>`).join("");
   document.getElementById("album-wrap").innerHTML = `
     <div class="album-list-head">${t("メモリーアルバム（{n}）", { n: a.length })}</div>
-    <p class="album-cap">${t("日付は写真を撮影した年月（答え合わせ）")}<br>${t("えんぴつのボタンで追記できます")}</p>
+    <p class="album-cap">${t("日付は写真を撮影した年月（答え合わせ）")}<br>${t("えんぴつのボタンで書き足せます")}</p>
     ${items}
     ${rest > 0 ? `<button type="button" class="btn btn-secondary btn-xl" id="album-more" style="margin-top:10px;">${t("さらに{a}件見る（あと{b}件）", { a: Math.min(30, rest), b: rest })}</button>` : ""}`;
   const more = document.getElementById("album-more");
@@ -7415,6 +7523,7 @@ function renderAlbumList(keep) {
 
 // 思い出をひとつ開く（写真とメモを大きく。← 戻るで一覧へ）
 function renderAlbumView(idx) {
+  if (albumView === "list") albumListScrollY = window.scrollY;
   albumView = "view";
   setBackLabel("album-back", true);
   const m = loadAlbumMemos()[idx];
@@ -7426,7 +7535,7 @@ function renderAlbumView(idx) {
     <div class="album-photo${isReal ? " has-img" : ""}"><span class="ph-emoji">${albumPhotoHtml(m.photo)}</span></div>
     <div class="album-view-note">${m.note ? esc(m.note).replace(/\n/g, "<br>") : t("（メモなし）")}</div>
     <div class="album-item-date album-view-date"><span class="row-ico">${balloonIconSvg("cal")}</span>${m.photoDate ? t("{d}ごろの写真", { d: formatYM(m.photoDate) }) : t("撮影した年月なし")}<span class="album-rec">${t("・記録 {d}", { d: m.date })}</span></div>
-    <button type="button" class="btn btn-secondary btn-xl" id="view-edit" style="margin-top:16px;"><span class="btn-ico">${balloonIconSvg("pencil")}</span>${t("追記する")}</button>`;
+    <button type="button" class="btn btn-secondary btn-xl" id="view-edit" style="margin-top:16px;"><span class="btn-ico">${balloonIconSvg("pencil")}</span>${t("書き足す")}</button>`;
   document.getElementById("view-edit").addEventListener("click", () => renderAlbumEdit(idx));
   // 今日の1枚と同じく、タップで少し大きく／もう一度で元に（2026-10-22）
   const vImg = document.querySelector("#album-wrap .album-photo.has-img img");
@@ -7440,6 +7549,7 @@ function leaveAlbumEdit() {
   if (albumEditFrom === "view" && loadAlbumMemos()[albumEditIdx]) renderAlbumView(albumEditIdx); else renderAlbumList(true);
 }
 function renderAlbumEdit(idx) {
+  if (albumView === "list") albumListScrollY = window.scrollY;
   albumEditFrom = albumView === "view" ? "view" : "list";
   albumEditIdx = idx;
   albumView = "edit";
@@ -7448,14 +7558,15 @@ function renderAlbumEdit(idx) {
   if (!m) { renderAlbumList(); return; }
   document.getElementById("album-wrap").innerHTML = `
     <div class="album-photo${hasPhoto(m.photo) ? " has-img" : ""}"><span class="ph-emoji">${albumPhotoHtml(m.photo)}</span></div>
-    <div class="album-q">${t("思い出を追記")}</div>
+    <div class="album-q">${t("思い出を書き足す")}</div>
     <label class="field"><span class="album-field-label">${t("メモ")}</span>
-      <div class="meal-line"><textarea id="edit-note" rows="3">${esc(m.note || "")}</textarea>${micMini("edit-note", "edit-save", "text")}</div></label>
+      <div class="meal-line"><textarea id="edit-note" class="grow-input" rows="3">${esc(m.note || "")}</textarea>${micMini("edit-note", "edit-save", "text")}</div></label>
     <label class="field"><span class="album-field-label">${t("撮影した年月")}</span>
       <input type="month" id="edit-date" value="${m.photoDate || ""}"></label>
     <button type="button" class="btn btn-primary btn-xl" id="edit-save">${t("保存")}</button>
     <button type="button" class="btn btn-secondary btn-xl" id="edit-cancel" style="margin-top:10px;">${t("やめる")}</button>`;
   wireMics(document.getElementById("album-wrap")); // 話して書く（語尾の「保存」で保存まで）
+  wireGrowInputs(document.getElementById("album-wrap"));
   document.getElementById("edit-save").addEventListener("click", () => {
     const list = loadAlbumMemos();
     if (!list[idx]) { renderAlbumList(); return; }
@@ -7480,6 +7591,7 @@ function openSleep() { store.set("mn_sleep_seen", todayStr()); updateSleepNudge(
 // おやすみ通知を押したとき：アプリのロックがかかっていれば、解除してから開く（2026-10-17。前はロックを飛ばして入れた）
 let pendingSleep = false;
 function openSleepFromNotice() {
+  saveFlowDraftIfAny(); // 日記や食事を書いている途中で通知を押しても、書いた文は残す（2026-10-26）
   const locked = settings.passcode && (!appStarted || document.querySelector(".screen.active")?.id === "screen-lock");
   if (locked) { pendingSleep = true; relockReturn = null; return; }
   openSleep();
@@ -7487,10 +7599,50 @@ function openSleepFromNotice() {
 
 // ---------- 今夜の月（実際の月の周期 約29.5日に同期して満ち欠け） ----------
 const MOON_SYNODIC = 29.530588853; // 朔望月（日）
-function moonAgeToday() {
-  const epoch = Date.UTC(2000, 0, 6, 18, 14); // 基準の新月
-  const age = ((Date.now() - epoch) / 86400000) % MOON_SYNODIC;
-  return age < 0 ? age + MOON_SYNODIC : age;
+// ---------- 本当の新月・満月の時刻（2026-10-27 Yukiさん「満月の日に、おやすみの月が満月になっていない」） ----------
+// 前は平均の周期（29.53日）だけで月齢を出し、名前を「月齢の整数＋1夜目」で決めていたため、
+// 昼に満月を迎えた日の夜（例：2026-10-26 13時が満月）は月齢15.1＝「十六夜」になっていた。
+// 平均と本当の満月は最大で半日ほどずれる。天文の計算式（Meeus『天文アルゴリズム』49章の主な項）で本当の時刻を出し、
+// 満月の瞬間にいちばん近い夜（朝10時〜翌朝10時）を満月の夜とする（カレンダーの満月の日とほぼ同じ夜になる）
+const MOON_EPOCH = Date.UTC(2000, 0, 6, 18, 14); // 計算式の k=0（2000年1月6日の新月）
+function moonPhaseMs(k) { // k が整数＝新月、k+0.5＝満月。戻りはミリ秒（誤差は数分）
+  const T = k / 1236.85, r = Math.PI / 180;
+  const jde = 2451550.09766 + 29.530588861 * k + 0.00015437 * T * T;
+  const E = 1 - 0.002516 * T - 0.0000074 * T * T;
+  const M = (2.5534 + 29.1053567 * k) * r, Mp = (201.5643 + 385.81693528 * k) * r, F = (160.7108 + 390.67050284 * k) * r;
+  const full = k % 1 !== 0;
+  const c = (full ? -0.40614 : -0.40720) * Math.sin(Mp) + (full ? 0.17302 : 0.17241) * E * Math.sin(M)
+    + (full ? 0.01614 : 0.01608) * Math.sin(2 * Mp) + (full ? 0.01043 : 0.01039) * Math.sin(2 * F)
+    + (full ? 0.00734 : 0.00739) * E * Math.sin(Mp - M) - (full ? 0.00515 : 0.00514) * E * Math.sin(Mp + M)
+    + (full ? 0.00209 : 0.00208) * E * E * Math.sin(2 * M);
+  return (jde + c - 2440587.5) * 86400000;
+}
+// 「夜」の番号：朝10時で区切る＝夜のまん中（夜10時ごろ）にいちばん近い夜に数える。
+// 夜中2時の満月はその前の晩、朝10時半の満月はその日の晩（カレンダーの満月の日と同じ）
+function moonNightIndex(ms) { const d = new Date(ms - 10 * 3600000); return Math.round(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()) / 86400000); }
+function moonInfo(atMs) {
+  const at = atMs == null ? Date.now() : atMs;
+  const n = moonNightIndex(at);
+  // いまいる「新月→次の新月」のひと月（本当の時刻で）
+  let kn = Math.floor((at - MOON_EPOCH) / 86400000 / MOON_SYNODIC) + 1;
+  while (moonPhaseMs(kn) > at) kn--;
+  const prev = moonPhaseMs(kn), mid = moonPhaseMs(kn + 0.5), next = moonPhaseMs(kn + 1);
+  const newN = moonNightIndex(prev), fullN = moonNightIndex(mid), nextNewN = moonNightIndex(next);
+  const isFull = n === fullN;
+  // 何夜目か：新月の夜＝1、満月の夜＝15。満月までは新月から、満月のあとは満月から数える（十六夜＝満月の次の夜）
+  let night;
+  if (n === nextNewN) night = 1;                       // 夜のうちに次の新月を迎える
+  else if (n < fullN) night = fullN - n <= 2 ? 15 - (fullN - n) : Math.min(12, n - newN + 1); // 満月の2夜前から十三夜・小望月（新月から数えると、ひと月によって満月までの夜数が14〜16とちがうため）
+  else night = Math.min(30, 15 + (n - fullN));
+  // 新月→満月と満月→新月は同じ長さではない（月の軌道がだ円のため）ので、半分ずつ分けて割る
+  const p = isFull ? 0.5 : at < mid ? 0.5 * (at - prev) / (mid - prev) : 0.5 + 0.5 * (at - mid) / (next - mid); // 満月の夜は、まんまるに描く
+  return {
+    p,
+    night,
+    isFull,
+    fullReached: n >= fullN && n !== nextNewN, // このひと月の満月の夜を迎えたか（星座の線をむすぶ）
+    daysToFull: n < fullN ? fullN - n : moonNightIndex(moonPhaseMs(kn + 1.5)) - n,
+  };
 }
 // 光っている部分の輪郭（満ち欠けの形）
 function moonLitPath(p, r) {
@@ -7501,8 +7653,8 @@ function moonLitPath(p, r) {
   return `M 0 ${-r} A ${r} ${r} 0 0 ${outer} 0 ${r} A ${rx} ${r} 0 0 ${term} 0 ${-r} Z`;
 }
 // 月齢ごとの和名と一言（昔ながらの月の名前）
-function moonName(age) {
-  const d = Math.min(30, Math.floor(age) + 1); // 新月からの夜数（1〜30）
+function moonName(night) {
+  const d = night; // 新月からの夜数（1〜30。満月の夜が15。moonInfo で本当の満月から数える）
   const table = [
     [1,  "新月（しんげつ）",        "月と太陽が重なる、始まりの夜"],
     [2,  "二日月（ふつかづき）",    "糸のように細い、生まれたての月"],
@@ -7596,13 +7748,11 @@ function moonExtraStarPos(i) {
   return [x, y];
 }
 function moonTonight() {
-  const age = moonAgeToday();
-  const p = age / MOON_SYNODIC;
-  const full = MOON_SYNODIC / 2;
-  const toFull = age <= full ? full - age : MOON_SYNODIC - age + full;
-  const isFull = toFull < 0.75;
+  const mi = moonInfo();
+  const p = mi.p;
+  const isFull = mi.isFull;
   const illum = (1 - Math.cos(2 * Math.PI * p)) / 2;
-  const { name, lore } = moonName(age);
+  const { name, lore } = moonName(mi.night);
   const v = moonVisits();
   // 今月の星座（今の季節に実際に見える星座から月替わり）。開いた夜ごとに星が1つずつ灯る
   const C = moonConstellationFor(v.cycle);
@@ -7610,10 +7760,10 @@ function moonTonight() {
   const constDone = v.count >= C.stars.length;
   const twinkle = (i) => `style="animation-duration:${(2.6 + (i * 0.7) % 2.6).toFixed(1)}s; animation-delay:-${((i * 0.53) % 3).toFixed(1)}s"`;
   // うっすら固定の星（月にかからない位置）
-  const baseStars = [[-150, -88, 1.1], [8, -92, 1], [148, 84, 1], [24, 88, 1.1]]
+  const baseStars = [[-150, -88, 1.6], [8, -92, 1.5], [148, 84, 1.5], [24, 88, 1.6]] // 2026-10-31 星を1.5倍に（Yukiさん「もう少し大きめに」）
     .map(([x, y, s], i) => `<circle class="st-base" cx="${x}" cy="${y}" r="${s}" fill="#fff" style="animation-duration:${(5 + i * 0.8).toFixed(1)}s; animation-delay:-${(i * 1.3).toFixed(1)}s"/>`).join("");
   // 星座の線は満月の夜にむすばれる（それまでは星が集まるだけ。満月後は月末まで結ばれたまま）
-  const fullReached = age >= (MOON_SYNODIC / 2 - 0.75);
+  const fullReached = mi.fullReached;
   let constLines = "";
   if (fullReached) {
     for (const [a, b] of C.lines) {
@@ -7624,12 +7774,12 @@ function moonTonight() {
   let visitStars = "";
   for (let i = 0; i < litN; i++) {
     const [x, y] = C.stars[i];
-    const s = (1.7 + 0.4 * ((i * 0.382) % 1)).toFixed(2);
+    const s = (2.5 + 0.6 * ((i * 0.382) % 1)).toFixed(2); // 1.5倍（2026-10-31）
     visitStars += `<circle class="st-visit" cx="${x}" cy="${y}" r="${s}" fill="#fff6d8" ${twinkle(i)}/>`;
   }
   for (let i = C.stars.length; i < v.count; i++) {
     const [x, y] = moonExtraStarPos(i);
-    const s = (0.9 + 0.6 * ((i * 0.618) % 1)).toFixed(2);
+    const s = (1.35 + 0.9 * ((i * 0.618) % 1)).toFixed(2); // 1.5倍（2026-10-31）
     visitStars += `<circle class="st-visit" cx="${x}" cy="${y}" r="${s}" fill="#fff6d8" ${twinkle(i)}/>`;
   }
   const stars = baseStars + constLines + visitStars;
@@ -7642,7 +7792,7 @@ function moonTonight() {
   // （2026-10-03 Yukiさん「大々的にしておかないと、ここを開く人がいなくなる」。
   //  それまでは月の最初の3晩だけ小さく出していた）
   const below = `
-    ${isFull ? "" : `<div class="moon-till">${t("満月まで、あと{n}日", { n: Math.round(toFull) })}</div>`}`;
+    ${isFull ? "" : `<div class="moon-till">${t("満月まで、あと{n}日", { n: mi.daysToFull })}</div>`}`;
   const svg = `
     <svg viewBox="-160 -100 320 200" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="${t("今夜の月と星座")}">
       <defs>
@@ -7714,7 +7864,7 @@ function renderGratitude() {
       <div class="grat-time-row" id="grat-time-row" ${notify.on ? "" : 'style="display:none;"'}>
         <span class="grat-time-label">${t("毎晩")}</span>
         <input type="time" id="grat-time" value="${notify.time}">
-        <span class="grat-time-label">${t("に、そっとお知らせします")}</span>
+        <span class="grat-time-label">${t("に、そっと通知します")}</span>
       </div>
     </div>
     <p class="sleep-footnote">${t("毎晩開くと星が灯って星座が現れます")}</p>`;
@@ -7770,10 +7920,7 @@ const NIGHT_NOTIFY_MSGS = [
 // 満月の夜だけの特別な通知（26個目）。この夜はローテーションを進めない
 const FULLMOON_NOTIFY_MSG = "今宵は満月です。あなたの夜空の星も、たまってきましたか？";
 function isFullMoonTonight() {
-  const age = moonAgeToday();
-  const full = MOON_SYNODIC / 2;
-  const toFull = age <= full ? full - age : MOON_SYNODIC - age + full;
-  return toFull < 0.75; // 画面の月の「満月」判定と同じ
+  return moonInfo().isFull; // 画面の月の「満月」判定と同じ
 }
 // 次の通知文言を返し、順番を1つ進める（localStorageで永続）
 function nextNightNotifyMessage() {
@@ -7825,48 +7972,49 @@ function wireIap() {
 }
 
 // 規約・プライバシーの本文（2026-09-15 正式版）
-// ※残りの【　】2か所（お問い合わせ先メールアドレス・管轄裁判所名）だけ、公開前に埋めること。
+// 空欄はもう無い（2026-10-26 問い合わせ先 marketing@fantamstick.jp・管轄は東京地方裁判所）。
 // ※中身を変えたら「最終改定日」も直すこと。内容は実装と一致させること（嘘を書かない）。
 const LEGAL_BLANK_NOTE = `<p class="legal-note">【　】の部分は、公開までに正式な内容を入れます。</p>`;
-const LEGAL_UPDATED = "2026年10月24日"; // 10/21：5章にカレンダー（予定を思い出す）を足した。10/24：5章の「お知らせ」を「通知」に
+const LEGAL_UPDATED = "2026年10月27日"; // 10/27：9章の矛盾して見える言い方を直した。10/21：5章にカレンダー。10/24：「お知らせ」→「通知」。10/26：製品版前の見直し（Siri・通知欄のメモ・バックアップ・消すときのこと・問い合わせ先・端末→スマホ・規約5条の言い方）
 const LEGAL_TEXTS = {
   privacy: {
     title: "プライバシーポリシー",
     body: `
-      ${LEGAL_BLANK_NOTE}
       <p>「記憶のギフト ～未来の自分へ～」（以下、本アプリ）は、ファンタムスティック株式会社（以下、当社）が提供します。日々の記録はとても私的なものです。安心してお使いいただけるよう、次のとおり取り扱います。</p>
 
       <h3>1. 記録は、お客さまのスマホの中に保存されます</h3>
-      <p>日記・食事・服装・買い物・メモリーアルバム・ありがとうなどの記録は、<b>お客さまの端末の中だけに保存されます</b>。当社のサーバーへ送られることはなく、当社が中身を見ることはできません。</p>
+      <p>日記・食事・服装・買い物・メモリーアルバム・ありがとうなどの記録は、<b>お客さまのスマホの中に保存されます</b>。当社のサーバーへ送られることはなく、当社が中身を見ることはできません。スマホの設定によっては、お客さまご自身の iCloud・Google のバックアップにも含まれます（6章）。</p>
 
       <h3>2. はじめに選んでいただく年代・性別について</h3>
-      <p>最初の画面でお聞きする年代・性別は、文字の大きさなど画面の出し方を整えるために使います。<b>この内容も端末の中だけに保存され、外部へ送られることはありません。</b>「無回答」を選ぶこともできます。</p>
+      <p>最初の画面でお聞きする年代・性別は、文字の大きさなど画面の出し方を整えるために使います。<b>この内容もスマホの中だけに保存され、外部へ送られることはありません。</b>「無回答」を選ぶこともできます。</p>
 
       <h3>3. 写真について</h3>
-      <p>食事・服装・メモリーアルバムで使う写真は、端末の中だけで扱われます。メモリーアルバムがスマホの写真を1枚表示する機能は、<b>お客さまが許可した場合にだけ</b>、端末の中で写真を読み取ります。許可は端末の設定からいつでも取り消せます。</p>
+      <p>食事・服装・メモリーアルバムで使う写真（カメラで撮った写真を含みます）は、スマホの中で扱われ、外部へ送られることはありません。食事の写真は3日たつと消えます。メモリーアルバムがスマホの写真を1枚表示する機能は、<b>お客さまが許可した場合にだけ</b>、スマホの中で写真を読み取ります。許可はスマホの設定からいつでも取り消せます。</p>
 
       <h3>4. 音声入力について</h3>
       <p>「話して書く」は、お使いのスマホに備わっている音声認識の仕組みを利用します。当社が音声や文字を受け取ることはありません。ただし、<b>機種や設定によっては、音声認識の処理が端末メーカー（Google・Apple など）のサーバーで行われることがあります</b>。その場合の取り扱いは、各社の方針にしたがいます。</p>
+      <p><b>Siri から残す（iPhone）</b>：「ヘイSiri、記憶のギフト」と話しかけると、話した言葉を「一瞬のひらめき」に残せます。声の聞き取りは Siri（Apple）が行い、その取り扱いは Apple の方針にしたがいます。残した言葉は、本アプリを開くまでスマホの中に一時的に置かれ、外部へ送られることはありません。ロックしたままでも残せるため、スマホを手にした方が言葉を足すことはできますが、中身を読むことはできません。</p>
+      <p><b>通知欄から書く（Android）</b>：通知欄（ロック画面を含みます）に「一瞬のひらめき」を書く欄を置けます。書いた言葉は、本アプリを開くまでスマホの中に一時的に置かれ、外部へ送られることはありません。ロック画面からは書き足すことだけができ、中身を読むことはできません。設定の「通知欄にひらめきを置く」でいつでも出さないようにできます。</p>
 
       <h3>5. 通知とカレンダーについて</h3>
-      <p>おやすみのお知らせなどの通知は、端末の中だけで動きます。通知の内容が外部へ送られることはありません。設定でいつでもオフにできます。</p>
-      <p>「予定を思い出す」は、<b>お客さまが許可した場合にだけ</b>、端末のカレンダーの予定（日時・題名・場所）を読み取り、通知の予約と、答えを表示する画面に使います。<b>予定を書き換えることはなく、本アプリの中に保存することも、外部へ送ることもありません。</b>通知には予定の内容を出しません。許可は端末の設定で、通知は本アプリの設定で、いつでもやめられます。</p>
+      <p>おやすみの通知などは、スマホの中だけで動きます。通知の内容が外部へ送られることはありません。設定でいつでもオフにできます。</p>
+      <p>「予定を思い出す」は、<b>お客さまが許可した場合にだけ</b>、スマホのカレンダーの予定（日時・題名・場所・くり返し）とカレンダーの名前を読み取り、通知の予約と、答えを表示する画面に使います。<b>予定を書き換えることはなく、予定の内容を本アプリの中に保存することも、外部へ送ることもありません。</b>保存するのは、どのカレンダーを使うかの選択だけです。通知には予定の内容を出しません。許可はスマホの設定で、通知は本アプリの設定で、いつでもやめられます。</p>
 
       <h3>6. バックアップと引き継ぎについて</h3>
-      <p>端末の設定にしたがって、記録が iCloud（iPhone）または Google（Android）へ自動でバックアップされることがあります。これはお客さまご自身のアカウントの中で守られる仕組みで、当社は中身を読めません。</p>
+      <p>スマホの設定にしたがって、記録（Android では写真の一部も）が iCloud（iPhone）または Google（Android）へ自動でバックアップされることがあります。これはお客さまご自身のアカウントの中で守られる仕組みで、当社は中身を読めません。</p>
       <p>別のスマホや別のアカウントへ移すときは、設定の「新しいスマホへ送る」で記録を1つのファイルにまとめ、お客さまご自身が選んだ方法（LINE・メールなど）で、ご自分あてに送っていただけます。このファイルは当社のサーバーを通らず、当社は中身を読めません。<b>ファイルには日記・写真・ロックのパスコードなどがそのまま入っているため、ご自分あて以外には送らないでください。</b>受け取ったスマホでは、今ある記録は消さずに、前のスマホの記録を足します。</p>
 
       <h3>7. 集めない情報</h3>
-      <p>本アプリは、アカウント登録を必要としません。氏名・住所・電話番号・メールアドレスをご入力いただくことはありません。行動の履歴を集めて分析することもしていません。</p>
+      <p>本アプリは、アカウント登録を必要としません。氏名・住所・電話番号・メールアドレスをご入力いただくことはありません。行動の履歴を集めて分析することもしていません。文字の形（フォント）などもアプリの中に入っており、本アプリが自動で外部と通信することはありません。</p>
 
       <h3>8. 広告について</h3>
       <p><b>現在、本アプリに広告は表示されません。</b>将来、広告を表示する場合は、配信会社名や取り扱いを本ポリシーに明記したうえで、アプリ内でお知らせします。</p>
 
       <h3>9. 第三者への提供</h3>
-      <p>お客さまの記録を第三者へ渡すことはありません。法令にもとづく開示の求めがあった場合を除きます（なお、記録は端末の中にあるため、当社が提出できる記録はありません）。</p>
+      <p>お客さまの記録は当社の手元にないため、第三者へ渡すことはありません。法令にもとづく開示を求められた場合も、当社が提出できる記録はありません。</p>
 
       <h3>10. 記録を消したいとき</h3>
-      <p>設定の「すべてのデータを消す」で、端末の中の記録をすべて消せます。アプリを削除した場合も、端末の中の記録は消えます。<b>いったん消した記録は、当社では元に戻せません。</b></p>
+      <p>設定の「すべてのデータを消す」で、スマホの中の記録をすべて消せます（写真のファイルは、次に本アプリを開いたときに消えます）。アプリを削除した場合も、スマホの中の記録は消えます。<b>いったん消した記録は、当社では元に戻せません。</b>なお、すでに取られた iCloud・Google のバックアップや、お客さまが送った引き継ぎのファイルは消えませんので、必要に応じてご自身で削除してください。</p>
 
       <h3>11. お子さまの利用</h3>
       <p>どなたでもお使いいただけますが、記録の管理はご本人またはご家族の責任のもとでお願いします。</p>
@@ -7875,7 +8023,7 @@ const LEGAL_TEXTS = {
       <p>本ポリシーは、必要に応じて改定することがあります。大きな変更があるときは、アプリ内でお知らせします。</p>
 
       <h3>13. お問い合わせ</h3>
-      <p>プライバシーについてのご質問は【お問い合わせ先メールアドレス】までご連絡ください。</p>
+      <p>プライバシーについてのご質問は、marketing@fantamstick.jp までご連絡ください。</p>
 
       <p class="legal-updated">最終改定日：${LEGAL_UPDATED}／提供：ファンタムスティック株式会社</p>
     `,
@@ -7883,7 +8031,6 @@ const LEGAL_TEXTS = {
   terms: {
     title: "利用規約",
     body: `
-      ${LEGAL_BLANK_NOTE}
       <p>この利用規約（以下、本規約）は、「記憶のギフト ～未来の自分へ～」（以下、本アプリ）をお使いいただく際の約束ごとを定めるものです。本アプリをお使いになる前に、お読みください。</p>
 
       <p class="legal-alert"><b>いちばん大切なお願い</b><br>記録は、お客さまのスマホの中にだけ入っています。<b>スマホが壊れる・なくす・初期化する・アプリを消す、などがあると記録は消えます。消えた記録を当社が元に戻すことはできません。</b>大切な記録は、スマホのバックアップ（iCloud・Google）を必ずオンにしてお使いください。</p>
@@ -7895,11 +8042,11 @@ const LEGAL_TEXTS = {
       <p>本アプリは、日々のできごとを記録し、あとから思い出す習慣づくりをお手伝いするものです。</p>
 
       <h3>第3条（記録の保存と消失／責任を負いかねること）</h3>
-      <p>記録は、お客さまの端末の中に保存されます。当社のサーバーには保管していません。したがって、次のような場合に記録が失われることがあり、<b>当社は失われた記録を復元できません。また、記録の消失・破損・読み取れなくなることによって生じたいかなる損害についても、当社は責任を負いかねます。</b></p>
+      <p>記録は、お客さまのスマホの中に保存されます。当社のサーバーには保管していません。したがって、次のような場合に記録が失われることがあり、<b>当社は失われた記録を復元できません。また、記録が消えたり、壊れたり、読めなくなったりしたことで生じたいかなる損害についても、当社は責任を負いかねます。</b></p>
       <ul>
-        <li>端末の故障・水濡れ・電池切れ・紛失・盗難</li>
-        <li>端末の初期化、本アプリの削除、機種変更</li>
-        <li>端末の空き容量不足、OSやアプリの更新、端末の設定変更</li>
+        <li>スマホの故障・水濡れ・電池切れ・紛失・盗難</li>
+        <li>スマホの初期化、本アプリの削除、機種変更</li>
+        <li>スマホの空き容量不足、OSやアプリの更新、スマホの設定変更</li>
         <li>バックアップが取られていなかった場合、またはバックアップからの復元が失敗した場合</li>
         <li>引き継ぎのファイルが送れなかった・届かなかった・読み込めなかった場合、またはお客さまが送り先を間違えた場合</li>
         <li>お客さまご自身の操作（「すべてのデータを消す」の実行、記録の削除など）</li>
@@ -7911,7 +8058,7 @@ const LEGAL_TEXTS = {
       <p>アプリや日記にパスコードを設定できます。<b>パスコードを忘れた場合、当社が解除することはできません。</b>設定時にお決めいただく「合言葉（秘密の質問）」でのみ解除できます。合言葉も分からなくなった場合は、アプリを削除して入れ直すことになり、そのとき記録は消えます。</p>
 
       <h3>第5条（医療行為ではありません）</h3>
-      <p>本アプリの思い出しクイズや記録は、毎日の習慣づくりを目的としたものです。<b>病気の診断・治療・予防を行うものではありません。</b>体調やもの忘れが気になるときは、お医者さまにご相談ください。</p>
+      <p>本アプリの思い出しクイズや記録は、毎日の習慣づくりを目的としたものです。<b>病気の診断・治療・予防を行うものではありません。</b>体調や記憶のことで気になることがあれば、お医者さまにご相談ください。</p>
 
       <h3>第6条（広告・有料の機能）</h3>
       <p>現在、本アプリに広告はありません。有料の機能も提供していません。将来これらを導入する場合は、アプリ内でお知らせし、本規約を改定します。</p>
@@ -7923,13 +8070,13 @@ const LEGAL_TEXTS = {
       <p>当社は、本アプリが常に正しく動くこと、記録が失われないことを保証するものではありません。本アプリの利用によってお客さまに生じた損害について、当社は責任を負いかねます。<span class="legal-small">（ただし、当社の故意または重大な過失による場合を除きます。また、お客さまが消費者である場合において、法令により免責が認められない部分については、この限りではありません。）</span></p>
 
       <h3>第9条（サービスの変更・終了）</h3>
-      <p>本アプリの内容は、予告なく変更・追加・終了することがあります。終了する場合も、端末の中の記録はそのまま残りますが、アプリが動かなくなることがあります。</p>
+      <p>本アプリの内容は、予告なく変更・追加・終了することがあります。終了する場合も、スマホの中の記録はそのまま残りますが、アプリが動かなくなることがあります。</p>
 
       <h3>第10条（本規約の変更）</h3>
       <p>本規約は、必要に応じて変更することがあります。変更後の内容は、アプリ内でお知らせします。</p>
 
       <h3>第11条（準拠法・管轄）</h3>
-      <p>本規約は日本法にしたがって解釈されます。本アプリに関して争いが生じた場合は、【管轄裁判所名】を第一審の専属的合意管轄裁判所とします。</p>
+      <p>本規約は日本法にしたがって解釈されます。本アプリに関して争いが生じた場合は、東京地方裁判所を第一審の専属的合意管轄裁判所とします。</p>
 
       <p class="legal-updated">最終改定日：${LEGAL_UPDATED}／提供：ファンタムスティック株式会社</p>
     `,
@@ -7957,11 +8104,7 @@ function nativeLocalNotify() {
 }
 // その夜の文言を日付から決める（予約し直しても同じ夜は同じ文）。満月の夜は特別文言
 function nightBodyFor(date) {
-  const epoch = Date.UTC(2000, 0, 6, 18, 14);
-  const age = (((date.getTime() - epoch) / 86400000) % MOON_SYNODIC + MOON_SYNODIC) % MOON_SYNODIC;
-  const full = MOON_SYNODIC / 2;
-  const toFull = age <= full ? full - age : MOON_SYNODIC - age + full;
-  if (toFull < 0.75) return t(FULLMOON_NOTIFY_MSG);
+  if (moonInfo(date.getTime()).isFull) return t(FULLMOON_NOTIFY_MSG); // 画面と同じ「満月の夜」
   return t(NIGHT_NOTIFY_MSGS[Math.floor(date.getTime() / 86400000) % NIGHT_NOTIFY_MSGS.length]);
 }
 const NIGHT_NOTIFY_ID_BASE = 8001; // 8001〜8030の30枠を使い回す（アプリを開くたび30日ぶん予約し直す）
@@ -8176,6 +8319,7 @@ function calTimeText(ev) {
 }
 async function openCalRecall(dateKey) {
   if (!dateKey) return;
+  saveFlowDraftIfAny(); // 書いている途中で通知を押しても、書いた文は残す（2026-10-26）
   const wrap = document.getElementById("calq-wrap");
   document.getElementById("calq-date").innerHTML =
     `${formatJP(todayStr())}<small>${t("{y}年", { y: new Date().getFullYear() })}</small>`;
@@ -8210,23 +8354,24 @@ async function openCalRecall(dateKey) {
 // 読めるのはスマホ本体の予定の置き場だけなので、まず本体のカレンダーに出ているかを見てもらう。iPhone と Android で書き分ける
 function calHelpHtml() {
   const ios = !!(window.Capacitor && window.Capacitor.getPlatform && window.Capacitor.getPlatform() === "ios");
+  // 文は 2026-10-25 Yukiさんの案を元に書き直し（ほかのカレンダーアプリも、たいていスマホのカレンダーに同期していることを知らせる）
   const steps = ios ? [
-    t("iPhoneに最初から入っている「カレンダー」アプリを開いて、その予定が出ているか見てください。"),
-    t("出ていれば、記憶のギフトでも読めます。上の「使うカレンダー」に、その予定のカレンダーのチェックが入っているか確かめてください。"),
-    t("出ていなければ、お使いのカレンダーのアプリの設定に「iPhoneのカレンダーと同期」のような項目がないか見て、オンにしてください。"),
-    t("Googleカレンダーを使っている方は、iPhoneの「設定」→「カレンダー」→「カレンダーアカウント」でGoogleのアカウントを足すと読めます。"),
+    t("iPhoneに最初から入っている「カレンダー」アプリを開き、その予定が表示されているか確認してください。ほかのカレンダーアプリを使っていても、多くの場合、予定はこの「カレンダー」アプリにも入っています。"),
+    t("表示されている場合は、この画面の「使うカレンダー」を見てください。その予定のカレンダーにチェックが入っているか確認してください。"),
+    t("表示されていない場合は、お使いのカレンダーアプリの設定を開いてください。「iPhoneのカレンダーと同期」のような項目をオンにしてください。"),
+    t("Googleカレンダーを使っている場合は、iPhoneの「設定」→「カレンダー」→「カレンダーアカウント」でGoogleアカウントを追加してください。"),
   ] : [
-    t("スマホのカレンダー（Googleカレンダーや、スマホに最初から入っているカレンダー）を開いて、その予定が出ているか見てください。"),
-    t("出ていれば、記憶のギフトでも読めます。上の「使うカレンダー」に、その予定のカレンダーのチェックが入っているか確かめてください。"),
-    t("出ていなければ、お使いのカレンダーのアプリの設定に「スマホのカレンダーと同期」のような項目がないか見て、オンにしてください。"),
+    t("スマホのカレンダー（「Googleカレンダー」など）を開き、その予定が表示されているか確認してください。ほかのカレンダーアプリを使っていても、多くの場合、予定はこのカレンダーにも入っています。"),
+    t("表示されている場合は、この画面の「使うカレンダー」を見てください。その予定のカレンダーにチェックが入っているか確認してください。"),
+    t("表示されていない場合は、お使いのカレンダーアプリの設定を開いてください。「スマホのカレンダーと同期」のような項目をオンにしてください。"),
   ];
   // 設定の説明が多すぎるので、細かい決まりも押すと開く中へ（2026-10-24 Yukiさん）
   return `
-    <p class="settings-hint" style="margin-top:14px;">${t("新しく足した予定は、このアプリを開いたときに通知に入ります。")}</p>
+    <p class="settings-hint" style="margin-top:14px;">${t("新しく足した予定は、このアプリを開いたときから通知されます。")}</p>
     <p class="settings-hint">${t("毎週くり返す予定は通知しません。")}</p>
-    <div class="set-more-sub">${t("予定が出てこないときは")}</div>
+    <div class="set-more-sub">${t("予定が表示されないときは")}</div>
     <ol>${steps.map(x => `<li>${x}</li>`).join("")}</ol>
-    <p class="settings-hint">${t("TimeTree など、予定を自分のところだけにしまうアプリの予定は読めません。")}</p>`;
+    <p class="settings-hint">${t("※ TimeTreeなど、アプリ内だけに保存された予定は読み込めません。")}</p>`;
 }
 
 // ---------- 設定のカード ----------
@@ -8246,9 +8391,9 @@ async function renderCalCard() {
       <button class="seg${c.on ? "" : " selected"}" data-v="0">${t("オフ")}</button>
     </div>
     ${c.on && !permitted ? `<p class="settings-hint cal-warn">${t("カレンダーを読む許可がありません。スマホの設定で「記憶のギフト」にカレンダーを許可してください")}</p>
-    <button type="button" class="btn btn-secondary btn-xl" id="cal-ask">${t("カレンダーの許可を求める")}</button>` : ""}
+    <button type="button" class="btn btn-secondary btn-xl" id="cal-ask">${t("カレンダーを許可する")}</button>` : ""}
     ${c.on && permitted ? `
-    <p class="settings-hint" style="margin-top:14px;">${t("時間等の設定はこちら↓")}</p>
+    <p class="settings-hint" style="margin-top:14px;">${t("時間などの設定はこちら ↓")}</p>
     <details class="set-more" id="cal-more" style="margin-top:6px;"${calMoreOpen ? " open" : ""}><summary>${t("くわしく")}</summary>
     <div class="cal-sub">${t("通知の回数")}</div>
     <div class="seg-group" id="cal-count">
@@ -8628,10 +8773,21 @@ function voiceSave(btn) {
   // 食事の欄（朝・昼・晩・間食・いちばんの1つ・外食）で「保存」と言ったときは、書いた分を残して**この画面にとどまる**
   // （2026-10-24 Yukiさん「マイクで記録して保存と言うと、ホームに戻ってしまう」。朝を言ったあと昼も続けて話したいため）。
   // 指で「保存」を押したときは今までどおり（書き終わり＝ホームへ）
-  if (saveBtnId === "flow-skip" && /^(meal-|eo-)/.test(btn.dataset.mic || "")) {
+  // 日記も同じ（2026-10-26：日記だけ「保存」でホームへ移っていた）
+  if (saveBtnId === "flow-skip" && /^(meal-|eo-|diary-text$)/.test(btn.dataset.mic || "")) {
     saveFlowDraftIfAny();
-    buzzSave(); // 保存したら震わせる（指で保存を押したときと同じ。2026-10-25 Yukiさん「食事で保存と言っても震えない」）
-    toastMemo(t("保存しました"));
+    // 何も書いていないときは震わせない・「保存しました」も出さない（2026-10-26）
+    const wrote = [...document.querySelectorAll("#screen-flow textarea, #screen-flow input[type=text]")].some(el => el.value.trim());
+    if (wrote) {
+      buzzSave(); // 保存したら震わせる（指で保存を押したときと同じ。2026-10-25 Yukiさん「食事で保存と言っても震えない」）
+      toastMemo(t("保存しました"));
+    }
+    return;
+  }
+  // 服装の過去の日のひと言は書くたび自動で保存しているので、「保存」と言ったら知らせるだけ（前は震えなかった。2026-10-26）
+  if (saveBtnId === "oday-keep") {
+    const el = document.getElementById("oday-note");
+    if (el && el.value.trim()) { el.dispatchEvent(new Event("input", { bubbles: true })); buzzSave(); toastMemo(t("保存しました")); }
     return;
   }
   // 買い物の欄も同じ：「保存」と言っても「思い出しながら、お買い物」へ進まず、**書く画面にとどまる**
@@ -8991,7 +9147,13 @@ function wireEvents() {
   });
   document.getElementById("album-back").addEventListener("click", () => {
     if (unzoomAlbumPhoto()) return; // 写真を大きくしていたら、まず元の大きさに
-    if (albumView === "edit") { leaveAlbumEdit(); return; }
+    if (albumView === "edit") {
+      // 直したまま戻ったら、保存してから戻る（何も聞かれずに直したぶんが消えていた。2026-10-26）。「やめる」は今までどおり保存しない
+      const m = loadAlbumMemos()[albumEditIdx], note = document.getElementById("edit-note"), date = document.getElementById("edit-date");
+      const changed = m && note && date && (note.value.trim() !== (m.note || "") || (date.value && date.value !== (m.photoDate || "")));
+      if (changed) document.getElementById("edit-save").click(); else leaveAlbumEdit();
+      return;
+    }
     if (albumView === "view") { renderAlbumList(true); return; }
     if (albumView === "list") {
       // 日別ページから来ていたら、そこへ帰る（来た道を戻る）
