@@ -4328,7 +4328,7 @@ function optRecorded(value, e) {
   }
   if (value === "eatout") {
     const o = e.eatout; if (!o) return "";
-    return [["place", "場所"], ["food", "食べたもの"], ["with", "誰と"], ["link", "お店のリンク"]].filter(([k]) => has(o[k])).map(([, n]) => t(n)).join("・");
+    return [["place", "場所"], ["food", "食べたもの"], ["with", "誰と"], ["link", "リンク"]].filter(([k]) => has(o[k])).map(([, n]) => t(n)).join("・");
   }
   if (value === "write") return has(e.diary) ? t("日記") : "";
   return "";
@@ -4774,7 +4774,7 @@ function eatoutFields(e) {
         ${micMini("eo-with", "flow-skip")}
       </div>
     </div>
-    <label class="field"><span class="field-label">${t("お店のリンク")}</span>
+    <label class="field"><span class="field-label">${t("リンク（店、マップ、食べログ等）")}</span>
     <input type="url" id="eo-link" placeholder="https://…" value="${esc(s.link)}"></label>`;
 }
 function eatoutCollect(e) {
