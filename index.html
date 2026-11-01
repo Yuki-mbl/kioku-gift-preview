@@ -2924,6 +2924,36 @@ html[data-fontsize="xlarge"] #set-font-size, html[data-fontsize="large"] #set-fo
 }
 /* 淡い配色のおやすみは、背景を暗くしたぶん「おやすみなさい」の緑を濃く（2026-10-31 Yukiさん） */
 [data-theme="pastel"] .sleep-greeting, [data-theme="pastel"] .grat-to-diary { color: #4f6b46; } /* 「残したい感謝は日記へ →」も同じ緑に */
+
+/* ---------- 外食の写真（10枚まで。2026-11-01） ---------- */
+.eo-photos { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
+.eo-thumb { position: relative; aspect-ratio: 1; border-radius: 12px; overflow: hidden; background: var(--border); }
+.eo-thumb img { width: 100%; height: 100%; object-fit: cover; display: block; cursor: zoom-in; }
+.eo-thumb .eo-del { position: absolute; top: 4px; right: 4px; width: 26px; height: 26px; }
+.eo-first { position: absolute; left: 4px; bottom: 4px; background: var(--accent-strong); color: #fff; font-size: .72rem; font-weight: 700; padding: 1px 6px; border-radius: 8px; pointer-events: none; }
+.eo-add { aspect-ratio: 1; border-radius: 12px; border: 2px dashed var(--border); background: none; color: var(--muted);
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; font-family: inherit; cursor: pointer; }
+.eo-add-plus { font-size: 1.7rem; line-height: 1; }
+.eo-add-text { font-size: .72rem; font-weight: 700; }
+
+/* 写真を1枚ずつ大きく見る（左右に送れる） */
+#gallery-pop { position: fixed; inset: 0; z-index: 320; background: rgba(8, 10, 22, .9);
+  display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 18px; gap: 10px; }
+#gallery-pop[hidden] { display: none; }
+.gal-stage { position: relative; width: 100%; display: flex; align-items: center; justify-content: center; }
+.gal-img { max-width: 100%; max-height: 58vh; object-fit: contain; border-radius: 16px; }
+.gal-nav { position: absolute; top: 50%; transform: translateY(-50%); width: 46px; height: 46px; border-radius: 50%; border: none;
+  background: rgba(255, 255, 255, .85); color: #333; font-size: 1.8rem; line-height: 1; cursor: pointer; }
+.gal-nav[hidden] { display: none; }
+.gal-prev { left: 2px; } .gal-next { right: 2px; }
+.gal-count { color: #fff; margin: 0; font-weight: 700; min-height: 1.2em; }
+.gal-actions { width: 100%; max-width: 360px; display: flex; flex-direction: column; gap: 10px; }
+.gal-actions .gal-remove { color: var(--danger, #c85a4b); }
+
+/* 思い出すの答え：写真が2枚以上なら1枚目＋「写真 n枚 ›」 */
+.quiz-photo-more { position: relative; display: block; margin: 10px auto 0; padding: 0; border: none; background: none; cursor: pointer; max-width: min(100%, 300px); }
+.quiz-photo-cover { display: block; width: 100%; height: auto; max-height: min(36vh, 340px); object-fit: cover; border-radius: 14px; border: 1.5px solid var(--border); }
+.quiz-photo-badge { position: absolute; right: 8px; bottom: 8px; background: rgba(40, 32, 24, .78); color: #fff; font-size: .9rem; font-weight: 700; padding: 4px 10px; border-radius: 999px; }
 </style>
 <div id="app">
 
@@ -4016,6 +4046,8 @@ function goBackOneStep() {
   if (calIntro && !calIntro.hidden) { document.getElementById("cal-intro-no").click(); calIntro.hidden = true; return true; }
   const photoPop = document.getElementById("photo-pop");
   if (photoPop && !photoPop.hidden) { photoPop.hidden = true; return true; }
+  const galPop = document.getElementById("gallery-pop");
+  if (galPop && !galPop.hidden) { closeGallery(); return true; } // 写真を1枚ずつ見る画面は、戻るで閉じる
   const shopPop = document.getElementById("shop-pop");
   if (shopPop && !shopPop.hidden) { closeShopPop(); return true; }
   if (unzoomAlbumPhoto()) return true; // アルバムの写真を大きくしているときは、まず元の大きさに（2026-10-25）
@@ -4066,7 +4098,7 @@ function wireSwipeNav() {
     const scr = document.querySelector(".screen.active")?.id;
     // 入力欄・下タブから始めた指は対象外
     const from = e.target;
-    const inExcluded = from.closest("input, textarea, #tab-bar, #memo-pop, #shop-pop, #photo-pop, #alert-pop, #cal-intro-pop, .reset-slide"); // すべらせて消すの途中で離すと戻ってしまっていた（2026-10-26） // どのカレンダーも月めくりは矢印のみ。なぞりはどこでもページ移動
+    const inExcluded = from.closest("input, textarea, #tab-bar, #memo-pop, #shop-pop, #photo-pop, #gallery-pop, #alert-pop, #cal-intro-pop, .reset-slide"); // すべらせて消すの途中で離すと戻ってしまっていた（2026-10-26） // どのカレンダーも月めくりは矢印のみ。なぞりはどこでもページ移動
     const diaryLock = scr === "screen-lock" && lockMode === "diary"; // 日記のパスコード画面はなぞりで先へ進めてよい（アプリ全体ロックは不可）
     ok = !!scr && (!SWIPE_OFF_SCREENS.has(scr) || diaryLock) && !inExcluded;
   }, { passive: true });
@@ -4729,10 +4761,10 @@ function eatoutFields(e) {
         ${micMini("eo-place", "flow-skip")}
       </div>
     </div>
+    <div class="field"><span class="field-label" id="eo-photo-label"></span><div class="eo-photos" id="eo-photos"></div></div>
     <div class="field"><span class="field-label">${t("食べたもの")}</span>
       <div class="meal-line">
         <textarea id="eo-food" rows="1" class="grow-input" placeholder="${phEx("eo-food", t("例：天ぷらそば"))}">${esc(s.food)}</textarea>
-        <span class="meal-photo-slot" data-slot="eatout"></span>
         ${micMini("eo-food", "flow-skip")}
       </div>
     </div>
@@ -4851,8 +4883,9 @@ function pruneMealPhotos() { // 3日前より古い写真を自動削除（外�
   for (const k in p) {
     if (k >= limit) continue;
     const v = p[k];
-    if (v && typeof v === "object" && v.eatout) {
-      if (Object.keys(v).length > 1) { p[k] = { eatout: v.eatout }; changed = true; }
+    if (v && typeof v === "object" && Object.keys(v).some(sl => EATOUT_KEY_RE.test(sl))) {
+      const keep = {}; Object.keys(v).forEach(sl => { if (EATOUT_KEY_RE.test(sl)) keep[sl] = v[sl]; }); // 外食の写真（10枚まで）は全部残す
+      if (Object.keys(keep).length !== Object.keys(v).length) { p[k] = keep; changed = true; }
     } else {
       delete p[k]; changed = true;
     }
@@ -4865,11 +4898,33 @@ function mealPhotosOf(ds) {
   if (!v) return {};
   return typeof v === "string" ? { day: v } : v;
 }
-function mealPhotoList(ds) { return Object.values(mealPhotosOf(ds)).filter(Boolean); }
+function mealPhotoList(ds) { // 朝・昼・晩…の写真のあとに、外食の写真を並び順どおり
+  const v = mealPhotosOf(ds);
+  return [...Object.keys(v).filter(k => !EATOUT_KEY_RE.test(k)).map(k => v[k]), ...eatoutPhotos(ds)].filter(Boolean);
+}
 function setMealPhotoSlot(ds, slot, url) {
   const p = loadMealPhotos();
   const cur = typeof p[ds] === "string" ? { day: p[ds] } : (p[ds] || {});
   if (url) cur[slot] = url; else delete cur[slot];
+  if (Object.keys(cur).length) p[ds] = cur; else delete p[ds];
+  saveMealPhotos(p);
+}
+// ---------- 外食の写真は10枚まで（2026-11-01 Yukiさん「何品も撮ることが多いのに1枚しか登録できない」） ----------
+// しまい方は今までの「1つの欄に1枚」のまま、外食だけ eatout・eatout2…eatout10 と欄を増やす（eatout が1枚目）。
+// こうしておくと、引き継ぎ・片づけ・アプリを入れ直したときの写真の扱いは、今までの仕組みのまま全部の写真に効く
+const EATOUT_PHOTO_MAX = 10;
+const EATOUT_KEY_RE = /^eatout\d*$/;
+function eatoutKey(i) { return i === 0 ? "eatout" : "eatout" + (i + 1); }
+function eatoutPhotos(ds) {
+  const v = mealPhotosOf(ds), out = [];
+  for (let i = 0; i < EATOUT_PHOTO_MAX; i++) if (v[eatoutKey(i)]) out.push(v[eatoutKey(i)]);
+  return out;
+}
+function setEatoutPhotos(ds, list) {
+  const p = loadMealPhotos();
+  const cur = typeof p[ds] === "string" ? { day: p[ds] } : (p[ds] || {});
+  Object.keys(cur).forEach(k => { if (EATOUT_KEY_RE.test(k)) delete cur[k]; });
+  list.filter(Boolean).slice(0, EATOUT_PHOTO_MAX).forEach((u, i) => { cur[eatoutKey(i)] = u; });
   if (Object.keys(cur).length) p[ds] = cur; else delete p[ds];
   saveMealPhotos(p);
 }
@@ -4893,8 +4948,10 @@ function resizePhotoToDataURL(file, maxPx, quality) {
 function attachMealPhotoUI(content) {
   const area = content.querySelector(".input-area");
   if (!area) return;
+  const strip = area.querySelector("#eo-photos");
+  if (strip) renderEatoutPhotos(strip);
   const slots = area.querySelectorAll(".meal-photo-slot");
-  if (!slots.length) return;
+  if (!slots.length && !strip) return;
   slots.forEach(renderMealSlot);
   const hint = document.createElement("p");
   hint.className = "photo-hint";
@@ -4936,6 +4993,119 @@ function renderMealSlot(slotEl) {
     setMealPhotoSlot(flow.date, slot, null);
     renderMealSlot(slotEl);
   });
+}
+
+// 外食の写真の並び（書く画面）：小さい写真を並べ、最後に「＋」。✕で消す。押すと大きく見て「いちばん前にする」「消す」
+function renderEatoutPhotos(strip) {
+  const ds = flow.date;
+  const list = eatoutPhotos(ds);
+  const label = document.getElementById("eo-photo-label");
+  if (label) label.textContent = t("写真（{n}／{m}枚）", { n: list.length, m: EATOUT_PHOTO_MAX });
+  strip.innerHTML = list.map((u, i) => `
+      <span class="eo-thumb" data-i="${i}">
+        <img src="${photoSrc(u)}" alt="${t("外食の写真{n}", { n: i + 1 })}">
+        <button type="button" class="eo-del photo-del" data-i="${i}" aria-label="${t("写真を消す")}"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 7l10 10M17 7L7 17"/></svg></button>
+        ${i === 0 && list.length > 1 ? `<span class="eo-first">${t("1枚目")}</span>` : ""}
+      </span>`).join("")
+    + (list.length < EATOUT_PHOTO_MAX ? `<button type="button" class="eo-add"><span class="eo-add-plus" aria-hidden="true">＋</span><span class="eo-add-text">${t("写真を足す")}</span></button>
+      <input type="file" accept="image/*" multiple class="eo-file" style="display:none;">` : "");
+  const addOne = u => { const cur = eatoutPhotos(ds); if (cur.length < EATOUT_PHOTO_MAX) setEatoutPhotos(ds, [...cur, u]); };
+  const add = strip.querySelector(".eo-add"), file = strip.querySelector(".eo-file");
+  if (add) add.addEventListener("click", async () => {
+    const d = await pickPhotoNative(PHOTO_MAX_PX);
+    if (d === undefined) { file.click(); return; } // ブラウザは選択画面（何枚かまとめて選べる）
+    if (d) { const u = await toStoredPhoto(await shrinkDataUrl(d, PHOTO_MAX_PX, PHOTO_QUALITY)); addOne(u); renderEatoutPhotos(strip); }
+  });
+  if (file) file.addEventListener("change", async () => {
+    for (const f of [...(file.files || [])]) {
+      if (eatoutPhotos(ds).length >= EATOUT_PHOTO_MAX) break;
+      addOne(await toStoredPhoto(await resizePhotoToDataURL(f, PHOTO_MAX_PX, PHOTO_QUALITY)));
+    }
+    renderEatoutPhotos(strip);
+  });
+  strip.querySelectorAll(".eo-del").forEach(btn => btn.addEventListener("click", e => {
+    e.stopPropagation();
+    const cur = eatoutPhotos(ds); cur.splice(Number(btn.dataset.i), 1); setEatoutPhotos(ds, cur);
+    renderEatoutPhotos(strip);
+  }));
+  strip.querySelectorAll(".eo-thumb img").forEach(img => img.addEventListener("click", () => {
+    const i = Number(img.parentElement.dataset.i);
+    openGallery(eatoutPhotos(ds), i, {
+      front: j => { const cur = eatoutPhotos(ds); const [x] = cur.splice(j, 1); cur.unshift(x); setEatoutPhotos(ds, cur); renderEatoutPhotos(strip); return 0; },
+      remove: j => { const cur = eatoutPhotos(ds); cur.splice(j, 1); setEatoutPhotos(ds, cur); renderEatoutPhotos(strip); return cur; },
+    });
+  }));
+}
+
+// ---------- 写真を1枚ずつ大きく見る（左右に送れる）。edit を渡すと「いちばん前にする」「この写真を消す」も出す ----------
+let galleryState = null;
+function openGallery(list, start, edit) {
+  if (!list || !list.length) return;
+  let pop = document.getElementById("gallery-pop");
+  if (!pop) {
+    pop = document.createElement("div");
+    pop.id = "gallery-pop";
+    pop.innerHTML = `
+      <div class="gal-stage">
+        <button type="button" class="gal-nav gal-prev" aria-label="${t("前の写真")}">‹</button>
+        <img class="gal-img" alt="">
+        <button type="button" class="gal-nav gal-next" aria-label="${t("次の写真")}">›</button>
+      </div>
+      <p class="gal-count"></p>
+      <div class="gal-actions"></div>`;
+    document.getElementById("app").appendChild(pop);
+    pop.querySelector(".gal-prev").addEventListener("click", () => galleryMove(-1));
+    pop.querySelector(".gal-next").addEventListener("click", () => galleryMove(1));
+    // 左右になぞって送る
+    let sx = 0;
+    pop.addEventListener("touchstart", e => { sx = e.touches[0].clientX; }, { passive: true });
+    pop.addEventListener("touchend", e => { const dx = e.changedTouches[0].clientX - sx; if (Math.abs(dx) > 50) galleryMove(dx < 0 ? 1 : -1); }, { passive: true });
+  }
+  galleryState = { list: list.slice(), i: Math.max(0, Math.min(start || 0, list.length - 1)), edit: edit || null };
+  renderGallery();
+  pop.hidden = false;
+}
+function galleryMove(d) {
+  if (!galleryState) return;
+  const n = galleryState.list.length;
+  galleryState.i = (galleryState.i + d + n) % n;
+  renderGallery();
+}
+function renderGallery() {
+  const pop = document.getElementById("gallery-pop"), g = galleryState;
+  if (!pop || !g) return;
+  const n = g.list.length;
+  pop.querySelector(".gal-img").src = photoSrc(g.list[g.i]);
+  pop.querySelector(".gal-count").textContent = n > 1 ? t("{i}／{n}枚目", { i: g.i + 1, n }) : "";
+  pop.querySelectorAll(".gal-nav").forEach(b => { b.hidden = n < 2; });
+  const acts = pop.querySelector(".gal-actions");
+  acts.innerHTML = (g.edit ? `
+      ${g.i > 0 ? `<button type="button" class="btn btn-primary btn-xl gal-front">${t("いちばん前にする")}</button>` : ""}
+      <button type="button" class="btn btn-secondary btn-xl gal-remove">${t("この写真を消す")}</button>` : "")
+    + `<button type="button" class="btn btn-secondary btn-xl gal-close">${t("閉じる")}</button>`;
+  acts.querySelector(".gal-close").addEventListener("click", closeGallery);
+  const front = acts.querySelector(".gal-front");
+  if (front) front.addEventListener("click", () => { g.edit.front(g.i); const x = g.list.splice(g.i, 1)[0]; g.list.unshift(x); g.i = 0; renderGallery(); });
+  const rm = acts.querySelector(".gal-remove");
+  if (rm) rm.addEventListener("click", () => {
+    g.edit.remove(g.i); g.list.splice(g.i, 1);
+    if (!g.list.length) { closeGallery(); return; }
+    g.i = Math.min(g.i, g.list.length - 1); renderGallery();
+  });
+}
+function closeGallery() {
+  const pop = document.getElementById("gallery-pop");
+  if (pop) { pop.hidden = true; pop.querySelector(".gal-img").removeAttribute("src"); }
+  galleryState = null;
+}
+// 思い出すの答えの写真：1枚なら今までどおり、2枚以上は1枚目に「写真 n枚 ›」を添え、押すと1枚ずつ見る
+function quizPhotosHtml(photos) {
+  if (!photos.length) return "";
+  if (photos.length === 1) return `<img class="quiz-photo" src="${photoSrc(photos[0])}" alt="${t("この日の写真")}">`;
+  return `<button type="button" class="quiz-photo-more" data-photos="${esc(JSON.stringify(photos))}">
+      <img class="quiz-photo-cover" src="${photoSrc(photos[0])}" alt="${t("この日の写真")}">
+      <span class="quiz-photo-badge">${t("写真 {n}枚", { n: photos.length })} ›</span>
+    </button>`;
 }
 
 // 「この日を書き足す」：まず食事か日記かを選ぶ（旧・食事→日記の2画面連続は廃止。
@@ -5314,7 +5484,7 @@ function buildQuizQuestions() {
 
   const makeQ = {
     outfit: (ds) => pushQ(ds, "outfit", t("{d}、どんな服装でしたか？", { d: formatJP(ds) }), outfitText(ds), outfitOf(ds)?.photo),
-    eatout: (ds, e) => pushQ(ds, "eatout", t("{d}、外食しましたね。どこで、誰とでしたか？", { d: formatJP(ds) }), formatPlaceAnswer(e.eatout), mealPhotoList(ds)),
+    eatout: (ds, e) => pushQ(ds, "eatout", t("{d}、外食しましたね。どこで、誰とでしたか？", { d: formatJP(ds) }), formatPlaceAnswer(e.eatout), eatoutPhotos(ds)),
     diary:  (ds, e) => (settings.diaryPass && !diaryUnlocked) ? false : pushQ(ds, "diary",  t("{d}に書いたこと、思い出せますか？", { d: formatJP(ds) }), e.diary),
   };
 
@@ -5389,7 +5559,7 @@ function buildQuizQuestions() {
     if ((eo.with || "").trim()) hints.push(t("「{v}」と外食しましたね。どこで、何を食べたか思い出せますか？", { v: eo.with }));
     specials.eatout.push({ ds, field: "eatout",
       q: t("{d}、{q}", { d: formatJP(ds), q: hints[Math.floor(Math.random() * hints.length)] }),
-      answer: formatPlaceAnswer(eo), photo: mealPhotoList(ds) });
+      answer: formatPlaceAnswer(eo), photo: eatoutPhotos(ds) });
   }
   // 服装：3日以内（写真は答えのほうに添える）
   for (const ds of [yStr, d2, d3]) {
@@ -5492,7 +5662,7 @@ function buildDeepQuestions(excludeKeys, max) {
       if ((eo.food || "").trim()) hints.push(["food", t("外で「{v}」を食べましたね。どこで、誰とでしたか？", { v: eo.food })]);
       if ((eo.with || "").trim()) hints.push(["with", t("「{v}」と外食しましたね。どこで、何を食べたか思い出せますか？", { v: eo.with })]);
       const h = hints[Math.floor(Math.random() * hints.length)];
-      pushQ(others, ds, "eatout", t("{d}、{q}", { d: formatJP(ds), q: h[1] }), formatPlaceAnswer(eo), mealPhotoList(ds));
+      pushQ(others, ds, "eatout", t("{d}、{q}", { d: formatJP(ds), q: h[1] }), formatPlaceAnswer(eo), eatoutPhotos(ds));
     }
     if (e.diary && !(settings.diaryPass && !diaryUnlocked)) pushQ(others, ds, "diary", t("{d}に書いたこと、思い出せますか？", { d: formatJP(ds) }), e.diary);
     // 服装：写真がある日は写真を手がかりに（期間無制限）。写真が無い日は7日以内だけ
@@ -5606,7 +5776,7 @@ function renderQuizStep(content) {
       document.getElementById("quiz-reveal-slot").innerHTML = `
         <div class="quiz-answer-label">${q.photos.length ? t("あなたが残したもの") : t("あなたが書いたこと")}</div>
         <div class="quiz-answer">${esc(q.answer).replace(/\n/g, "<br>")}</div>
-        ${q.photos.map(u => `<img class="quiz-photo" src="${photoSrc(u)}" alt="${t("この日の写真")}">`).join("")}`;
+        ${quizPhotosHtml(q.photos)}`;
       // 最後の問題のあとは「もっと思い出す」＋「ホームへ／今日の食事を記録」
       const moreLeft = MORE_RECALL_MAX - moreRecallUsed();
       const canMore = isLast && flow.recallOnly && !moreRecallDoneToday();
@@ -5691,7 +5861,7 @@ function renderQuizStep(content) {
         document.getElementById("quiz-reveal-slot").innerHTML = `
           <div class="quiz-answer-label">${q.photos.length ? t("あなたが残したもの") : t("あなたが書いたこと")}</div>
           <div class="quiz-answer">${esc(q.answer).replace(/\n/g, "<br>")}</div>
-          ${q.photos.map(u => `<img class="quiz-photo" src="${photoSrc(u)}" alt="${t("この日の写真")}">`).join("")}`;
+          ${quizPhotosHtml(q.photos)}`;
         content.querySelector(".quiz-actions").outerHTML = `
           <div class="quiz-judge quiz-judge-2">
             <button class="btn btn-primary" id="quiz-next">${isLastD ? `${t("おしまい")}<span class="btn-ico btn-ico-r">${balloonIconSvg("sprout")}</span>` : `${t("次の思い出し")}<span class="btn-ico btn-ico-r">${balloonIconSvg("sprout")}</span>`}</button>
@@ -5775,7 +5945,10 @@ function dayFields(ds) {
   if (settings.diaryPass && !diaryUnlocked) {
     diaryFields = diaryFields.map(() => ({ label: "日記", text: t("🔒 ロックされています（押すと解除）") }));
   }
-  return [...outfitField, ...pick("外食"), ...pick("食事"),
+  // 外食の写真があれば、1枚目を小さく添えて枚数も書く（押すと書く画面で全部見られる。2026-11-01）
+  const eoPh = eatoutPhotos(ds);
+  const eatoutF = pick("外食").map(f => eoPh.length ? { ...f, thumb: eoPh[0], text: f.text + (eoPh.length > 1 ? t("（写真{n}枚）", { n: eoPh.length }) : "") } : f);
+  return [...outfitField, ...eatoutF, ...pick("食事"),
           ...diaryFields, ...albumFieldsFor(ds), ...pick("行った場所")];
 }
 
@@ -9244,6 +9417,8 @@ function wireEvents() {
   document.addEventListener("click", e => {
     const img = e.target.closest(".outfit-day-img, .outfit-today-img, .quiz-photo");
     if (img && img.src) openPhotoPop(img.src);
+    const more = e.target.closest(".quiz-photo-more");
+    if (more) { try { openGallery(JSON.parse(more.dataset.photos), 0); } catch (err) {} }
   });
   document.getElementById("photo-pop").addEventListener("click", () => {
     document.getElementById("photo-pop").hidden = true;
@@ -9670,7 +9845,8 @@ function backupPhotoOrder() {
   const byDateDesc = (a, b) => String(b).localeCompare(String(a));
   loadAlbumMemos().slice().sort((a, b) => byDateDesc(a && a.date, b && b.date)).forEach(a => add(a && a.photo));
   const mp = loadMealPhotos();
-  Object.keys(mp).sort(byDateDesc).forEach(ds => { const v = mp[ds]; if (v && typeof v === "object") add(v.eatout); });
+  // 外食は1回につき最初の3枚まで（10枚まで撮れるようにしたら、外食だけで枠がすぐ埋まるため。2026-11-01 Yukiさん了承。iPhone は全部）
+  Object.keys(mp).sort(byDateDesc).forEach(ds => { const v = mp[ds]; if (v && typeof v === "object") for (let i = 0; i < 3; i++) add(v[eatoutKey(i)]); });
   const o = loadOutfits();
   Object.keys(o).sort(byDateDesc).forEach(ds => add((o[ds] || {}).photo));
   return out;
